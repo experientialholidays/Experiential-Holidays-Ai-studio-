@@ -360,7 +360,7 @@
         </div>
 
         <!-- Collapsible Filter Options Panel -->
-        <div id="filterOptionsBlock" class="hidden absolute left-4 right-4 md:left-auto md:right-8 mt-2 p-5 bg-white rounded-3xl border border-stone-200/80 shadow-2xl z-50 overflow-y-auto h-[45vh] max-h-[45vh] md:h-auto md:max-h-[70vh] md:w-[450px] space-y-6">
+        <div id="filterOptionsBlock" class="hidden relative mt-4 p-5 bg-white rounded-3xl border border-stone-200/80 shadow-sm space-y-6 overflow-y-auto max-h-[50vh]">
             <!-- Close Button -->
             <button type="button" onclick="toggleFilterOptions()" class="absolute top-4 right-4 text-stone-400 hover:text-stone-700 transition cursor-pointer p-1.5 rounded-full hover:bg-stone-50 z-50" title="Close Filters">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -403,7 +403,7 @@
         </div>
             
         <div id="filterStatus" class="mt-4 flex flex-wrap gap-2"></div>
-        <div id="resultCount" class="text-xs font-bold text-stone-400 uppercase mt-5 tracking-widest"></div>
+        <div id="resultCount" class="text-xs font-extrabold text-[#a37c6b] uppercase mt-5 tracking-widest"></div>
     </div>
 
     <div id="cardContainer" class="card-grid"></div>
