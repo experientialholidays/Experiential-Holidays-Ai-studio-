@@ -74,6 +74,54 @@
             padding: 12px 16px !important;
         }
         
+        /* Dynamic styling for selected subcategories */
+        .sub-cat-lbl {
+            transition: all 0.2s ease-in-out !important;
+            user-select: none;
+        }
+        .sub-cat-lbl:has(input:checked) {
+            background-color: var(--tag-bg) !important;
+            border-color: var(--accent) !important;
+            box-shadow: 0 2px 8px rgba(163, 124, 107, 0.1) !important;
+        }
+        .sub-cat-lbl:has(input:checked) span {
+            color: var(--accent) !important;
+            font-weight: 700 !important;
+        }
+        /* Custom styled checkboxes inside the subcategory list */
+        .sub-cat-lbl input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #d1c7bd;
+            border-radius: 6px;
+            outline: none;
+            background-color: white;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            position: relative;
+            flex-shrink: 0;
+        }
+        .sub-cat-lbl input[type="checkbox"]:hover {
+            border-color: var(--accent);
+        }
+        .sub-cat-lbl input[type="checkbox"]:checked {
+            background-color: var(--accent);
+            border-color: var(--accent);
+        }
+        .sub-cat-lbl input[type="checkbox"]:checked::after {
+            content: "✓";
+            color: white;
+            font-size: 12px;
+            font-weight: 900;
+            position: absolute;
+            display: block;
+        }
+        
     </style>
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>

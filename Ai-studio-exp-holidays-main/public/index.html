@@ -63,6 +63,31 @@
             --border-soft: #f0e6e0;
         }
 
+        /* Subcategory filter buttons selection styling */
+        .sub-cat-btn {
+            background-color: white;
+            color: #57534e; /* stone-600 */
+            border: 1px solid #e7e5e4; /* stone-200 */
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            user-select: none;
+        }
+        .sub-cat-btn:hover {
+            background-color: #f5f5f4; /* stone-100 */
+            color: #292524; /* stone-800 */
+        }
+        .sub-cat-btn.selected {
+            background-color: var(--accent) !important;
+            color: white !important;
+            border-color: var(--accent) !important;
+            box-shadow: 0 2px 8px rgba(163, 124, 107, 0.25) !important;
+            font-weight: 700 !important;
+        }
+        .sub-cat-btn.selected:hover {
+            background-color: #8c6555 !important; /* Slightly darker shade of accent for contrast on hover */
+            color: white !important;
+        }
+
         body { 
             font-family: 'Inter', sans-serif; 
             background: var(--bg-warm); 
@@ -434,14 +459,12 @@
             if (index > -1) {
                 selectedSubCategories.splice(index, 1);
                 if (btn) {
-                    btn.classList.remove('bg-[#a37c6b]', 'text-white', 'border-[#a37c6b]');
-                    btn.classList.add('bg-white', 'text-stone-600', 'border-stone-200');
+                    btn.classList.remove('selected');
                 }
             } else {
                 selectedSubCategories.push(sub);
                 if (btn) {
-                    btn.classList.remove('bg-white', 'text-stone-600', 'border-stone-200');
-                    btn.classList.add('bg-[#a37c6b]', 'text-white', 'border-[#a37c6b]');
+                    btn.classList.add('selected');
                 }
             }
             runFilter();
@@ -454,8 +477,7 @@
                 const btnId = `btn-sub-${sub.replace(/[^a-zA-Z0-9]/g, '')}`;
                 const btn = document.getElementById(btnId);
                 if (btn) {
-                    btn.classList.remove('bg-[#a37c6b]', 'text-white', 'border-[#a37c6b]');
-                    btn.classList.add('bg-white', 'text-stone-600', 'border-stone-200');
+                    btn.classList.remove('selected');
                 }
                 runFilter();
             }
@@ -484,7 +506,7 @@
                             ${subCats.map(sub => `
                                 <button type="button" 
                                         id="btn-sub-${sub.replace(/[^a-zA-Z0-9]/g, '')}" 
-                                        class="px-3.5 py-1.5 rounded-full text-xs font-semibold border transition cursor-pointer hover:bg-stone-50 select-none bg-white text-stone-600 border-stone-200" 
+                                        class="px-3.5 py-1.5 rounded-full text-xs font-semibold border select-none sub-cat-btn" 
                                         onclick="toggleSubCategoryFilter('${sub.replace(/'/g, "\\'")}')">
                                     ${sub}
                                 </button>
@@ -1128,8 +1150,7 @@
                     const btnId = `btn-sub-${categoryParam.replace(/[^a-zA-Z0-9]/g, '')}`;
                     const btn = document.getElementById(btnId);
                     if (btn) {
-                        btn.classList.remove('bg-white', 'text-stone-600', 'border-stone-200');
-                        btn.classList.add('bg-[#a37c6b]', 'text-white', 'border-[#a37c6b]');
+                        btn.classList.add('selected');
                     }
                 }, 500);
             }
