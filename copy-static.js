@@ -36,4 +36,4 @@ function copyFolderSync(from, to) {
 }
 
 copyFolderSync(srcAssets, destAssets);
-console.log('Copied assets folder to dist/');
+console.log('Static assets folder copied to dist/');
