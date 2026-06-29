@@ -1,17 +1,5 @@
 {
   "projects": {
     "default": "submit-a"
-  },
-  "targets": {
-    "submit-a": {
-      "hosting": {
-        "production": [
-          "submit-a"
-        ],
-        "testing": [
-          "expholi-testing"
-        ]
-      }
-    }
   }
 }

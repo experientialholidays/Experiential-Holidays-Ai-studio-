@@ -24,18 +24,6 @@ jobs:
       - name: Build Project
         run: npm run build
 
-      - name: Determine Deploy Target
-        id: deploy_target
-        run: |
-          REPO_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-          if [[ "$REPO_NAME" == *"testing"* || "$REPO_NAME" == *"experiential-holidays-ai-studio-"* ]]; then
-            echo "target=testing" >> $GITHUB_OUTPUT
-            echo "Determined deploy target is: testing"
-          else
-            echo "target=production" >> $GITHUB_OUTPUT
-            echo "Determined deploy target is: production"
-          fi
-
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
@@ -43,4 +31,3 @@ jobs:
           firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_SUBMIT_A }}"
           projectId: submit-a
           channelId: live
-          target: ${{ steps.deploy_target.outputs.target }}
