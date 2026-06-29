@@ -1,0 +1,36 @@
+{
+  "hosting": [
+    {
+      "target": "production",
+      "public": "dist",
+      "ignore": [
+        "firebase.json",
+        "package.json",
+        "package-lock.json",
+        "tsconfig.json",
+        "metadata.json",
+        "server.js",
+        "copy-static.js",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "cleanUrls": true
+    },
+    {
+      "target": "testing",
+      "public": "dist",
+      "ignore": [
+        "firebase.json",
+        "package.json",
+        "package-lock.json",
+        "tsconfig.json",
+        "metadata.json",
+        "server.js",
+        "copy-static.js",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "cleanUrls": true
+    }
+  ]
+}

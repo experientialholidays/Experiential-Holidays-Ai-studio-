@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experiential Holidays India | Retreats, Workshops & Wellness Experiences</title>
+    <meta name="description" content="Discover retreats, workshops, festivals, wellness journeys and transformational experiences across India.">
+    <meta name="keywords" content="retreats india, workshops india, yoga retreats, wellness retreats, experiential travel, meditation retreats">
+    <meta name="author" content="Experiential Holidays">
+    <meta name="robots" content="index, follow">
+
+    <link rel="canonical" href="https://experientialholidays.info/">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Experiential Holidays India">
+    <meta property="og:description" content="Discover meaningful retreats and transformational experiences across India.">
+    <meta property="og:url" content="https://experientialholidays.info/">
+    <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/submit-a.firebasestorage.app/o/file_00000000644071fa82872ccf94d36b6f.png?alt=media&token=28d7ea2e-7eb8-486f-aa51-3a6d8a438eb1">
+    <meta property="og:site_name" content="Experiential Holidays">
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-W1N6TNTMJQ"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){ dataLayer.push(arguments); }
+        
+        // Deny advertising and personalization tracking by default to protect user privacy
+        gtag('consent', 'default', {
+            'ad_storage': 'denied',
+            'ad_user_data': 'denied',
+            'ad_personalization': 'denied',
+            'analytics_storage': 'granted' // Only allow basic, anonymous analytics measurement
+        });
+        
+        gtag('js', new Date());
+        gtag('config', 'G-W1N6TNTMJQ', {
+            'allow_google_signals': false,          // Disable cross-device demographics matching
+            'allow_ad_personalization_signals': false // Explicitly disable personalized advertising data collection
+        });
+    </script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght=400;600;700;800&display=swap" rel="stylesheet">
+    <script src="config.js"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Experiential Holidays",
+        "url": "https://experientialholidays.info",
+        "description": "Curated retreats and experiential travel opportunities across India."
+    }
+    </script>
+
+    <style>
+        :root { 
+            --slate: #4a4542; 
+            --accent: #a37c6b; 
+            --tag-bg: #f5ede8; 
+            --bg-warm: #faf7f4;
+            --border-soft: #f0e6e0;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: var(--bg-warm); 
+            color: var(--slate); 
+            font-size: 17px; 
+            overflow-x: hidden; /* Prevent explicit accidental horizontal scrolls */
+        }
+
+        .nav-main { 
+            background: white; 
+            border-bottom: 1px solid var(--border-soft); 
+            padding: 16px 20px; 
+        }
+
+        .filter-header { 
+            font-size: 12px; 
+            font-weight: 850; 
+            color: #a39e9b;
+            text-transform: uppercase; 
+            margin-bottom: 6px; 
+            letter-spacing: 0.08em; 
+        }
+
+        .filter-container { 
+            width: 100%;
+            max-width: 1400px; 
+            margin: 0 auto; 
+            padding: 24px 16px; 
+            box-sizing: border-box;
+        }
+        @media (min-width: 768px) {
+            .filter-container {
+                padding: 24px 32px;
+            }
+        }
+        /* Force the grid columns to occupy full available width */
+        .filter-container .grid > div {
+            width: 100% !important;
+        }
+
+        /* Force native inputs and Tom Select elements to stretch completely */
+        .custom-input,
+        .ts-wrapper,
+        .ts-control,
+        .ts-dropdown {
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+        }
+
+        /* Force the two Date Range boxes to share the 100% width perfectly */
+        .filter-container .flex.gap-2 {
+            width: 100% !important;
+        }
+        .filter-container .flex.gap-2 input {
+            flex: 1 !important; 
+            width: 100% !important;
+        }
+
+        .custom-input { 
+            width: 100%; 
+            border: 1px solid var(--border-soft); 
+            padding: 12px 16px; 
+            border-radius: 12px; 
+            outline: none; 
+            font-size: 16px; 
+            background: white; 
+            transition: all 0.2s; 
+        }
+
+        .custom-input:focus { 
+            border-color: var(--accent); 
+            box-shadow: 0 0 0 3px #f5ede8; 
+        }
+
+        .tag { 
+            background: var(--tag-bg); 
+            color: var(--accent); 
+            padding: 6px 16px; 
+            border-radius: 20px; 
+            font-size: 15px; 
+            font-weight: 700; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 8px; 
+            margin: 5px 5px 0 0; 
+            border: 1px solid var(--border-soft); 
+        }
+
+        .tag span { 
+            cursor: pointer; 
+            font-size: 18px; 
+            color: var(--accent); 
+            opacity: 0.7; 
+        }
+
+        .tag span:hover { 
+            opacity: 1; 
+        }
+
+        /* FIXED: Completely rebuilt layout rules to handle mobile, tablet, and wide laptops */
+        
+        .card-grid { 
+            display: grid; 
+            grid-template-columns: 1fr; /* 1 Column on Mobile */
+            gap: 20px; 
+            justify-content: center;
+            padding: 16px 8px; 
+            max-width: 1400px; /* Match Navbar limit */
+            margin: 0 auto; 
+        }
+
+        @media (min-width: 768px) {
+            .card-grid { 
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); 
+            justify-content: center;
+            gap: 28px; 
+            padding: 20px; 
+            max-width: 1400px; 
+            margin: 0 auto; 
+            }
+        }
+
+
+        .card { 
+            background: white; 
+            border-radius: 24px; 
+            overflow: hidden; 
+            border: 1px solid var(--border-soft); 
+            cursor: pointer; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            position: relative; 
+            width: 100%;
+            max-width: 420px; /* Acts as an absolute physical limit */
+            margin: 0 auto;
+        }
+
+        .card:hover { 
+            transform: translateY(-4px); 
+            box-shadow: 0 16px 32px rgba(163, 124, 107, 0.08); 
+            border-color: #ebdcd5; 
+        }
+
+        .card-media-container { 
+            width: 100%; 
+            height: 260px; 
+            background: #fdfcfc; 
+            overflow: hidden; 
+            position: relative; 
+        }
+
+        @media (min-width: 768px) { 
+            .card-media-container { height: 220px; } 
+        }
+
+        .card-body { 
+            padding: 24px; 
+        }
+
+        .card h3 { 
+            font-size: 1.35rem; 
+            font-weight: 800; 
+            color: #2e2a27; 
+            margin-bottom: 8px; 
+            line-height: 1.25; 
+        }
+
+        .cat-badge { 
+            background: #fdfcfc; 
+            color: var(--accent); 
+            font-size: 12px; 
+            font-weight: 800; 
+            padding: 4px 12px; 
+            border-radius: 50px; 
+            text-transform: uppercase; 
+            border: 1px solid var(--border-soft); 
+        }
+        
+        /* Tom Select perfectly matched to .custom-input */
+        .ts-wrapper {
+            font-family: 'Inter', sans-serif;
+        }
+        .ts-control {
+            border: 1px solid var(--border-soft) !important;
+            border-radius: 12px !important;
+            padding: 12px 16px !important;
+            font-size: 16px !important;
+            color: var(--slate) !important;
+            background: white !important;
+            box-shadow: none !important;
+        }
+        .ts-control > input {
+            font-size: 16px !important;
+            color: var(--slate) !important;
+        }
+        /* Matching the focus ring */
+        .ts-wrapper.focus .ts-control {
+            border-color: var(--accent) !important;
+            box-shadow: 0 0 0 3px #f5ede8 !important;
+        }
+        /* Styling the dropdown menu */
+        .ts-dropdown {
+            border-radius: 12px !important;
+            border: 1px solid var(--border-soft) !important;
+            font-size: 16px !important;
+            margin-top: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
+            color: var(--slate) !important;
+        }
+        .ts-dropdown .option {
+            padding: 12px 16px !important;
+        }
+        .ts-dropdown .active {
+            background-color: var(--tag-bg) !important;
+            color: var(--accent) !important;
+        }
+        /* Clever CSS to hide placeholder when a date is picked */
+       .date-placeholder-input {
+            color: transparent; /* Hides the native dd/mm/yyyy text */
+        }
+        .date-placeholder-input:focus,
+        .date-placeholder-input:valid {
+            color: var(--slate); /* Shows the date once selected */
+        }
+        .date-placeholder-input:focus + span,
+        .date-placeholder-input:valid + span {
+            display: none; /* Hides the placeholder text label */
+        }
+        
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        
+    </style>
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+</head>
+    
+<body class="pb-10">
+
+    <div id="site-navbar"></div>
+    <script src="navbar.js"></script>
+
+    <div id="connectionStatus" style="display:none; background:#f5ede8; color:var(--accent); font-family:monospace; padding:6px; font-size:11px; text-align:center; border-bottom:1px solid var(--border-soft); font-weight:600;">
+        Connecting to Firebase...
+    </div>
+
+    <div class="filter-container">
+        <!-- Search and Toggle Row -->
+        <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-end">
+            <div class="flex-1 relative">
+                <h5 class="filter-header mb-2">Universal Search</h5>
+                <input type="text" id="searchInput" placeholder="Search experiences, locations, categories or dates (e.g. 'Goa', '21 July', 'Yoga')..." class="custom-input">
+            </div>
+            <div class="flex flex-col justify-end">
+                <button type="button" id="filterToggleBtn" onclick="toggleFilterOptions()" class="flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl border font-bold text-[#a37c6b] hover:bg-[#f5ede8]/30 transition bg-white cursor-pointer h-[50px] shadow-sm" style="border-color: var(--border-soft);">
+                    <svg class="w-5 h-5 text-[#a37c6b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                    </svg>
+                    <span>More Filters</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Collapsible Filter Options Panel -->
+        <div id="filterOptionsBlock" class="hidden mt-4 p-5 bg-white rounded-3xl border border-stone-100 shadow-sm space-y-6">
+            <!-- State Dropdown & Dates Row -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- State Selection Dropdown -->
+                <div>
+                    <h5 class="filter-header mb-2">State</h5>
+                    <select id="stateFilterSelect" class="custom-input" onchange="runFilter()">
+                        <option value="">All States</option>
+                        <!-- populated via JS -->
+                    </select>
+                </div>
+                <!-- Date Range -->
+                <div class="md:col-span-2">
+                    <h5 class="filter-header mb-2">Date Range</h5>
+                    <div class="flex gap-2">
+                        <div class="relative flex-1">
+                            <input type="date" id="startDateInput" class="custom-input text-sm date-placeholder-input" required>
+                            <span class="absolute left-4 top-[13px] text-stone-400 text-sm pointer-events-none bg-white pr-4">Start Date</span>
+                        </div>
+                        <div class="relative flex-1">
+                            <input type="date" id="endDateInput" class="custom-input text-sm date-placeholder-input" required>
+                            <span class="absolute left-4 top-[13px] text-stone-400 text-sm pointer-events-none bg-white pr-4">End Date</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories and Subcategories -->
+            <div>
+                <h5 class="filter-header mb-3 border-b border-stone-100 pb-2">Filter by Subcategories</h5>
+                <div class="space-y-4" id="categoriesFilterContainer">
+                    <!-- populated via JS -->
+                </div>
+            </div>
+        </div>
+            
+        <div id="filterStatus" class="mt-4 flex flex-wrap gap-2"></div>
+        <div id="resultCount" class="text-xs font-bold text-stone-400 uppercase mt-5 tracking-widest"></div>
+    </div>
+
+    <div id="cardContainer" class="card-grid"></div>
+
+    <script>
+        const firebaseConfig = window.GLOBAL_FIREBASE_CONFIG;
+
+        // Initialize Firebase SDK
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let allData = [];
+        let activeCategory = null; // fallback for backward compatibility
+        let selectedSubCategories = [];
+
+        const CATEGORY_DATA = {
+            "Wellness & Healing": ["Yoga", "Meditation", "Ayurveda", "Reiki", "Sound Healing", "Breathwork", "Detox", "Spa & Massage", "Acupuncture"],
+            "Mental Health & Emotional Growth": ["Therapy & Counseling", "Mindfulness", "Trauma Release", "Stress Management", "Self-Love & Compassion", "Emotional Intelligence", "Journaling"],
+            "Spirituality & Consciousness": ["Vipassana", "Zen", "Tantra", "Shamanic Journeys", "Astrology", "Tarot & Oracle", "Energy Work", "Plant Medicine", "Mysticism"],
+            "Fitness, Movement & Martial Arts": ["Pilates", "Dance", "Tai Chi", "Qigong", "Martial Arts", "Calisthenics", "Running & Trekking", "Somatics"],
+            "Adventure & Outdoor Exploration": ["Hiking & Trekking", "Surfing", "Scuba Diving", "Rock Climbing", "Wildlife Safari", "Camping", "Kayaking", "Cycling"],
+            "Nature, Sustainability & Eco Living": ["Permaculture", "Eco-Volunteering", "Foraging", "Organic Farming", "Forest Bathing", "Sustainable Architecture"],
+            "Leadership, Business & Career": ["Entrepreneurship", "Public Speaking", "Networking", "Financial Literacy", "Productivity", "Team Building", "Executive Coaching"],
+            "Technology & Innovation": ["Web3 & Crypto", "AI & Machine Learning", "Coding Bootcamps", "Design Thinking", "Maker Spaces"],
+            "Creativity & Arts": ["Painting & Drawing", "Pottery & Ceramics", "Photography", "Writing & Poetry", "Music Production", "Acting & Improv", "Culinary Arts"],
+            "Relationships & Connection": ["Couples Retreats", "Men's Groups", "Women's Circles", "Conscious Dating", "Community Living", "Non-Violent Communication"],
+            "Culture, Philosophy & Learning": ["Language Immersion", "History & Heritage", "Philosophy", "Traditional Arts & Crafts", "Culinary Tours"],
+            "Lifestyle & Personal Transformation": ["Habit Building", "Minimalism", "Life Coaching", "Digital Detox", "Biohacking"],
+            "Luxury, Leisure & Travel": ["Luxury Retreats", "Boutique Hotels", "Glamping", "Cruises", "Wine Tasting"],
+            "Identity & Belonging": ["LGBTQ+ Retreats", "BIPOC Retreats", "Youth & Teen Programs", "Elder & Wisdom Circles"],
+            "Other": ["Other"]
+        };
+        const STATES = ["Andaman and Nicobar Islands", "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chandigarh", "Chhattisgarh", "Dadra and Nagar Haveli and Daman and Diu", "Delhi", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jammu and Kashmir", "Jharkhand", "Karnataka", "Kerala", "Ladakh", "Lakshadweep", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Puducherry", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal"];
+
+        window.toggleFilterOptions = function() {
+            const block = document.getElementById('filterOptionsBlock');
+            const btn = document.getElementById('filterToggleBtn');
+            if (block) {
+                if (block.classList.contains('hidden')) {
+                    block.classList.remove('hidden');
+                    if (btn) {
+                        btn.classList.add('bg-[#f5ede8]');
+                        btn.querySelector('span').innerText = 'Hide Filters';
+                    }
+                } else {
+                    block.classList.add('hidden');
+                    if (btn) {
+                        btn.classList.remove('bg-[#f5ede8]');
+                        btn.querySelector('span').innerText = 'More Filters';
+                    }
+                }
+            }
+        };
+
+        window.toggleSubCategoryFilter = function(sub) {
+            const index = selectedSubCategories.indexOf(sub);
+            const btnId = `btn-sub-${sub.replace(/[^a-zA-Z0-9]/g, '')}`;
+            const btn = document.getElementById(btnId);
+            
+            if (index > -1) {
+                selectedSubCategories.splice(index, 1);
+                if (btn) {
+                    btn.classList.remove('bg-[#a37c6b]', 'text-white', 'border-[#a37c6b]');
+                    btn.classList.add('bg-white', 'text-stone-600', 'border-stone-200');
+                }
+            } else {
+                selectedSubCategories.push(sub);
+                if (btn) {
+                    btn.classList.remove('bg-white', 'text-stone-600', 'border-stone-200');
+                    btn.classList.add('bg-[#a37c6b]', 'text-white', 'border-[#a37c6b]');
+                }
+            }
+            runFilter();
+        };
+
+        window.clearSelectedSubCategory = function(sub) {
+            const index = selectedSubCategories.indexOf(sub);
+            if (index > -1) {
+                selectedSubCategories.splice(index, 1);
+                const btnId = `btn-sub-${sub.replace(/[^a-zA-Z0-9]/g, '')}`;
+                const btn = document.getElementById(btnId);
+                if (btn) {
+                    btn.classList.remove('bg-[#a37c6b]', 'text-white', 'border-[#a37c6b]');
+                    btn.classList.add('bg-white', 'text-stone-600', 'border-stone-200');
+                }
+                runFilter();
+            }
+        };
+
+        function initFilterUI() {
+            // Populate State Dropdown
+            const stateSelect = document.getElementById('stateFilterSelect');
+            if (stateSelect) {
+                stateSelect.innerHTML = '<option value="">All States</option>' + STATES.map(st => `
+                    <option value="${st}">${st}</option>
+                `).join('');
+            }
+
+            // Populate Categories & Subcategories
+            const catContainer = document.getElementById('categoriesFilterContainer');
+            if (catContainer) {
+                let html = '';
+                for (const [mainCat, subCats] of Object.entries(CATEGORY_DATA)) {
+                    html += `
+                    <div class="flex flex-col md:flex-row md:items-center gap-2 py-3 border-b border-stone-100 last:border-0">
+                        <div class="w-full md:w-56 shrink-0 font-bold text-stone-700 text-xs sm:text-sm uppercase tracking-wider">
+                            ${mainCat}
+                        </div>
+                        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4 md:mx-0 md:px-0 scroll-smooth whitespace-nowrap">
+                            ${subCats.map(sub => `
+                                <button type="button" 
+                                        id="btn-sub-${sub.replace(/[^a-zA-Z0-9]/g, '')}" 
+                                        class="px-3.5 py-1.5 rounded-full text-xs font-semibold border transition cursor-pointer hover:bg-stone-50 select-none bg-white text-stone-600 border-stone-200" 
+                                        onclick="toggleSubCategoryFilter('${sub.replace(/'/g, "\\'")}')">
+                                    ${sub}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                    `;
+                }
+                catContainer.innerHTML = html;
+            }
+        }
+
+        // Run UI init
+        setTimeout(initFilterUI, 100);
+
+        // --- Analytics and Search/Filter Tracking State ---
+        let hasSearchedInSession = false;
+        let lastSearchQuery = "";
+        let searchDebounceTimeout = null;
+
+        window.trackClickAndNavigate = function(element) {
+            const id = element.getAttribute('data-id');
+            const name = element.getAttribute('data-name');
+            if (typeof gtag === 'function') {
+                gtag('event', 'click_experience_card', {
+                    'experience_id': id,
+                    'experience_name': name
+                });
+            }
+            window.location.href = `experience.html?id=${id}`;
+        };
+
+        function trackSearchEvent(resultsCount) {
+            if (typeof gtag !== 'function') return;
+
+            const searchQuery = document.getElementById('searchInput').value.trim();
+            const dateStart = document.getElementById('startDateInput').value;
+            const dateEnd = document.getElementById('endDateInput').value;
+            const stateVal = document.getElementById('stateFilterSelect') ? document.getElementById('stateFilterSelect').value : '';
+
+            const hasActiveFilter = searchQuery !== "" || selectedSubCategories.length > 0 || dateStart !== "" || dateEnd !== "" || stateVal !== "";
+
+            if (searchDebounceTimeout) {
+                clearTimeout(searchDebounceTimeout);
+            }
+
+            searchDebounceTimeout = setTimeout(() => {
+                if (hasActiveFilter) {
+                    const isRedefined = hasSearchedInSession && (searchQuery !== lastSearchQuery || selectedSubCategories.length > 0 || dateStart !== "" || dateEnd !== "" || stateVal !== "");
+                    
+                    gtag('event', isRedefined ? 'redefine_search' : 'search_experiences', {
+                        'search_term': searchQuery || '(empty)',
+                        'results_count': resultsCount,
+                        'category': selectedSubCategories.join(',') || 'all',
+                        'start_date': dateStart || 'none',
+                        'end_date': dateEnd || 'none',
+                        'is_redefined': isRedefined
+                    });
+
+                    lastSearchQuery = searchQuery;
+                    hasSearchedInSession = true;
+                } else if (hasSearchedInSession) {
+                    // Search criteria cleared - closed search
+                    gtag('event', 'close_or_clear_search', {
+                        'action': 'clear_all_filters'
+                    });
+                    lastSearchQuery = "";
+                    hasSearchedInSession = false;
+                }
+            }, 1000);
+        }
+
+        // Date parsing helper
+        function extractDateRange(text) {
+            const monthMap = {
+                jan:0, january:0,
+                feb:1, february:1,
+                mar:2, march:2,
+                apr:3, april:3,
+                may:4,
+                jun:5, june:5,
+                jul:6, july:6,
+                aug:7, august:7,
+                sep:8, september:8, sept:8,
+                oct:9, october:9,
+                nov:10, november:10,
+                dec:11, december:11
+            };
+            
+            const monthsStr = Object.keys(monthMap).join('|');
+            
+            let result = { start: null, end: null, cleanText: text, isNLP: false, originalMatch: '' };
+            
+            const regex1 = new RegExp(`\\b(\\d{1,2})\\s*(${monthsStr})\\s*(?:-|to)\\s*(\\d{1,2})\\s*(${monthsStr})\\b`, 'i');
+            const regex2 = new RegExp(`\\b(\\d{1,2})\\s*(?:-|to)\\s*(\\d{1,2})\\s*(${monthsStr})\\b`, 'i');
+            const regex2b = new RegExp(`\\b(${monthsStr})\\s*(\\d{1,2})\\s*(?:-|to)\\s*(\\d{1,2})\\b`, 'i');
+            const regex3 = new RegExp(`\\b(\\d{1,2})\\s*(${monthsStr})\\b`, 'i');
+            const regex4 = new RegExp(`\\b(${monthsStr})\\s*(\\d{1,2})\\b`, 'i');
+            
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth();
+            
+            function parseDate(dayStr, monthStr, refMonth, refYear) {
+                let m = monthMap[monthStr.toLowerCase()];
+                let d = parseInt(dayStr, 10);
+                let y = refYear;
+                if (m < currentMonth - 2 && refYear === currentYear) {
+                    y = currentYear + 1;
+                }
+                return new Date(y, m, d);
+            }
+            
+            function formatDateStr(dObj) {
+                return `${dObj.getFullYear()}-${String(dObj.getMonth()+1).padStart(2,'0')}-${String(dObj.getDate()).padStart(2,'0')}`;
+            }
+
+            let match = text.match(regex1);
+            if (match) {
+                let d1 = match[1], m1 = match[2], d2 = match[3], m2 = match[4];
+                let date1 = parseDate(d1, m1, currentMonth, currentYear);
+                let date2 = parseDate(d2, m2, currentMonth, date1.getFullYear());
+                if (date2 < date1) date2.setFullYear(date2.getFullYear() + 1);
+                
+                result.start = formatDateStr(date1);
+                result.end = formatDateStr(date2);
+                result.cleanText = text.replace(match[0], '').trim();
+                result.isNLP = true;
+                result.originalMatch = match[0];
+                return result;
+            }
+            
+            match = text.match(regex2);
+            if (match) {
+                let d1 = match[1], d2 = match[2], mStr = match[3];
+                let date2 = parseDate(d2, mStr, currentMonth, currentYear);
+                let date1 = parseDate(d1, mStr, currentMonth, date2.getFullYear());
+                if (date1 > date2) date1.setMonth(date1.getMonth() - 1);
+                
+                result.start = formatDateStr(date1);
+                result.end = formatDateStr(date2);
+                result.cleanText = text.replace(match[0], '').trim();
+                result.isNLP = true;
+                result.originalMatch = match[0];
+                return result;
+            }
+            
+            match = text.match(regex2b);
+            if (match) {
+                let mStr = match[1], d1 = match[2], d2 = match[3];
+                let date1 = parseDate(d1, mStr, currentMonth, currentYear);
+                let date2 = parseDate(d2, mStr, currentMonth, date1.getFullYear());
+                
+                result.start = formatDateStr(date1);
+                result.end = formatDateStr(date2);
+                result.cleanText = text.replace(match[0], '').trim();
+                result.isNLP = true;
+                result.originalMatch = match[0];
+                return result;
+            }
+            
+            match = text.match(regex3);
+            if (match) {
+                let d1 = match[1], m1 = match[2];
+                let date1 = parseDate(d1, m1, currentMonth, currentYear);
+                result.start = result.end = formatDateStr(date1);
+                result.cleanText = text.replace(match[0], '').trim();
+                result.isNLP = true;
+                result.originalMatch = match[0];
+                return result;
+            }
+            
+            match = text.match(regex4);
+            if (match) {
+                let m1 = match[1], d1 = match[2];
+                let date1 = parseDate(d1, m1, currentMonth, currentYear);
+                result.start = result.end = formatDateStr(date1);
+                result.cleanText = text.replace(match[0], '').trim();
+                result.isNLP = true;
+                result.originalMatch = match[0];
+                return result;
+            }
+            
+            return result;
+        }
+
+        function formatDisplayDate(dateStr) {
+            if (!dateStr || typeof dateStr !== 'string') return "";
+            try {
+                const parts = dateStr.split('-');
+                if(parts.length !== 3) return dateStr;
+                const dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
+                if (isNaN(dateObj.getTime())) return dateStr;
+                
+                const day = dateObj.getDate();
+                const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                return `${day} ${months[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
+            } catch (e) {
+                return dateStr;
+            }
+        }
+
+        // Real-time Database Stream Listener
+        db.collection('retreats').onSnapshot((snapshot) => {
+            document.getElementById('connectionStatus').innerText = "Connected Live to Firestore";
+            allData = [];
+            
+            const now = new Date();
+            const currentDateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+            const currentTimeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+            snapshot.forEach((doc) => {
+                const r = doc.data();
+                if (r.isHidden) return;
+                
+                let end_date = (r.endDate || '').trim();
+                let end_time = (r.endTime || '').trim();
+                
+                if (!end_date) {
+                    end_date = (r.startDate || '').trim();
+                    end_time = (r.startTime || '').trim();
+                }
+                if (!end_time) end_time = "23:59";
+                if (end_time.length === 4 && end_time[1] === ':') end_time = "0" + end_time;
+                
+                if (end_date && (end_date < currentDateStr || (end_date === currentDateStr && end_time < currentTimeStr))) {
+                    return; // Skip expired experiences
+                }
+
+                let media = Array.isArray(r.fileUrls) ? [...r.fileUrls] : [];
+                let v_links = Array.isArray(r.videoLinks) ? [...r.videoLinks] : [];
+                media = media.concat(v_links);
+                let cats = Array.isArray(r.categories) ? r.categories : [];
+
+                allData.push({
+                    id: doc.id,
+                    Name: r.retreatName || 'Untitled',
+                    Description: r.description || '', 
+                    Categories: Array.isArray(r.categories) ? r.categories : [],
+                    Hashtags: Array.isArray(r.hashtags) ? r.hashtags : [],
+                    State: r.state || '',
+                    City: r.city || '',
+                    Start: r.startDate || '',
+                    StartDisplay: formatDisplayDate(r.startDate || ''),
+                    StartTime: r.startTime || '',
+                    End: r.endDate || '',
+                    EndDisplay: formatDisplayDate(r.endDate || ''),
+                    EndTime: r.endTime || '',
+                    Cost: r.contribution || '',
+                    Inclusions: r.inclusionsExclusions || '',
+                    Org: r.orgInfo || '',
+                    CName: r.contactName || '',
+                    CEmail: r.orgContactEmail || '',
+                    CPhone: r.contactWhatsApp || '',
+                    CNum: r.contactNumber || '',
+                    ExternalLinks: Array.isArray(r.externalLinks) ? r.externalLinks : [],
+                    MediaArray: media,
+                    Timestamp: r.timestamp || Date.now()
+                });
+            });
+
+            allData.sort((a, b) => {
+                // 1. Handle entries with no dates (push to bottom)
+                if (!a.Start && b.Start) return 1;
+                if (a.Start && !b.Start) return -1;
+                if (!a.Start && !b.Start) {
+                    return a.Name.localeCompare(b.Name); 
+                }
+
+                // 2. Format times for clean comparison
+                let timeA = a.StartTime || "00:00";
+                let timeB = b.StartTime || "00:00";
+                if (timeA.length === 4 && timeA[1] === ':') timeA = "0" + timeA;
+                if (timeB.length === 4 && timeB[1] === ':') timeB = "0" + timeB;
+    
+                // 3. Sort by Date -> If same, sort by Time -> If same, sort Alphabetically by Name
+                return a.Start.localeCompare(b.Start) || 
+                       timeA.localeCompare(timeB) || 
+                       a.Name.localeCompare(b.Name);
+            });
+
+            runFilter();
+        }, (error) => {
+            document.getElementById('connectionStatus').innerText = "Connection Failed: " + error.message;
+        });
+
+        // Media Parsing Functions
+        function getYouTubeId(url) {
+            if (!url || typeof url !== 'string') return null;
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|\/shorts\/)([^#\&\?]*).*/;
+            const match = url.trim().match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        }
+
+        function getInstagramId(url) {
+            if (!url || typeof url !== 'string') return null;
+            const match = url.trim().match(/instagram\.com\/(?:reel|reels|p)\/([a-zA-Z0-9_-]+)/i);
+            return match ? match[1] : null;
+        }
+
+        function isPdf(url) {
+            if (!url || typeof url !== 'string') return false;
+            return url.toLowerCase().includes('.pdf');
+        }
+
+        function isImage(url) {
+            if (!url || typeof url !== 'string') return false;
+            const cleanUrl = url.split('?')[0].toLowerCase();
+            return (
+                cleanUrl.endsWith('.jpg') || cleanUrl.endsWith('.jpeg') || 
+                cleanUrl.endsWith('.png') || cleanUrl.endsWith('.gif') || 
+                cleanUrl.endsWith('.webp')
+            );
+        }
+
+        // Card Rendering
+        function renderCards(data) {
+            document.getElementById('resultCount').innerText = `${data.length} Experiences found`;
+            let html = '';
+            
+            data.forEach(item => {
+                const cats = item.Categories.map(c => `<span class="cat-badge mr-1">${c}</span>`).join('');
+                let mediaArr = item.MediaArray;
+                let primaryMedia = '';
+                
+                const ytUrl = mediaArr.find(url => typeof url === 'string' && (url.includes('youtube.com') || url.includes('youtu.be')));
+                const instaUrl = mediaArr.find(url => typeof url === 'string' && url.includes('instagram.com'));
+                const imgUrl = mediaArr.find(url => typeof url === 'string' && !url.includes('youtube.com') && !url.includes('youtu.be') && !url.includes('instagram.com') && !isPdf(url));
+                const pdfUrl = mediaArr.find(url => isPdf(url));
+
+                const ytId = getYouTubeId(ytUrl);
+                const instaId = getInstagramId(instaUrl);
+
+                if (ytId) {
+                    primaryMedia = `<iframe class="absolute top-0 left-0 w-full h-full lazy-video pointer-events-none" data-src="https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${ytId}" frameborder="0" allow="autoplay; encrypted-media"></iframe>`;
+                } else if (imgUrl) {
+                    primaryMedia = `<img src="${imgUrl}" class="absolute top-0 left-0 w-full h-full object-cover object-top" alt="Experience Image">`;
+                } else if (instaId) {
+                    // We removed 'src' and changed it to 'data-src', and added the 'lazy-video' class
+                    // This forces Instagram to use your custom Intersection Observer!
+                    primaryMedia = `
+                    <iframe
+                        data-src="https://www.instagram.com/reel/${instaId}/embed/"
+                        class="w-full h-[160%] -mt-[75px] pointer-events-none lazy-video"
+                        onerror="this.parentNode.innerHTML='<div class=\\'absolute inset-0 flex items-center justify-center bg-gradient-to-br from-pink-500 via-red-500 to-yellow-500 text-white font-bold\\'>Instagram Reel</div>'">
+                    </iframe>`;
+
+                } else if (pdfUrl) {
+                    primaryMedia = `
+                    <div class="absolute inset-0 flex flex-col items-center justify-center bg-stone-100 text-stone-600">
+                        <div class="text-6xl mb-4">📄</div>
+                        <div class="font-bold text-lg">PDF Document</div>
+                    </div>`;
+                } else {
+                    primaryMedia = `<img src="https://via.placeholder.com/600x400" class="absolute top-0 left-0 w-full h-full object-contain" alt="Placeholder">`;
+                }
+
+                let hashtagsHtml = '';
+                if (item.Hashtags && item.Hashtags.length > 0) {
+                    hashtagsHtml = `
+                        <div class="mt-2 flex flex-wrap gap-1 text-[11px] text-[#a37c6b] font-semibold tracking-wide">
+                            ${item.Hashtags.map(t => `<span class="bg-[#f5ede8]/50 px-1.5 py-0.5 rounded">${t}</span>`).join('')}
+                        </div>`;
+                }
+
+                html += `
+                <div class="card relative" data-id="${item.id}" data-name="${item.Name.replace(/"/g, '&quot;')}" onclick="window.trackClickAndNavigate(this)">
+                    <div class="card-media-container">
+                        ${primaryMedia}
+                        <div class="absolute inset-0 bg-transparent z-10"></div>
+                    </div>
+                    <div class="card-body relative">
+                        <div class="mb-3 flex flex-wrap gap-1">${cats}</div>
+                        <h3>${item.Name}</h3>
+                        <p class="text-stone-500 text-base font-medium">📍 ${item.City}, ${item.State}</p>
+                        <p class="text-stone-400 text-base font-medium">
+                            📅 ${item.StartDisplay || item.Start} ${item.EndDisplay ? ' - ' + item.EndDisplay : ''}
+                        </p>
+                        ${hashtagsHtml}
+                    </div>
+                </div>`;
+            });
+            
+            document.getElementById('cardContainer').innerHTML = html || '<p class="col-span-full text-center py-20 text-stone-400">No matching experiences found.</p>';
+            observeVideos();
+        }
+
+        // Lazy Load Videos
+        function observeVideos() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    const iframe = entry.target;
+                    if (entry.isIntersecting) {
+                        if (!iframe.src) {
+                            iframe.src = iframe.dataset.src;
+                        }
+                    }
+                });
+            }, { threshold: 0.1, rootMargin: "1000px"});
+            document.querySelectorAll('.lazy-video').forEach(vid => observer.observe(vid));
+        }
+
+
+        window.clearCategory = function() {
+            selectedSubCategories = [];
+            // Reset button styles
+            document.querySelectorAll('#categoriesFilterContainer button').forEach(btn => {
+                btn.classList.remove('bg-[#a37c6b]', 'text-white', 'border-[#a37c6b]');
+                btn.classList.add('bg-white', 'text-stone-600', 'border-stone-200');
+            });
+            window.history.replaceState({}, document.title, window.location.pathname);
+            runFilter();
+        };
+
+        window.clearStateFilter = function() {
+            const stateSelect = document.getElementById('stateFilterSelect');
+            if (stateSelect) {
+                stateSelect.value = '';
+            }
+            runFilter();
+        };
+
+        // Filtering System
+        function runFilter() {
+            let sRaw = document.getElementById('searchInput').value.toLowerCase();
+            
+            const nlpDate = extractDateRange(sRaw);
+            const s = nlpDate.cleanText;
+            
+            // Split the search input into an array of individual words
+            const searchWords = s.split(/\s+/).filter(word => word.length > 0);
+            
+            const dStartRaw = document.getElementById('startDateInput').value;
+            const dEndRaw = document.getElementById('endDateInput').value;
+            
+            const dStart = dStartRaw || nlpDate.start;
+            const dEnd = dEndRaw || nlpDate.end;
+
+            const tags = document.getElementById('filterStatus');
+            tags.innerHTML = '';
+            
+            // Rebuild words into a search phrase for the tag (or keep raw if they didn't type a date that got stripped)
+            if(s) {
+                const words = s.split(/\s+/).filter(w => w.length > 0);
+                words.forEach(word => {
+                    tags.innerHTML += `<div class="tag">${word} <span onclick="clearSearchWord('${word.replace(/'/g, "\\'")}')">×</span></div>`;
+                });
+            }
+            
+            selectedSubCategories.forEach(cat => {
+                tags.innerHTML += `<div class="tag">${cat} <span onclick="clearSelectedSubCategory('${cat.replace(/'/g, "\\'")}')">×</span></div>`;
+            });
+
+            const stateVal = document.getElementById('stateFilterSelect') ? document.getElementById('stateFilterSelect').value : '';
+            if (stateVal) {
+                tags.innerHTML += `<div class="tag">📍 ${stateVal} <span onclick="clearStateFilter()">×</span></div>`;
+            }
+
+            if(dStart || dEnd) {
+                let txt = '';
+                if (dStart && dEnd) {
+                    if (dStart === dEnd) {
+                        txt = `${formatDisplayDate(dStart)}`;
+                    } else {
+                        txt = `${formatDisplayDate(dStart)} to ${formatDisplayDate(dEnd)}`;
+                    }
+                } else if (dStart) {
+                    txt = `From ${formatDisplayDate(dStart)}`;
+                } else {
+                    txt = `Until ${formatDisplayDate(dEnd)}`;
+                }
+                
+                // If the user's manual inputs are empty, it means the date is from NLP string!
+                if (!dStartRaw && nlpDate.start) {
+                    tags.innerHTML += `<div class="tag">${txt} <span onclick="clearF('searchInputDate')">×</span></div>`;
+                } else {
+                    tags.innerHTML += `<div class="tag">${txt} <span onclick="clearF('dates')">×</span></div>`;
+                }
+                
+            }
+
+            const filtered = allData.filter(i => {
+                
+                // 1. Combine EVERY field into one massive string of text
+                const searchableText = [
+                    i.Name,
+                    i.City,
+                    i.State,
+                    i.Cost,
+                    i.Inclusions,
+                    i.Org,
+                    i.CName,
+                    i.CEmail,
+                    i.CPhone,
+                    i.CNum,
+                    i.StartDisplay,
+                    i.EndDisplay,
+                    i.Start, // Includes raw YYYY-MM-DD
+                    i.End,   // Includes raw YYYY-MM-DD
+                    (i.Categories || []).join(' '),     // Convert array to string
+                    (i.Hashtags || []).join(' '),       // Convert hashtags array to string
+                    (i.ExternalLinks || []).join(' ')   // Convert array to string
+                ].join(' ').toLowerCase();
+                
+                // 2. Ensure EVERY separate word typed exists somewhere in that massive text block
+                const matchText = searchWords.length === 0 || searchWords.every(word => {
+                    // Escape any special characters in the search word so it doesn't break the regex
+                    const safeWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    // The \b ensures the match starts at a word boundary (prevents 'abundance' matching 'dance')
+                    const regex = new RegExp('\\b' + safeWord, 'i'); 
+                    return regex.test(searchableText);
+                });
+
+                const matchCategory = selectedSubCategories.length === 0 || (i.Categories && selectedSubCategories.some(cat => i.Categories.includes(cat)));
+                
+                const matchState = !stateVal || (i.State && i.State.toLowerCase() === stateVal.toLowerCase());
+                
+                let matchDate = true;
+                if (dStart || dEnd) {
+                    const expStart = i.Start;
+                    const expEnd = i.End || i.Start; 
+                    
+                    if (dStart && dEnd) {
+                        matchDate = (expStart <= dEnd) && (expEnd >= dStart);
+                    } else if (dStart) {
+                        matchDate = (expEnd >= dStart);
+                    } else if (dEnd) {
+                        matchDate = (expStart <= dEnd);
+                    }
+                }
+                return matchText && matchCategory && matchDate && matchState;
+            });
+            
+            renderCards(filtered);
+            trackSearchEvent(filtered.length);
+        }
+
+        function clearF(id) { 
+            if (typeof gtag === 'function') {
+                gtag('event', 'close_filter_tag', {
+                    'tag_type': id
+                });
+            }
+            if(id === 'dates') {
+                document.getElementById('startDateInput').value = '';
+                document.getElementById('endDateInput').value = '';
+            } else if(id === 'searchInputDate') {
+                // Remove the NLP recognized part from the search input
+                const sRaw = document.getElementById('searchInput').value.toLowerCase();
+                const nlpDate = extractDateRange(sRaw);
+                document.getElementById('searchInput').value = nlpDate.cleanText;
+            } else {
+                document.getElementById(id).value = ''; 
+            }
+            runFilter(); 
+        }
+
+        function clearSearchWord(wordToRemove) {
+            if (typeof gtag === 'function') {
+                gtag('event', 'close_filter_tag', {
+                    'tag_type': 'search_word_tag',
+                    'tag_value': wordToRemove
+                });
+            }
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                let sRaw = searchInput.value;
+                // Handle replacing the word case-insensitively, keeping other words
+                const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const regex = new RegExp(`\\b${escapeRegExp(wordToRemove)}\\b`, 'gi');
+                searchInput.value = sRaw.replace(regex, '').replace(/\s+/g, ' ').trim();
+            }
+            runFilter();
+        }
+
+        function validateAndFilter() {
+            const start = document.getElementById('startDateInput') ? document.getElementById('startDateInput').value : '';
+            const end = document.getElementById('endDateInput') ? document.getElementById('endDateInput').value : '';
+            
+            if (start && end && start > end) {
+                alert("Error: The End Date cannot be earlier than the Start Date.");
+                const endEl = document.getElementById('endDateInput');
+                if (endEl) endEl.value = ''; 
+            }
+            runFilter();
+        }
+
+        // Event Listeners for Filters
+        const searchInputEl = document.getElementById('searchInput');
+        if (searchInputEl) searchInputEl.oninput = runFilter;
+        const startDateInputEl = document.getElementById('startDateInput');
+        if (startDateInputEl) startDateInputEl.onchange = validateAndFilter;
+        const endDateInputEl = document.getElementById('endDateInput');
+        if (endDateInputEl) endDateInputEl.onchange = validateAndFilter;
+
+        // Setup initial dropdown states
+
+    </script>
+
+    <script type="module">
+        import { initializeApp, getApp, getApps } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = window.GLOBAL_FIREBASE_CONFIG;
+
+        const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        
+
+        onAuthStateChanged(auth, (user) => {
+            const dropdownProfile = document.getElementById('dropdown-profile');
+            const userEmailEl = document.getElementById('user-email');
+            const logoutBtn = document.getElementById('logout-btn');
+            const loginBtnMenu = document.getElementById('login-btn-menu');
+
+            if (user) {
+                if (userEmailEl) userEmailEl.innerText = user.email;
+                if (dropdownProfile) dropdownProfile.classList.remove('hidden');
+                if (logoutBtn) logoutBtn.classList.remove('hidden');
+                if (loginBtnMenu) loginBtnMenu.classList.add('hidden');
+            } else {
+                if (dropdownProfile) dropdownProfile.classList.add('hidden');
+                if (logoutBtn) logoutBtn.classList.add('hidden');
+                if (loginBtnMenu) loginBtnMenu.classList.remove('hidden');
+            }
+        });
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const categoryParam = urlParams.get('category') || urlParams.get('search'); // Handles both fallback styles
+
+        if (categoryParam) {
+            // Assign directly to the database category filter instead of the text input box
+            if (typeof selectedSubCategories !== 'undefined') {
+                if (!selectedSubCategories.includes(categoryParam)) {
+                    selectedSubCategories.push(categoryParam);
+                }
+                // Toggle the state of the button
+                setTimeout(() => {
+                    const btnId = `btn-sub-${categoryParam.replace(/[^a-zA-Z0-9]/g, '')}`;
+                    const btn = document.getElementById(btnId);
+                    if (btn) {
+                        btn.classList.remove('bg-white', 'text-stone-600', 'border-stone-200');
+                        btn.classList.add('bg-[#a37c6b]', 'text-white', 'border-[#a37c6b]');
+                    }
+                }, 500);
+            }
+    
+            if (typeof allData !== 'undefined' && allData.length > 0) {
+                runFilter();
+            }
+        }
+        const loginBtnMenuEl = document.getElementById('login-btn-menu');
+        if (loginBtnMenuEl) loginBtnMenuEl.onclick = () => signInWithPopup(auth, provider);
+
+        const logoutBtnEl = document.getElementById('logout-btn');
+        if (logoutBtnEl) logoutBtnEl.onclick = () => signOut(auth);
+
+        // Check for category search parameters in the URL when the page loads
+        
+
+        
+    </script>
+<div id="site-footer"></div>
+    <script src="footer.js"></script>
+</body>
+    </html>

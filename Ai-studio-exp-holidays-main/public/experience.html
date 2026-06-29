@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experience Details | Experiential Holidays</title>
+    <meta name="description" content="Discover retreats, workshops, festivals, wellness journeys and transformational experiences across India.">
+    <meta name="keywords" content="retreats india, workshops india, yoga retreats, wellness retreats, experiential travel, meditation retreats">
+    <meta name="author" content="Experiential Holidays">
+    <meta name="robots" content="index, follow">
+
+    <link rel="canonical" href="https://experientialholidays.info/">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Experiential Holidays India">
+    <meta property="og:description" content="Discover meaningful retreats and transformational experiences across India.">
+    <meta property="og:url" content="https://experientialholidays.info/">
+    <meta property="og:image" content="https://experientialholidays.info/assets/share-image.jpg">
+    <meta property="og:site_name" content="Experiential Holidays">
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-W1N6TNTMJQ"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){ dataLayer.push(arguments); }
+        
+        // Deny advertising and personalization tracking by default to protect user privacy
+        gtag('consent', 'default', {
+            'ad_storage': 'denied',
+            'ad_user_data': 'denied',
+            'ad_personalization': 'denied',
+            'analytics_storage': 'granted' // Only allow basic, anonymous analytics measurement
+        });
+        
+        gtag('js', new Date());
+        gtag('config', 'G-W1N6TNTMJQ', {
+            'allow_google_signals': false,          // Disable cross-device demographics matching
+            'allow_ad_personalization_signals': false // Explicitly disable personalized advertising data collection
+        });
+    </script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght=400;600;700;800&display=swap" rel="stylesheet">
+    <script src="config.js"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Experiential Holidays",
+        "url": "https://experientialholidays.info",
+        "description": "Curated retreats and experiential travel opportunities across India."
+    }
+    </script>
+
+    <style>
+        :root { 
+            --slate: #4a4542; 
+            --accent: #a37c6b; 
+            --bg-warm: #faf7f4;
+            --border-soft: #f0e6e0;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: var(--bg-warm); 
+            color: var(--slate); 
+            font-size: 17px; 
+        }
+
+        .nav-main { 
+            background: white; 
+            border-bottom: 1px solid var(--border-soft); 
+            padding: 16px 20px; 
+        }
+
+        .cat-badge { 
+            background: #fdfcfc; 
+            color: var(--accent); 
+            font-size: 13px; 
+            font-weight: 800; 
+            padding: 4px 12px; 
+            border-radius: 50px; 
+            text-transform: uppercase; 
+            border: 1px solid var(--border-soft); 
+        }
+
+        #modal-top-info {
+            position: relative;
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 24px 24px 10px;
+        }
+
+        #modal-carousel {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            overflow: visible;
+        }
+
+        .carousel-main {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto;
+        }
+
+        .carousel-item {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            background: transparent;
+            border-radius: 24px;
+            overflow: hidden;
+            padding: 0;
+        }
+
+        .carousel-item img {
+            width: auto;
+            height: auto;
+            max-width: 100%;
+            max-height: 82vh;
+            object-fit: contain;
+            display: block;
+            margin: auto;
+            border-radius: 18px;
+        }
+
+        .carousel-item iframe:not(.instagram-frame) {
+            width: 100%;
+            height: 82vh;
+            border: none;
+            border-radius: 18px;
+            background: white;
+        }
+
+        .instagram-wrap {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+
+
+        .pdf-frame {
+            width: 100%;
+            height: 82vh;
+            border: none;
+            background: white;
+            border-radius: 18px;
+        }
+
+        .youtube-frame {
+            width: 100%;
+            height: 82vh;
+            border: none;
+            border-radius: 22px;
+            background: black;
+        }
+
+        .carousel-image {
+            width: auto;
+            height: auto;
+            max-width: 100%;
+            max-height: 82vh;
+            object-fit: contain;
+            display: block;
+            margin: auto;
+        }
+
+        .carousel-thumbs {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 14px 4px 6px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .carousel-thumb {
+            position: relative; 
+            width: 84px;
+            height: 84px;
+            border-radius: 18px;
+            overflow: hidden;
+            cursor: pointer;
+            flex-shrink: 0;
+            border: 3px solid transparent;
+            background: #f3f3f3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+
+        .carousel-thumb.active {
+            border-color: var(--accent);
+            transform: scale(1.04);
+        }
+
+        .carousel-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #modal-content {
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 14px 24px 80px;
+        }
+
+        .section-label { 
+            font-size: 14px; 
+            font-weight: 800; 
+            color: #a39e9b; 
+            text-transform: uppercase; 
+            margin-top: 30px; 
+            margin-bottom: 12px; 
+            border-bottom: 1px solid var(--border-soft); 
+            padding-bottom: 4px; 
+            letter-spacing: 0.05em; 
+        }
+
+        .btn-wa { 
+            display: block; 
+            text-align: center; 
+            padding: 18px; 
+            background: #25D366; 
+            color: white; 
+            border-radius: 16px; 
+            text-decoration: none; 
+            font-weight: 800; 
+            margin-top: 40px; 
+            box-shadow: 0 8px 20px rgba(37, 211, 102, 0.2); 
+            transition: transform 0.2s; 
+        }
+
+        .btn-wa:hover { 
+            transform: translateY(-1px); 
+        }
+
+        /* Lightbox Styles */
+        #lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            overflow: auto;
+            z-index: 99999;
+            background: rgba(245, 245, 245, .97);
+            backdrop-filter: blur(8px);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        #lightbox-content {
+            min-height: 100vh;
+            width: 100vw;
+            max-width: 100vw;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        #lightbox-content iframe {
+            max-width: 95vw;
+            max-height: 95vh;
+            border: none;
+            border-radius: 20px;
+            background: white;
+        }
+
+        #lightbox-content img {
+            max-width: 95vw;
+            max-height: 95vh;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            display: block;
+            margin: auto;
+        }
+
+        .lightbox-close {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #fff;
+            color: #333;
+            font-size: 30px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0,0,0,.15);
+            z-index: 100001;
+        }
+
+        .lightbox-prev, .lightbox-next {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, .95);
+            color: #444;
+            font-size: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0,0,0,.12);
+            z-index: 100001;
+        }
+
+        .lightbox-prev { left: 16px; }
+        .lightbox-next { right: 16px; }
+
+        @media(max-width: 768px) {
+            #modal-top-info { padding: 20px 18px 8px; }
+            #modal-content { padding: 10px 18px 70px; }
+            #modal-carousel { padding: 0 10px; gap: 10px; }
+            .carousel-item iframe, .instagram-frame, .pdf-frame { height: 72vh; }
+            #lightbox-content iframe { height: 88vh; }
+            .lightbox-prev, .lightbox-next { width: 42px; height: 42px; font-size: 22px; }
+            .lightbox-close { width: 42px; height: 42px; font-size: 26px; }
+            .carousel-thumb { width: 68px; height: 68px; border-radius: 14px; }
+            .youtube-frame, .carousel-image { height: 72vh; }
+        }
+        
+        .instagram-frame {
+            width: 420px;
+            max-width: 95vw;
+            height: 80vh;
+            border: none;
+            border-radius: 18px;
+            display: block;
+            margin: auto;
+        }    
+        
+
+@media (max-width: 767px) {
+    .instagram-frame {
+        width: 100%;
+        height: 900px;
+        max-height: none;
+    }
+}
+        }
+    </style>
+</head>
+<body class="pb-10">
+
+    <div id="site-navbar"></div>
+    <script src="navbar.js"></script>
+
+    <div id="loading-state" class="max-w-4xl mx-auto py-20 text-center text-stone-400 font-bold">
+        Loading experience...
+    </div>
+
+    <div id="experience-container">
+        <div id="modal-top-info" class="w-full max-w-5xl mx-auto px-5 pt-8 pb-2"></div>
+        <div id="modal-carousel"></div>
+        <div id="modal-content" class="w-full max-w-5xl mx-auto px-5 pt-6"></div>
+    </div>
+
+    <div id="lightbox">
+        <div class="lightbox-close" onclick="closeLightbox(false)">&times;</div>
+        <div class="lightbox-prev" onclick="changeLightbox(-1)">&#10094;</div>
+        <div id="lightbox-content" class="lightbox-content"></div>
+        <div class="lightbox-next" onclick="changeLightbox(1)">&#10095;</div>
+    </div>
+
+    <script>
+        const firebaseConfig = window.GLOBAL_FIREBASE_CONFIG;
+        // Initialize Firebase SDK
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const urlParams = new URLSearchParams(window.location.search);
+        const experienceId = urlParams.get('id');
+
+        let allData = [];
+        let currentMedia = [];
+        let currentMediaIndex = 0;
+        let activeDetailMedia = 0;
+
+        function formatDisplayDate(dateStr) {
+            if (!dateStr || typeof dateStr !== 'string') return "";
+            try {
+                const parts = dateStr.split('-');
+                if(parts.length !== 3) return dateStr;
+                const dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
+                if (isNaN(dateObj.getTime())) return dateStr;
+                
+                const day = dateObj.getDate();
+                const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                return `${day} ${months[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
+            } catch (e) {
+                return dateStr;
+            }
+        }
+
+        if (!experienceId) {
+            document.body.innerHTML = `
+                <div style="padding:40px;text-align:center;">
+                    <h1>Experience not found</h1>
+                </div>
+            `;
+        } else {
+            db.collection('retreats').doc(experienceId).get().then((doc) => {
+                if (!doc.exists) {
+                    document.body.innerHTML = `
+                        <div style="padding:40px;text-align:center;">
+                            <h1>Experience not found</h1>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const r = doc.data();
+                let media = Array.isArray(r.fileUrls) ? [...r.fileUrls] : [];
+                let videos = Array.isArray(r.videoLinks) ? [...r.videoLinks] : [];
+                media = media.concat(videos);
+
+                const experience = {
+                    id: doc.id,
+                    Name: r.retreatName || 'Untitled',
+                    Categories: Array.isArray(r.categories) ? r.categories : [],
+                    Hashtags: Array.isArray(r.hashtags) ? r.hashtags : [],
+                    State: r.state || '',
+                    City: r.city || '',
+                    Start: r.startDate || '',
+                    StartDisplay: formatDisplayDate(r.startDate || ''),
+                    StartTime: r.startTime || '',
+                    End: r.endDate || '',
+                    EndDisplay: formatDisplayDate(r.endDate || ''),
+                    EndTime: r.endTime || '',
+                    Description: r.description || '',
+                    Cost: r.contribution || '',
+                    Inclusions: r.inclusionsExclusions || '',
+                    Org: r.orgInfo || '',
+                    CName: r.contactName || '',
+                    CEmail: r.orgContactEmail || '',
+                    CPhone: r.contactWhatsApp || '',
+                    CNum: r.contactNumber || '',
+                    ExternalLinks: Array.isArray(r.externalLinks) ? r.externalLinks : [],
+                    MediaArray: media,
+                    timestamp: r.timestamp || Date.now(),
+                    lastUpdated: r.lastUpdated || null
+                };
+
+                renderExperience(experience);
+            }).catch((error) => {
+                console.error(error);
+            });
+        }
+
+        function getYouTubeId(url) {
+            if (!url || typeof url !== 'string') return null;
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|\/shorts\/)([^#\&\?]*).*/;
+            const match = url.trim().match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        }
+
+        function getInstagramId(url) {
+            if (!url || typeof url !== 'string') return null;
+            const match = url.trim().match(/instagram\.com\/(?:reel|reels|p)\/([a-zA-Z0-9_-]+)/i);
+            return match ? match[1] : null;
+        }
+
+        function isPdf(url) {
+            if (!url || typeof url !== 'string') return false;
+            return url.toLowerCase().includes('.pdf');
+        }
+
+        function isImage(url) {
+            if (!url || typeof url !== 'string') return false;
+            const cleanUrl = url.split('?')[0].toLowerCase();
+            return (
+                cleanUrl.endsWith('.jpg') ||
+                cleanUrl.endsWith('.jpeg') ||
+                cleanUrl.endsWith('.png') ||
+                cleanUrl.endsWith('.gif') ||
+                cleanUrl.endsWith('.webp')
+            );
+        }
+
+        function getMediaType(url) {
+            if (isPdf(url)) return 'pdf';
+            if (getYouTubeId(url)) return 'youtube';
+            if (getInstagramId(url)) return 'instagram';
+            if (isImage(url)) return 'image';
+            return 'unknown';
+        }
+
+        function hasValidPhone(phone) {
+            if (!phone) return false;
+            const digits = phone.replace(/\D/g, '');
+            return digits.length >= 6;
+        }
+
+        function renderMainMedia(index) {
+            if (!currentMedia || !currentMedia.length) return;
+            activeDetailMedia = index;
+            const url = currentMedia[index];
+            const ytId = getYouTubeId(url);
+            const instaId = getInstagramId(url);
+            const pdfFile = isPdf(url);
+            let html = '';
+
+            if (ytId) {
+                html = `
+                <div class="carousel-item">
+                    <iframe class="youtube-frame" src="https://www.youtube.com/embed/${ytId}" allowfullscreen></iframe>
+                </div>`;
+            } else if (isImage(url)) {
+                html = `
+                <div class="carousel-item" onclick="openLightbox(${index})">
+                    <img src="${url}" class="carousel-image" loading="lazy">
+                </div>`;
+            } else if (pdfFile) {
+                html = `
+                <div class="carousel-item">
+                    <iframe class="pdf-frame" src="https://drive.google.com/viewerng/viewer?embedded=true&url=${encodeURIComponent(url)}"></iframe>
+                </div>`;
+            } else if (instaId) {
+                html = `
+                <div class="carousel-item instagram-wrap">
+                    <iframe class="instagram-frame" src="https://www.instagram.com/reel/${instaId}/embed/" loading="lazy"></iframe> 
+                </div>`;
+            }
+
+            document.getElementById('modal-carousel-main').innerHTML = html;
+            document.querySelectorAll('.carousel-thumb').forEach((el, i) => {
+                if(i === index) el.classList.add('active');
+                else el.classList.remove('active');
+            });
+        }
+        window.renderMainMedia = renderMainMedia;
+
+        function renderExperience(i) { 
+            const loading = document.getElementById('loading-state');
+            if (loading) loading.remove();
+
+            document.title = `${i.Name} | Experiential Holidays`;
+            const canonical = document.querySelector("link[rel='canonical']");
+            if(canonical) canonical.href = window.location.href;
+
+            const metaDesc = document.querySelector('meta[name="description"]');
+            if(metaDesc) metaDesc.setAttribute('content', (i.Description || '').substring(0,160));
+
+            const ogTitle = document.querySelector('meta[property="og:title"]');
+            if(ogTitle) ogTitle.setAttribute('content', i.Name);
+
+            // 1. Google Analytics: Track Experience View
+            if(typeof gtag === 'function'){
+                gtag('event', 'view_experience', { 
+                    experience_id: i.id,
+                    experience_name: i.Name,
+                    host_name: i.Org || 'Unknown'
+                });
+            }
+
+            // 2. Database: Track Unique Page View (Once per session)
+            let hasViewed = false;
+            try {
+                hasViewed = sessionStorage.getItem('viewed_' + i.id);
+            } catch(e) { }
+
+            if (!hasViewed) {
+                db.collection('retreats').doc(i.id).update({
+                    views: firebase.firestore.FieldValue.increment(1)
+                }).catch(err => console.log("View count update bypassed (check rules)"));
+                try {
+                    sessionStorage.setItem('viewed_' + i.id, 'true');
+                } catch(e) { }
+            }
+            
+            if(!i) return;
+            
+            let media = [...i.MediaArray];
+            media.sort((a, b) => {
+                const priority = { youtube: 1, image: 2, instagram: 3, pdf: 4, unknown: 5 };
+                return priority[getMediaType(a)] - priority[getMediaType(b)];
+            });
+
+            currentMedia = media;
+
+            let locString = `${i.City || ''}${(i.City && i.State) ? ', ' : ''}${i.State || ''}`;
+            let dateString = `${i.StartDisplay || i.Start} ${i.EndDisplay ? ' - ' + i.EndDisplay : ''}`;
+            
+            let timestampHtml = '';
+            const finalTime = i.lastUpdated || i.timestamp;
+            if (finalTime) {
+                const dateObj = new Date(finalTime);
+                const dDate = `${dateObj.getDate()} ${dateObj.toLocaleString('default', {month: 'short'})} ${dateObj.getFullYear()}`;
+                const dTime = `${String(dateObj.getHours()).padStart(2, '0')}:${String(dateObj.getMinutes()).padStart(2, '0')}`;
+                
+                const labelStr = i.lastUpdated ? 'Edited On:' : 'Submitted On:';
+
+                timestampHtml = `
+                <div class="mt-8 text-right text-[10px] text-stone-400 font-medium">
+                    <div class="uppercase tracking-wider">${labelStr}</div>
+                    <div>${dDate}, ${dTime}</div>
+                </div>`;
+            }
+
+            // 1. TOP HTML
+            let topHtml = ``;
+            if(i.Categories && i.Categories.length > 0) {
+                topHtml += `
+                <div class="mb-4 flex flex-row flex-wrap gap-2 pr-12">
+                    ${i.Categories.map(c => `
+                        <div>
+                            <span class="cat-badge cursor-pointer hover:bg-stone-100 transition inline-block" 
+                                 onclick="window.location.href='index.html?category=${encodeURIComponent(c)}'">
+                                ${c}
+                             </span>
+                        </div>`).join('')}
+                </div>`;
+            }
+            if(i.Hashtags && i.Hashtags.length > 0) {
+                topHtml += `
+                <div class="mb-4 flex flex-row flex-wrap gap-1.5 pr-12">
+                    ${i.Hashtags.map(tag => `
+                        <span class="text-xs font-semibold text-[#a37c6b] bg-[#f5ede8]/50 px-2 py-0.5 rounded-md">
+                            ${tag}
+                        </span>`).join('')}
+                </div>`;
+            }
+            if(i.Name) topHtml += `<h2 class="text-3xl font-black text-stone-800 leading-tight mb-2">${i.Name}</h2>`;
+            if(locString) topHtml += `<p class="text-xl font-bold text-stone-500 mb-2">📍 ${locString}</p>`;
+
+            if(i.Start || i.End) {
+                topHtml += `
+                <div class="bg-white p-5 rounded-2xl border border-slate-100 mt-4 mb-6" style="border-color: var(--border-soft);">
+                    <p class="text-xs font-bold text-stone-400 uppercase mb-1 tracking-wider">Schedule</p>
+                    ${i.Start ? `<p class="font-bold text-stone-700">Starts: ${i.StartDisplay || i.Start} ${i.StartTime ? 'at ' + i.StartTime : ''}</p>` : ''}
+                    ${i.End ? `<p class="font-bold text-stone-700">Ends: ${i.EndDisplay || i.End} ${i.EndTime ? 'at ' + i.EndTime : ''}</p>` : ''}
+                </div>`;
+            }
+            document.getElementById('modal-top-info').innerHTML = topHtml;
+
+            // 2. CAROUSEL
+            activeDetailMedia = 0;
+            document.getElementById('modal-carousel').innerHTML = `
+                <div id="modal-carousel-main" class="carousel-main"></div>
+                <div class="carousel-thumbs">
+                ${media.map((url, index) => {
+                    const ytId = getYouTubeId(url);
+                    const instaId = getInstagramId(url);
+                    const pdfFile = isPdf(url);
+
+                    if (ytId) {
+                        return `
+                        <div class="carousel-thumb relative" onclick="renderMainMedia(${index})">
+                            <img src="https://img.youtube.com/vi/${ytId}/mqdefault.jpg">
+                            <div class="absolute bottom-1 right-1 bg-red-600 text-white text-[10px] px-1 rounded">YT</div>
+                        </div>`;
+                    } else if (isImage(url)) {
+                        return `
+                        <div class="carousel-thumb" onclick="renderMainMedia(${index})">
+                            <img src="${url}">
+                        </div>`;
+                    } else if (instaId) {
+                        return `
+                        <div class="carousel-thumb relative" onclick="renderMainMedia(${index})">
+                            <img src="https://www.instagram.com/p/${instaId}/media/?size=m" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                            <div class="absolute inset-0 hidden items-center justify-center bg-gradient-to-br from-pink-500 via-red-500 to-yellow-500 text-white text-xs font-bold">Instagram</div>
+                            <div class="absolute bottom-1 right-1 bg-black/70 text-white text-[10px] px-1 rounded">IG</div>
+                        </div>`;
+                    } else if (pdfFile) {
+                        return `
+                        <div class="carousel-thumb flex flex-col bg-stone-100 text-stone-700" onclick="renderMainMedia(${index})">
+                            <div class="text-3xl">📄</div>
+                            <div class="text-[10px] font-bold mt-1">PDF</div>
+                        </div>`;
+                    }
+                    return '';
+                }).join('')}
+                </div>
+            `;
+            renderMainMedia(0);
+
+            // 3. BOTTOM HTML
+            let bottomHtml = ``;
+            if(i.Description) {
+                bottomHtml += `
+                    <div class="section-label">Overview</div>
+                    <p class="whitespace-pre-line text-stone-600 leading-relaxed mb-6">${i.Description}</p>`;
+            }
+
+            if(i.Cost || i.Inclusions) {
+                bottomHtml += `<div class="section-label">Contribution</div>`;
+                if(i.Cost) bottomHtml += `<p class="font-bold text-stone-800 text-lg whitespace-pre-wrap">${i.Cost}</p>`;
+                if(i.Inclusions) bottomHtml += `<p class="text-stone-500 italic text-base mt-2 whitespace-pre-wrap">${i.Inclusions}</p>`;
+            }
+
+            if(i.Org || i.CName || i.CEmail || i.CPhone || i.CNum) {
+                bottomHtml += `<div class="section-label">Host Information</div>`;
+                if(i.Org) bottomHtml += `<p class="font-bold text-stone-800 whitespace-pre-wrap">${i.Org}</p>`;
+    
+                let contactDetails = [
+                    i.CName, 
+                    i.CEmail, 
+                    hasValidPhone(i.CPhone) ? `WA: ${i.CPhone}` : '',
+                    hasValidPhone(i.CNum) ? `Ph: ${i.CNum}` : ''
+                ].filter(detail => detail).join(' | ');
+    
+                if(contactDetails) {
+                    bottomHtml += `<p class="text-stone-500 text-base mt-1">${contactDetails}</p>`;
+                }
+            }
+
+            if(i.ExternalLinks && i.ExternalLinks.length > 0) {
+                bottomHtml += `
+                    <div class="section-label">Related Links</div>
+                    <div class="flex flex-col gap-2 mb-6">
+                        ${i.ExternalLinks.map(l => `<a href="${l}" target="_blank" class="text-blue-600 underline hover:text-blue-800 truncate ext-link-btn" data-url="${l}">${l}</a>`).join('')}
+                    </div>`;
+            }
+
+            if(hasValidPhone(i.CPhone)) {
+                let waMessage = `I came across the *${i.Name}* experience to be held on ${dateString} at ${locString} on experientialholidays.info. Can I get more details?`;
+                let encodedMessage = encodeURIComponent(waMessage);
+                bottomHtml += `<a href="https://wa.me/${i.CPhone}?text=${encodedMessage}" target="_blank" class="btn-wa">Inquire on WhatsApp</a>`;
+            }
+
+            bottomHtml += timestampHtml;
+
+            document.getElementById('modal-content').innerHTML = bottomHtml;
+
+            setTimeout(() => {
+                // WhatsApp Button Tracking (DB + GA4)
+                const waBtn = document.querySelector('.btn-wa');
+                if(waBtn) {
+                    waBtn.addEventListener('click', () => {
+                        // DB Tracking
+                        db.collection('retreats').doc(i.id).update({
+                            whatsappClicks: firebase.firestore.FieldValue.increment(1)
+                        }).catch(err => console.log("Click count update bypassed"));
+
+                        // GA4 Tracking
+                        if(typeof gtag === 'function'){
+                            gtag('event', 'click_whatsapp', {
+                                experience_id: i.id,
+                                experience_name: i.Name,
+                                host_name: i.Org || 'Unknown'
+                            });
+                        }
+                    });
+                }
+
+                // External Links Tracking (DB + GA4)
+                const extLinks = document.querySelectorAll('.ext-link-btn');
+                extLinks.forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        const clickedUrl = e.currentTarget.getAttribute('data-url');
+                        
+                        // NEW: Increment External Link Clicks in Database
+                        db.collection('retreats').doc(i.id).update({
+                            externalLinkClicks: firebase.firestore.FieldValue.increment(1)
+                        }).catch(err => console.log("External link count update bypassed"));
+
+                        // GA4 Event
+                        if(typeof gtag === 'function'){
+                            gtag('event', 'click_external_link', {
+                                experience_id: i.id,
+                                experience_name: i.Name,
+                                host_name: i.Org || 'Unknown',
+                                link_url: clickedUrl
+                            });
+                        }
+                    });
+                });
+            }, 100);
+        }
+
+        // Lightbox Functions
+        window.addEventListener('popstate', function() {
+            if (document.getElementById('lightbox').style.display === 'flex') {
+                closeLightbox(true);
+            }
+        });
+
+        function openLightbox(index) {
+            currentMediaIndex = index;
+            const lightbox = document.getElementById('lightbox');
+            if (!lightbox) return;
+
+            document.body.appendChild(lightbox);
+            lightbox.style.display = 'flex';
+            updateLightbox();
+            history.pushState({ lightboxOpen: true }, '', '#lightbox');
+        }
+
+        function closeLightbox(isPopState = false) {
+            const lightbox = document.getElementById('lightbox');
+            if (lightbox) lightbox.style.display = 'none';
+            
+            const container = document.getElementById('lightbox-content');
+            if (container) container.innerHTML = '';
+            
+            if (!isPopState && window.location.hash === '#lightbox') {
+                history.back();
+            }
+        }
+
+        function changeLightbox(step) {
+            if (currentMedia.length === 0) return;
+            let newIndex = currentMediaIndex + step;
+            
+            if (newIndex < 0 || newIndex >= currentMedia.length) {
+                return; 
+            }
+            
+            currentMediaIndex = newIndex;
+            updateLightbox();
+        }
+
+        function updateLightbox() {
+            const url = currentMedia[currentMediaIndex];
+            const container = document.getElementById('lightbox-content');
+            if (!container) return;
+
+            const instaId = getInstagramId(url);
+            const ytId = getYouTubeId(url);
+            const pdfFile = isPdf(url);
+
+            if (ytId) {
+                container.innerHTML = `
+                    <iframe src="https://www.youtube.com/embed/${ytId}?autoplay=1" style="width:min(96vw,1200px);height:min(80vh,700px);border-radius:22px;" allow="autoplay; fullscreen" allowfullscreen></iframe>
+                `;
+            } else if (isImage(url)) {
+                container.innerHTML = `<img src="${url}" loading="lazy" alt="Media">`;
+            } else if (pdfFile) {
+                container.innerHTML = `
+                    <iframe src="https://drive.google.com/viewerng/viewer?embedded=true&url=${encodeURIComponent(url)}" style="width:96vw;height:92vh;background:white;border-radius:18px;"></iframe>
+                `;
+            } else if (instaId) {
+                container.innerHTML = `
+                    <iframe class="instagram-frame" src="https://www.instagram.com/reel/${instaId}/embed/" scrolling="no" allowtransparency="true"></iframe>
+                `;
+            }
+        }
+
+        // Lightbox Swipe Logic
+        let startX = 0;
+        let endX = 0;
+        const lightboxContainer = document.getElementById('lightbox');
+
+        lightboxContainer.addEventListener('touchstart', e => {
+            startX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        lightboxContainer.addEventListener('touchend', e => {
+            endX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, { passive: true });
+
+        lightboxContainer.addEventListener('mousedown', e => {
+            startX = e.screenX;
+        });
+
+        lightboxContainer.addEventListener('mouseup', e => {
+            endX = e.screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            const threshold = 50; 
+            const isIframe = document.querySelector('#lightbox-content iframe');
+            if (isIframe) return; 
+
+            if (endX < startX - threshold) changeLightbox(1); 
+            if (endX > startX + threshold) changeLightbox(-1);
+        }
+    </script>
+
+    <script type="module">
+        import { initializeApp, getApp, getApps } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = window.GLOBAL_FIREBASE_CONFIG;
+
+        const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        const menuBtn = document.getElementById('mobile-menu-btn');
+        const dropdownMenu = document.getElementById('dropdown-menu');
+
+        
+
+        onAuthStateChanged(auth, (user) => {
+            const dropdownProfile = document.getElementById('dropdown-profile');
+            const userEmailEl = document.getElementById('user-email');
+            const logoutBtn = document.getElementById('logout-btn');
+            const loginBtnMenu = document.getElementById('login-btn-menu');
+
+            if (user) {
+                if (userEmailEl) userEmailEl.innerText = user.email;
+                if (dropdownProfile) dropdownProfile.classList.remove('hidden');
+                if (logoutBtn) logoutBtn.classList.remove('hidden');
+                if (loginBtnMenu) loginBtnMenu.classList.add('hidden');
+            } else {
+                if (dropdownProfile) dropdownProfile.classList.add('hidden');
+                if (logoutBtn) logoutBtn.classList.add('hidden');
+                if (loginBtnMenu) loginBtnMenu.classList.remove('hidden');
+            }
+        });
+
+        const loginBtnMenuEl = document.getElementById('login-btn-menu');
+        if (loginBtnMenuEl) loginBtnMenuEl.onclick = () => signInWithPopup(auth, provider);
+
+        const logoutBtnEl = document.getElementById('logout-btn');
+        if (logoutBtnEl) logoutBtnEl.onclick = () => signOut(auth);
+    </script>
+<div id="site-footer"></div>
+    <script src="footer.js"></script>
+</body>
+</html>

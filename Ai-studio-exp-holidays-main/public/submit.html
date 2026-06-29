@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit an Experience</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="config.js"></script>
+    <style>
+        :root { 
+            --slate: #4a4542; 
+            --accent: #a37c6b; 
+            --tag-bg: #f5ede8; 
+            --bg-warm: #faf7f4;
+            --border-soft: #f0e6e0;
+        }
+        body { font-family: 'Inter', sans-serif; color: var(--slate); font-size: 17px; background-color: var(--bg-warm); }
+        .form-section { background: white; border-radius: 24px; padding: 32px; border: 1px solid var(--border-soft); margin-bottom: 28px; }
+        .input-label { display: block; text-transform: uppercase; font-size: 11px; font-weight: 800; color: #a39e9b; margin-bottom: 8px; letter-spacing: 0.05em; }
+        .custom-input { width: 100%; background: white; border: 1px solid var(--border-soft); padding: 12px 16px; border-radius: 12px; outline: none; transition: all 0.2s; font-size: 15px; color: #2e2a27; }
+        .custom-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px #f5ede8; background: white; }
+        .btn-primary { background: var(--accent); color: white; padding: 16px; border-radius: 16px; font-weight: 800; transition: all 0.2s; width: 100%; text-transform: uppercase; letter-spacing: 1px; border: 1px solid var(--accent); shadow-sm; }
+        .btn-primary:hover { opacity: 0.95; transform: translateY(-1px); }
+        .btn-soft { background: #white; color: var(--accent); padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; transition: 0.2s; border: 1px solid var(--border-soft); }
+        .btn-soft:hover { background: var(--tag-bg); border-color: #e8dad0; }
+        
+        /* Custom file styling overwrite safely */
+        .file-input-item::file-selector-button {
+            background-color: white;
+            color: var(--accent);
+            font-weight: 700;
+            border: 1px solid var(--border-soft);
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .file-input-item::file-selector-button:hover {
+            background-color: var(--tag-bg);
+        }
+        /* Tom Select perfectly matched to .custom-input */
+        .ts-wrapper {
+            font-family: 'Inter', sans-serif;
+        }
+        .ts-control {
+            border: 1px solid var(--border-soft) !important;
+            border-radius: 12px !important;
+            padding: 12px 16px !important;
+            font-size: 15px !important;
+            color: #2e2a27 !important;
+            background: white !important;
+            box-shadow: none !important;
+        }
+        .ts-control > input {
+            font-size: 15px !important;
+            color: #2e2a27 !important;
+        }
+        /* Matching the golden focus ring */
+        .ts-wrapper.focus .ts-control {
+            border-color: var(--accent) !important;
+            box-shadow: 0 0 0 3px #f5ede8 !important;
+        }
+        /* Styling the dropdown menu */
+        .ts-dropdown {
+            border-radius: 12px !important;
+            border: 1px solid var(--border-soft) !important;
+            font-size: 15px !important;
+            margin-top: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
+            color: #2e2a27 !important;
+        }
+        .ts-dropdown .option {
+            padding: 12px 16px !important;
+        }
+        
+    </style>
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+</head>
+<body class="flex flex-col min-h-screen">
+    <div id="site-navbar"></div>
+    <script src="navbar.js"></script>
+
+    <div id="login-prompt" class="max-w-[1000px] mx-auto p-4 md:p-8 text-center mt-20">
+        <h2 class="text-2xl md:text-3xl font-black text-stone-800 uppercase tracking-tight mb-4">Access Required</h2>
+        <p class="text-stone-500 mb-8">You need to sign in with your authorized account to submit or edit an experience.</p>
+        <button onclick="document.getElementById('login-btn-menu').click()" class="btn-primary max-w-xs mx-auto block">Sign In to Continue</button>
+    </div>
+
+    <form id="main-content" class="hidden max-w-[1000px] mx-auto p-4 md:p-8">
+        <header class="mb-8 flex justify-between items-end">
+            <div>
+                <h2 id="form-title" class="text-2xl md:text-3xl font-black text-stone-800 uppercase tracking-tight">Submit an Experience</h2>
+            </div>
+            <div class="flex gap-3">
+                <button type="button" id="reset-form-btn" class="text-stone-500 text-xs font-bold uppercase border border-stone-200 px-3 py-1.5 rounded-xl hover:bg-stone-50 transition">Reset Form</button>
+                <a href="index.html" id="cancel-edit" class="hidden text-red-500 text-xs font-bold uppercase border border-red-200 px-3 py-1.5 rounded-xl hover:bg-red-50 transition">Discard Changes</a>
+            </div>
+        </header>
+
+        <input type="hidden" id="editingId">
+
+        <div class="form-section shadow-sm">
+            <h3 class="text-xs font-black uppercase tracking-widest mb-6" style="color: var(--accent);">01 Basic Details</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div class="md:col-span-2"><label class="input-label">Experience Title *</label><textarea id="retreatName" rows="1" class="custom-input resize-none overflow-hidden" required></textarea></div>
+                <div>
+                    <label class="input-label">State/UT *</label>
+                    <select id="state" required></select>
+                </div>
+                <div><label class="input-label">Location *</label><input type="text" id="city" class="custom-input" required></div>
+                <div><label class="input-label">Start Date & Time</label><div class="flex gap-2"><input type="date" id="startDate" class="custom-input"><input type="time" id="startTime" class="custom-input w-28"></div></div>
+                <div><label class="input-label">End Date & Time</label><div class="flex gap-2"><input type="date" id="endDate" class="custom-input"><input type="time" id="endTime" class="custom-input w-28"></div></div>
+            </div>
+        </div>
+
+        <div class="form-section shadow-sm">
+            <h3 class="text-xs font-black uppercase tracking-widest mb-6" style="color: var(--accent);">02 Detailed Information</h3>
+            <div class="space-y-6">
+                <div>
+                    <label class="input-label">Pick Multiple Categories & Subcategories *</label>
+                    <input type="text" id="cat-search-input" class="custom-input mb-3" placeholder="Quick search (e.g. Yoga, Meditation)..." onkeyup="window.filterCategories()">
+                    <div id="category-accordion" class="border rounded-2xl overflow-y-auto bg-stone-50 max-h-72" style="border-color: var(--border-soft)">
+                        <!-- generated via js -->
+                    </div>
+                    <div id="selected-categories-tags" class="flex flex-wrap gap-2 mt-3"></div>
+                    <input type="text" id="otherCategory" class="hidden mt-3 custom-input" placeholder="Custom category...">
+                </div>
+                <div><label class="input-label">General Description *</label><textarea id="description" rows="4" class="custom-input" required></textarea></div>
+                <div>
+                    <label class="input-label">Provide exactly 5 hashtags to help users search your experience (should be different from title, location, and categories) *</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-2">
+                        <input type="text" id="hashtag1" placeholder="#Tag1 (e.g. #peaceful)" class="custom-input text-xs sm:text-sm" required>
+                        <input type="text" id="hashtag2" placeholder="#Tag2" class="custom-input text-xs sm:text-sm" required>
+                        <input type="text" id="hashtag3" placeholder="#Tag3" class="custom-input text-xs sm:text-sm" required>
+                        <input type="text" id="hashtag4" placeholder="#Tag4" class="custom-input text-xs sm:text-sm" required>
+                        <input type="text" id="hashtag5" placeholder="#Tag5" class="custom-input text-xs sm:text-sm" required>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div><label class="input-label">Contribution / Price Details</label><textarea id="contribution" rows="3" class="custom-input"></textarea></div>
+                    <div><label class="input-label">Inclusions & Exclusions</label><textarea id="inclusionsExclusions" rows="3" class="custom-input"></textarea></div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label class="input-label">YouTube or Instagram link (Max 5)</label>
+                        <div id="video-links-container" class="space-y-2"><input type="url" class="video-link-input custom-input" placeholder="https://..."></div>
+                        <button type="button" id="add-video-link-btn" class="mt-3 btn-soft">+ Add Another Video Link</button>
+                    </div>
+                    <div>
+                        <label class="input-label">Media Upload (Max 10)</label>
+                        <div id="existing-files-container" class="space-y-1 mb-3"></div>
+                        <div id="file-upload-container" class="space-y-2"><input type="file" class="file-input-item block w-full text-xs text-stone-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-white file:border file:border-slate-200"></div>
+                        <button type="button" id="add-file-btn" class="mt-3 btn-soft">+ Add Another File</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section shadow-sm">
+            <h3 class="text-xs font-black uppercase tracking-widest mb-6" style="color: var(--accent);">03 Contact Information</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div class="md:col-span-2"><label class="input-label">Organization/ Host Name (with Bio) *</label><textarea id="orgInfo" rows="2" class="custom-input" required></textarea></div>
+                <div><label class="input-label">Contact person name </label><input type="text" id="contactName" class="custom-input"></div>
+                <div><label class="input-label">Contact Email </label><input type="email" id="orgContactEmail" class="custom-input"></div>
+                <div><label class="input-label">WhatsApp Number </label><div class="flex gap-2"><input type="text" id="countryCode" class="w-16 custom-input text-center" value="+91" required><input type="tel" id="contactWhatsApp" class="flex-1 custom-input"></div></div>
+                <div><label class="input-label">Contact Number</label><div class="flex gap-2"><input type="text" id="countryCodeCall" class="w-16 custom-input text-center" value="+91"><input type="tel" id="contactCall" class="flex-1 custom-input"></div></div>
+                <div class="md:col-span-2 pt-4 border-t" style="border-top-color: var(--border-soft);">
+                    <label class="input-label">External Links (Max 5)</label>
+                    <div id="external-links-container" class="space-y-2">
+                        <input type="text" class="external-link-input custom-input" placeholder="Website URL (e.g. www.example.com)">
+                    </div>
+                    <button type="button" id="add-link-btn" class="mt-3 btn-soft">+ Add Another Link</button>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" id="submit-btn" class="btn-primary mb-12 shadow-md">Publish Experience</button>
+    </form>
+
+    <script type="module">
+        
+        import { initializeApp, getApp, getApps } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        // ADDED: deleteObject imported here
+        import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+        // ADD THIS LINE HERE (Connects to our central config file)
+        const firebaseConfig = window.GLOBAL_FIREBASE_CONFIG;
+
+        const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+        const provider = new GoogleAuthProvider();
+
+        const CATEGORY_DATA = {
+            "Wellness & Healing": ["Yoga", "Meditation", "Ayurveda", "Reiki", "Sound Healing", "Breathwork", "Detox", "Spa & Massage", "Acupuncture"],
+            "Mental Health & Emotional Growth": ["Therapy & Counseling", "Mindfulness", "Trauma Release", "Stress Management", "Self-Love & Compassion", "Emotional Intelligence", "Journaling"],
+            "Spirituality & Consciousness": ["Vipassana", "Zen", "Tantra", "Shamanic Journeys", "Astrology", "Tarot & Oracle", "Energy Work", "Plant Medicine", "Mysticism"],
+            "Fitness, Movement & Martial Arts": ["Pilates", "Dance", "Tai Chi", "Qigong", "Martial Arts", "Calisthenics", "Running & Trekking", "Somatics"],
+            "Adventure & Outdoor Exploration": ["Hiking & Trekking", "Surfing", "Scuba Diving", "Rock Climbing", "Wildlife Safari", "Camping", "Kayaking", "Cycling"],
+            "Nature, Sustainability & Eco Living": ["Permaculture", "Eco-Volunteering", "Foraging", "Organic Farming", "Forest Bathing", "Sustainable Architecture"],
+            "Leadership, Business & Career": ["Entrepreneurship", "Public Speaking", "Networking", "Financial Literacy", "Productivity", "Team Building", "Executive Coaching"],
+            "Technology & Innovation": ["Web3 & Crypto", "AI & Machine Learning", "Coding Bootcamps", "Design Thinking", "Maker Spaces"],
+            "Creativity & Arts": ["Painting & Drawing", "Pottery & Ceramics", "Photography", "Writing & Poetry", "Music Production", "Acting & Improv", "Culinary Arts"],
+            "Relationships & Connection": ["Couples Retreats", "Men's Groups", "Women's Circles", "Conscious Dating", "Community Living", "Non-Violent Communication"],
+            "Culture, Philosophy & Learning": ["Language Immersion", "History & Heritage", "Philosophy", "Traditional Arts & Crafts", "Culinary Tours"],
+            "Lifestyle & Personal Transformation": ["Habit Building", "Minimalism", "Life Coaching", "Digital Detox", "Biohacking"],
+            "Luxury, Leisure & Travel": ["Luxury Retreats", "Boutique Hotels", "Glamping", "Cruises", "Wine Tasting"],
+            "Identity & Belonging": ["LGBTQ+ Retreats", "BIPOC Retreats", "Youth & Teen Programs", "Elder & Wisdom Circles"],
+            "Other": ["Other"]
+        };
+        const ALL_CATEGORIES = Object.keys(CATEGORY_DATA);
+        const STATES = ["Andaman and Nicobar Islands", "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chandigarh", "Chhattisgarh", "Dadra and Nagar Haveli and Daman and Diu", "Delhi", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jammu and Kashmir", "Jharkhand", "Karnataka", "Kerala", "Ladakh", "Lakshadweep", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Puducherry", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal"];
+        // Tracks existing database attachments currently loaded into Edit View
+        let existingFileUrls = [];
+
+        const stateSelect = document.getElementById('state');
+        stateSelect.innerHTML = `<option value="">Select State</option>`;
+        STATES.forEach(s => stateSelect.innerHTML += `<option value="${s}">${s}</option>`);
+        
+        // Initialize Tom Select Dropdown
+        const stateDropdown = new TomSelect("#state", {
+            create: false,
+            sortField: {
+                field: "text",
+                direction: "asc"
+            }
+        });
+        
+        // ==========================================
+// 1. BULLETPROOF AUTO-SAVE & RESTORE LOGIC
+// ==========================================
+const DRAFT_KEY = 'holiday_form_draft';
+
+// Safe localStorage wrappers to prevent iframe cross-origin SecurityErrors
+function safeGetItem(key) {
+    try {
+        return localStorage.getItem(key);
+    } catch (e) {
+        console.warn("localStorage is not accessible:", e);
+        return null;
+    }
+}
+function safeSetItem(key, val) {
+    try {
+        localStorage.setItem(key, val);
+    } catch (e) {
+        console.warn("localStorage is not accessible:", e);
+    }
+}
+function safeRemoveItem(key) {
+    try {
+        localStorage.removeItem(key);
+    } catch (e) {
+        console.warn("localStorage is not accessible:", e);
+    }
+}
+
+function captureAndSaveDraft() {
+    // Don't overwrite if editing an existing database entry
+    const editIdEl = document.getElementById('editingId');
+    if (editIdEl && editIdEl.value) return;
+
+    try {
+        // Helper function to safely grab only links that actually have text in them
+        const getLinks = (selector) => Array.from(document.querySelectorAll(selector))
+                                            .map(input => input.value.trim())
+                                            .filter(val => val !== "");
+
+        const currentDraft = {
+            retreatName: document.getElementById('retreatName')?.value || "",
+            state: document.getElementById('state')?.value || "",
+            city: document.getElementById('city')?.value || "",
+            startDate: document.getElementById('startDate')?.value || "",
+            startTime: document.getElementById('startTime')?.value || "",
+            endDate: document.getElementById('endDate')?.value || "",
+            endTime: document.getElementById('endTime')?.value || "",
+            description: document.getElementById('description')?.value || "",
+            hashtags: [
+                document.getElementById('hashtag1')?.value || "",
+                document.getElementById('hashtag2')?.value || "",
+                document.getElementById('hashtag3')?.value || "",
+                document.getElementById('hashtag4')?.value || "",
+                document.getElementById('hashtag5')?.value || ""
+            ],
+            contribution: document.getElementById('contribution')?.value || "",
+            inclusionsExclusions: document.getElementById('inclusionsExclusions')?.value || "",
+            orgInfo: document.getElementById('orgInfo')?.value || "",
+            contactName: document.getElementById('contactName')?.value || "",
+            orgContactEmail: document.getElementById('orgContactEmail')?.value || "",
+            contactWhatsApp: document.getElementById('contactWhatsApp')?.value || "",
+            contactCall: document.getElementById('contactCall')?.value || "",
+            countryCode: document.getElementById('countryCode')?.value || "",
+            countryCodeCall: document.getElementById('countryCodeCall')?.value || "",
+            categories: Array.from(document.querySelectorAll('input[name="cat"]:checked')).map(cb => cb.value),
+            otherCategoryText: document.getElementById('otherCategory')?.value || "",
+            videoLinks: getLinks('.video-link-input'),
+            externalLinks: getLinks('.external-link-input')
+        };
+        safeSetItem(DRAFT_KEY, JSON.stringify(currentDraft));
+    } catch (err) {
+        console.error("Draft save encountered an issue:", err);
+    }
+}
+
+function lookForAndRestoreDraft() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('id')) return; // Exit if editing
+
+    const savedData = safeGetItem(DRAFT_KEY);
+    if (!savedData) return;
+
+    try {
+        const draft = JSON.parse(savedData);
+        
+        // 1. Restore Text Fields safely
+        const setVal = (id, val) => { if (document.getElementById(id) && val) document.getElementById(id).value = val; };
+        
+        setVal('retreatName', draft.retreatName);
+        setVal('city', draft.city);
+        setVal('startDate', draft.startDate);
+        setVal('startTime', draft.startTime);
+        setVal('endDate', draft.endDate);
+        setVal('endTime', draft.endTime);
+        setVal('description', draft.description);
+        if (draft.hashtags && Array.isArray(draft.hashtags)) {
+            setVal('hashtag1', draft.hashtags[0] || "");
+            setVal('hashtag2', draft.hashtags[1] || "");
+            setVal('hashtag3', draft.hashtags[2] || "");
+            setVal('hashtag4', draft.hashtags[3] || "");
+            setVal('hashtag5', draft.hashtags[4] || "");
+        }
+        setVal('contribution', draft.contribution);
+        setVal('inclusionsExclusions', draft.inclusionsExclusions);
+        setVal('orgInfo', draft.orgInfo);
+        setVal('contactName', draft.contactName);
+        setVal('orgContactEmail', draft.orgContactEmail);
+        setVal('contactWhatsApp', draft.contactWhatsApp);
+        setVal('contactCall', draft.contactCall);
+        setVal('countryCode', draft.countryCode);
+        setVal('countryCodeCall', draft.countryCodeCall);
+
+        if (draft.state && typeof stateDropdown !== 'undefined' && stateDropdown) {
+            stateDropdown.setValue(draft.state);
+        } else if (draft.state && document.getElementById('state')) {
+            document.getElementById('state').value = draft.state;
+        }
+
+        // 2. Restore Links Safely
+        if (draft.videoLinks && draft.videoLinks.length > 0) {
+            const vContainer = document.getElementById('video-links-container');
+            if (vContainer) {
+                vContainer.innerHTML = ''; // Clear default
+                draft.videoLinks.forEach(link => {
+                    const input = document.createElement('input');
+                    input.type = 'url';
+                    input.className = 'video-link-input custom-input mt-2';
+                    input.value = link;
+                    vContainer.appendChild(input);
+                });
+            }
+        }
+
+        if (draft.externalLinks && draft.externalLinks.length > 0) {
+            const eContainer = document.getElementById('external-links-container');
+            if (eContainer) {
+                eContainer.innerHTML = ''; // Clear default
+                draft.externalLinks.forEach(link => {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.className = 'external-link-input custom-input mt-2';
+                    input.value = link;
+                    eContainer.appendChild(input);
+                });
+            }
+        }
+        
+        // Wait for page to render categories, then restore them and resize text
+        setTimeout(() => {
+            // Restore Categories
+            if (draft.categories) {
+                document.querySelectorAll('input[name="cat"]').forEach(cb => {
+                    if (draft.categories.includes(cb.value)) {
+                        cb.checked = true;
+                        if (cb.value === 'Other') {
+                            const otherInput = document.getElementById('otherCategory');
+                            if (otherInput) {
+                                otherInput.classList.remove('hidden');
+                                otherInput.value = draft.otherCategoryText || "";
+                            }
+                        }
+                    }
+                });
+                if (window.updateSelectedTags) window.updateSelectedTags();
+            }
+            
+            // Force textareas to resize multiple times to guarantee it catches the CSS layout
+            const resizeText = () => {
+                ['retreatName', 'description', 'contribution', 'inclusionsExclusions', 'orgInfo'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el && el.value) {
+                        el.style.height = 'auto'; // Reset
+                        if (el.scrollHeight > 0) {
+                            el.style.height = (el.scrollHeight + 5) + 'px'; // Expand to fit + small buffer
+                        }
+                    }
+                });
+            };
+            
+            // Fire the resize immediately, and again half a second later just in case the browser was slow
+            resizeText();
+            setTimeout(resizeText, 500); 
+
+        }, 250);
+
+    } catch (e) {
+        console.error("Draft restoration encountered an issue:", e);
+    }
+}
+
+// Initialize everything immediately (does not wait for DOMContentLoaded to prevent lockups)
+function initAutoSaveSystem() {
+    const mainContent = document.getElementById('main-content');
+    if (mainContent) {
+        mainContent.addEventListener('input', captureAndSaveDraft);
+        mainContent.addEventListener('change', captureAndSaveDraft);
+    }
+
+    // Attach normal auto-expand for when you are actively typing
+    ['retreatName', 'description', 'contribution', 'inclusionsExclusions', 'orgInfo'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight + 5) + 'px';
+            });
+        }
+    });
+
+    lookForAndRestoreDraft();
+}
+
+// Run the system
+initAutoSaveSystem();
+// ==========================================
+    
+
+
+
+        
+        // Auto-expanding textareas
+        const textareasToExpand = ['retreatName', 'description', 'contribution', 'inclusionsExclusions', 'orgInfo'];
+
+        textareasToExpand.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', function() {
+                    this.style.height = 'auto';
+                    this.style.height = this.scrollHeight + 'px';
+                });
+            }
+        });
+        
+        const catAccordion = document.getElementById('category-accordion');
+        if (catAccordion) {
+            let catHTML = '';
+            for (const [mainCat, subCats] of Object.entries(CATEGORY_DATA)) {
+                const safeId = mainCat.replace(/[^a-zA-Z0-9]/g, '');
+                catHTML += `
+                <div class="border-b border-stone-200 last:border-0 main-cat-group" data-main="${mainCat}">
+                    <div class="flex justify-between items-center p-3 cursor-pointer hover:bg-stone-100 transition" onclick="window.toggleSubCats('${safeId}')">
+                        <div class="flex items-center gap-3">
+                            <span class="font-bold text-stone-700 text-sm sm:text-base">${mainCat}</span>
+                        </div>
+                        <span class="text-stone-400 text-xl font-medium w-6 h-6 flex items-center justify-center expand-icon" id="icon-${safeId}">+</span>
+                    </div>
+                    <div id="sub-${safeId}" class="hidden px-4 pb-3 pt-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sub-cats-container bg-stone-50/50">
+                        ${subCats.map(sub => `
+                            <label class="flex items-center gap-2 text-sm bg-white p-2 rounded-xl border border-stone-100 cursor-pointer hover:bg-stone-50 transition sub-cat-lbl" data-sub="${sub}">
+                                <input type="checkbox" name="cat" value="${sub}" class="w-3.5 h-3.5 rounded text-[#a37c6b] focus:ring-[#f5ede8]" onchange="window.handleCatChange(this)">
+                                <span class="text-stone-600">${sub}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
+                `;
+            }
+            catAccordion.innerHTML = catHTML;
+        }
+
+        window.toggleSubCats = (idPrefix) => {
+            const subContainer = document.getElementById(`sub-${idPrefix}`);
+            const icon = document.getElementById(`icon-${idPrefix}`);
+            if (subContainer) {
+                if (subContainer.classList.contains('hidden')) {
+                    subContainer.classList.remove('hidden');
+                    if(icon) icon.innerText = '-';
+                } else {
+                    subContainer.classList.add('hidden');
+                    if(icon) icon.innerText = '+';
+                }
+            }
+        };
+
+        window.handleCatChange = (cb) => {
+            if (cb.value === 'Other') {
+                const otherInput = document.getElementById('otherCategory');
+                if (otherInput) {
+                    otherInput.classList.toggle('hidden', !cb.checked);
+                    if(cb.checked) otherInput.focus();
+                }
+            }
+            if (window.updateSelectedTags) window.updateSelectedTags();
+            if (typeof captureAndSaveDraft === 'function') captureAndSaveDraft();
+        };
+
+        window.updateSelectedTags = () => {
+            const container = document.getElementById('selected-categories-tags');
+            if (!container) return;
+            const checked = Array.from(document.querySelectorAll('input[name="cat"]:checked'));
+            container.innerHTML = checked.map(cb => `
+                <span class="inline-flex items-center gap-1 bg-[#f5ede8] text-[#a37c6b] text-xs font-bold px-2.5 py-1 rounded-lg border border-[#e8dad0]">
+                    ${cb.value}
+                    <span class="cursor-pointer hover:text-stone-800 ml-1" onclick="window.uncheckCat('${cb.value.replace(/'/g, "\\'")}')">×</span>
+                </span>
+            `).join('');
+        };
+
+        window.uncheckCat = (val) => {
+            const cb = document.querySelector(`input[name="cat"][value="${val}"]`);
+            if(cb) {
+                cb.checked = false;
+                window.handleCatChange(cb);
+            }
+        };
+
+        window.filterCategories = () => {
+            const inputEl = document.getElementById('cat-search-input');
+            if (!inputEl) return;
+            const query = inputEl.value.toLowerCase();
+            document.querySelectorAll('.main-cat-group').forEach(group => {
+                const mainTitle = group.getAttribute('data-main').toLowerCase();
+                const subLabels = group.querySelectorAll('.sub-cat-lbl');
+                let hasVisibleSub = false;
+                
+                subLabels.forEach(lbl => {
+                    const subTitle = lbl.getAttribute('data-sub').toLowerCase();
+                    if (subTitle.includes(query) || mainTitle.includes(query)) {
+                        lbl.style.display = 'flex';
+                        hasVisibleSub = true;
+                    } else {
+                        lbl.style.display = 'none';
+                    }
+                });
+
+                const subContainer = group.querySelector('.sub-cats-container');
+                const icon = group.querySelector('.expand-icon');
+                if (query.trim() !== '') {
+                    if (hasVisibleSub || mainTitle.includes(query)) {
+                        group.style.display = 'block';
+                        subContainer.classList.remove('hidden');
+                        if(icon) icon.innerText = '-';
+                    } else {
+                        group.style.display = 'none';
+                    }
+                } else {
+                    group.style.display = 'block';
+                    subContainer.classList.add('hidden');
+                    if(icon) icon.innerText = '+';
+                    subLabels.forEach(lbl => lbl.style.display = 'flex');
+                }
+            });
+        };
+
+        document.getElementById('add-file-btn').onclick = () => {
+            const container = document.getElementById('file-upload-container');
+            if (container.querySelectorAll('input').length < 10) {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.className = "file-input-item block w-full text-xs text-stone-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-white file:border file:border-slate-200 mt-2";
+                container.appendChild(input);
+            }
+        };
+
+        document.getElementById('add-link-btn').onclick = () => {
+            const container = document.getElementById('external-links-container');
+            if (container.querySelectorAll('input').length < 5) {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'external-link-input custom-input mt-2';
+                input.placeholder = 'Website URL (e.g. www.example.com)';
+                container.appendChild(input);
+            }
+        };
+        
+
+        document.getElementById('add-video-link-btn').onclick = () => {
+            const container = document.getElementById('video-links-container');
+            if (container.querySelectorAll('input').length < 5) {
+                const input = document.createElement('input');
+                input.type = 'url';
+                input.className = 'video-link-input custom-input mt-2';
+                input.placeholder = 'https://...';
+                container.appendChild(input);
+            }
+        };
+        
+
+
+
+        onAuthStateChanged(auth, async (user) => {
+            const dropdownProfile = document.getElementById('dropdown-profile');
+            const userEmailEl = document.getElementById('user-email');
+            const logoutBtn = document.getElementById('logout-btn');
+            const loginBtnMenu = document.getElementById('login-btn-menu');
+            const adminBadge = document.getElementById('admin-badge');
+            const mainContent = document.getElementById('main-content');
+            const loginPrompt = document.getElementById('login-prompt');
+
+            if (user) {
+                if (loginPrompt) loginPrompt.classList.add('hidden');
+                if (mainContent) mainContent.classList.remove('hidden');
+                if (userEmailEl) userEmailEl.innerText = user.email;
+                if (dropdownProfile) dropdownProfile.classList.remove('hidden');
+                if (logoutBtn) logoutBtn.classList.remove('hidden');
+                if (loginBtnMenu) loginBtnMenu.classList.add('hidden');
+
+                try {
+                    const adminSnap = await getDoc(doc(db, "admins", user.email.toLowerCase().trim()));
+                    const isAdmin = adminSnap.exists();
+                    if (typeof isAdminGlobal !== 'undefined') isAdminGlobal = isAdmin; 
+                    
+                    if (isAdmin) {
+                        if (adminBadge) adminBadge.classList.remove('hidden');
+                        document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+                    }
+                    
+                    if (typeof fetchData === "function") {
+                        fetchData(user.email, isAdmin);
+                    }
+
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const urlEditId = urlParams.get('id');
+                    if (urlEditId) {
+                        loadEditData(urlEditId);
+                    }
+                } catch (error) {}
+
+            } else {
+                if (loginPrompt) loginPrompt.classList.remove('hidden');
+                if (mainContent) mainContent.classList.add('hidden');
+                if (dropdownProfile) dropdownProfile.classList.add('hidden');
+                if (adminBadge) adminBadge.classList.add('hidden');
+                if (logoutBtn) logoutBtn.classList.add('hidden');
+                if (loginBtnMenu) loginBtnMenu.classList.remove('hidden');
+                document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
+            }
+        });
+
+        // 1. Sign In Click - Closes menu, triggers popup
+        const loginBtnMenuEl = document.getElementById('login-btn-menu');
+        if (loginBtnMenuEl) {
+            loginBtnMenuEl.onclick = () => {
+                document.getElementById('dropdown-menu').classList.add('hidden');
+                signInWithPopup(auth, provider);
+            };
+        }
+
+        // 2. Logout Click - Closes menu, signs out
+        const logoutBtnEl = document.getElementById('logout-btn');
+        if (logoutBtnEl) {
+            logoutBtnEl.onclick = () => {
+                document.getElementById('dropdown-menu').classList.add('hidden');
+                signOut(auth);
+            };
+        }
+
+        window.deleteExistingFile = async (index) => {
+    const fileUrlToDelete = existingFileUrls[index];
+    
+    if (confirm("Are you sure you want to permanently delete this file from storage?")) {
+        try {
+            // Create a pointer reference directly from the URL string
+            const storageRef = ref(storage, fileUrlToDelete);
+            await deleteObject(storageRef);
+        } catch (error) {
+            console.warn("Storage deletion bypassed or file already missing from bucket:", error);
+        }
+
+        existingFileUrls.splice(index, 1);
+        renderExistingFiles();
+    }
+};
+
+        function renderExistingFiles() {
+            const fileContainer = document.getElementById('existing-files-container');
+            fileContainer.innerHTML = '';
+            existingFileUrls.forEach((url, i) => {
+                let fileName = `File ${i + 1}`;
+                try {
+                    const decoded = decodeURIComponent(url);
+                    fileName = decoded.split('/').pop().split('?')[0] || fileName;
+                } catch(e) {}
+                
+                fileContainer.innerHTML += `
+                    <div class="flex items-center justify-between bg-stone-100 p-2.5 rounded-xl text-xs mt-1 border" style="border-color: var(--border-soft);">
+                        <a href="${url}" target="_blank" class="text-blue-600 font-semibold underline truncate max-w-[80%]" title="${fileName}">${fileName}</a>
+                        <button type="button" onclick="window.deleteExistingFile(${i})" class="text-red-500 font-bold hover:text-red-700 ml-2 uppercase text-[10px] tracking-wider">Delete</button>
+                    </div>
+                `;
+            });
+        }
+
+        async function loadEditData(id) {
+            const snap = await getDoc(doc(db, "retreats", id));
+            if(!snap.exists()) return;
+            const r = snap.data();
+
+            const currentUserEmail = auth.currentUser ? auth.currentUser.email.toLowerCase().trim() : "";
+            const adminSnap = await getDoc(doc(db, "admins", currentUserEmail));
+            const isUserAdmin = adminSnap.exists();
+
+            if (r.hostEmail.toLowerCase().trim() !== currentUserEmail && !isUserAdmin) {
+                alert("Security Alert: You are not authorized to modify this document.");
+                window.location.href = "dashboard.html";
+                return;
+    
+            }
+            document.getElementById('editingId').value = id;
+            document.getElementById('retreatName').value = r.retreatName || "";
+            if (r.state) stateDropdown.setValue(r.state);
+            document.getElementById('city').value = r.city || "";
+            document.getElementById('startDate').value = r.startDate || "";
+            document.getElementById('startTime').value = r.startTime || "";
+            document.getElementById('endDate').value = r.endDate || "";
+            document.getElementById('endTime').value = r.endTime || "";
+            document.getElementById('description').value = r.description || "";
+            if (r.hashtags && Array.isArray(r.hashtags)) {
+                document.getElementById('hashtag1').value = r.hashtags[0] || "";
+                document.getElementById('hashtag2').value = r.hashtags[1] || "";
+                document.getElementById('hashtag3').value = r.hashtags[2] || "";
+                document.getElementById('hashtag4').value = r.hashtags[3] || "";
+                document.getElementById('hashtag5').value = r.hashtags[4] || "";
+            } else {
+                document.getElementById('hashtag1').value = "";
+                document.getElementById('hashtag2').value = "";
+                document.getElementById('hashtag3').value = "";
+                document.getElementById('hashtag4').value = "";
+                document.getElementById('hashtag5').value = "";
+            }
+            document.getElementById('contribution').value = r.contribution || "";
+            document.getElementById('inclusionsExclusions').value = r.inclusionsExclusions || "";
+            document.getElementById('orgInfo').value = r.orgInfo || "";
+            document.getElementById('contactName').value = r.contactName || "";
+            document.getElementById('orgContactEmail').value = r.orgContactEmail || "";
+
+            setTimeout(() => {
+                ['retreatName', 'description', 'contribution', 'inclusionsExclusions', 'orgInfo'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.style.height = 'auto';
+                        el.style.height = el.scrollHeight + 'px';
+                    }
+                });
+            }, 0);
+
+            if (r.videoLinks && r.videoLinks.length > 0) {
+                const container = document.getElementById('video-links-container');
+                container.innerHTML = '';
+                r.videoLinks.forEach(link => {
+                    const input = document.createElement('input');
+                    input.type = 'url';
+                    input.className = 'video-link-input custom-input mt-2';
+                    input.value = link;
+                    container.appendChild(input);
+                });
+            }
+
+            if (r.contactWhatsApp && r.contactWhatsApp.includes('+')) {
+                document.getElementById('countryCode').value = r.contactWhatsApp.substring(0, 3);
+                document.getElementById('contactWhatsApp').value = r.contactWhatsApp.substring(3);
+            } else {
+                document.getElementById('contactWhatsApp').value = r.contactWhatsApp || "";
+            }
+
+            if (r.contactNumber && r.contactNumber.includes('+')) {
+                document.getElementById('countryCodeCall').value = r.contactNumber.substring(0, 3);
+                document.getElementById('contactCall').value = r.contactNumber.substring(3);
+            } else {
+                document.getElementById('contactCall').value = r.contactNumber || "";
+            }
+
+            const savedCats = r.categories || [];
+            const checkboxes = document.querySelectorAll('input[name="cat"]');
+            let hasOther = false;
+            savedCats.forEach(cat => {
+                let found = false;
+                checkboxes.forEach(cb => {
+                    if (cb.value === cat) { cb.checked = true; found = true; }
+                });
+                if (!found) { hasOther = true; document.getElementById('otherCategory').value = cat; }
+            });
+            if(hasOther) {
+                checkboxes.forEach(cb => { if(cb.value === 'Other') cb.checked = true; });
+                document.getElementById('otherCategory').classList.remove('hidden');
+            }
+            if (window.updateSelectedTags) window.updateSelectedTags();
+
+            if (r.externalLinks && r.externalLinks.length > 0) {
+                const container = document.getElementById('external-links-container');
+                container.innerHTML = '';
+                r.externalLinks.forEach(link => {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.className = 'external-link-input custom-input mt-2';
+                    input.value = link;
+                    container.appendChild(input);
+                });
+            }
+            
+            if (r.fileUrls && r.fileUrls.length > 0) {
+                existingFileUrls = [...r.fileUrls];
+                renderExistingFiles();
+            }
+
+            document.getElementById('form-title').innerText = "Update Experience";
+            document.getElementById('cancel-edit').classList.remove('hidden');
+            document.getElementById('submit-btn').innerText = "Save Changes";
+        }
+
+        document.getElementById('main-content').onsubmit = async (e) => {
+            e.preventDefault();
+
+            const selectedCatsCheck = document.querySelectorAll('input[name="cat"]:checked');
+            if (selectedCatsCheck.length === 0) {
+                alert("Please select at least one category.");
+                document.getElementById('category-accordion').scrollIntoView({ behavior: 'smooth' });
+                return;
+            }
+
+            const btn = document.getElementById('submit-btn');
+            const editId = document.getElementById('editingId').value;
+            btn.innerText = "PROCESSING..."; btn.disabled = true;
+            try {
+                let newFileUrls = [];
+                const fileInputs = document.querySelectorAll('.file-input-item');
+                for (let input of fileInputs) {
+                    if (input.files[0]) {
+                        const userFolder = auth.currentUser.email;
+                        const sRef = ref(storage, `retreats/${userFolder}/${Date.now()}_${input.files[0].name}`);
+                        const snap = await uploadBytes(sRef, input.files[0]);
+                        newFileUrls.push(await getDownloadURL(snap.ref));
+                    }
+                }
+
+                const finalFileUrls = [...existingFileUrls, ...newFileUrls];
+
+                let selectedCats = Array.from(document.querySelectorAll('input[name="cat"]:checked')).map(c => c.value);
+                if(selectedCats.includes('Other')) {
+                    const custom = document.getElementById('otherCategory').value;
+                    if(custom) selectedCats.push(custom);
+                    selectedCats = selectedCats.filter(c => c !== 'Other');
+                }
+                // Auto-format external links to ensure they work correctly
+                let externalLinksArray = Array.from(document.querySelectorAll('.external-link-input'))
+                    .map(input => input.value.trim())
+                    .filter(val => val !== "");
+
+                externalLinksArray = externalLinksArray.map(link => {
+                    // If the user didn't type http:// or https://, add it automatically
+                    if (!/^https?:\/\//i.test(link)) {
+                      return 'https://' + link;
+                   }
+                  return link;
+               });
+
+// You will pass externalLinksArray to your Firestore addDoc/updateDoc payload
+
+                const hashtagsArray = [
+                    document.getElementById('hashtag1').value.trim(),
+                    document.getElementById('hashtag2').value.trim(),
+                    document.getElementById('hashtag3').value.trim(),
+                    document.getElementById('hashtag4').value.trim(),
+                    document.getElementById('hashtag5').value.trim()
+                ].map(tag => {
+                    if (tag && !tag.startsWith('#')) {
+                        return '#' + tag;
+                    }
+                    return tag;
+                }).filter(tag => tag !== "");
+
+                const data = {
+                    retreatName: document.getElementById('retreatName').value,
+                    hostEmail: auth.currentUser.email,
+                    state: document.getElementById('state').value,
+                    city: document.getElementById('city').value,
+                    startDate: document.getElementById('startDate').value || "",
+                    startTime: document.getElementById('startTime').value || "",
+                    endDate: document.getElementById('endDate').value || "",
+                    endTime: document.getElementById('endTime').value || "",
+                    description: document.getElementById('description').value,
+                    hashtags: hashtagsArray,
+                    categories: selectedCats,
+                    contribution: document.getElementById('contribution').value,
+                    inclusionsExclusions: document.getElementById('inclusionsExclusions').value,
+                    
+                    orgInfo: document.getElementById('orgInfo').value,
+                    contactName: document.getElementById('contactName').value,
+                    contactWhatsApp: document.getElementById('countryCode').value + document.getElementById('contactWhatsApp').value,
+                    contactNumber: document.getElementById('contactCall').value ? (document.getElementById('countryCodeCall').value + document.getElementById('contactCall').value) : "",
+                    orgContactEmail: document.getElementById('orgContactEmail').value,
+                    videoLinks: Array.from(document.querySelectorAll('.video-link-input'))
+                                     .map(i => i.value.trim())
+                                     .filter(v => v !== ""),
+                    
+                    externalLinks: externalLinksArray,
+                    fileUrls: finalFileUrls
+                };
+
+                // Initialize metrics to 0 only for new posts
+                if (!editId) {
+                    data.timestamp = Date.now();
+                    data.views = 0;
+                    data.whatsappClicks = 0;
+                    data.externalLinkClicks = 0;
+                } else {
+                    data.lastUpdated = Date.now();
+                }
+
+                if(editId) await updateDoc(doc(db, "retreats", editId), data);
+                else await addDoc(collection(db, "retreats"), data);
+                safeRemoveItem('holiday_form_draft');
+                window.location.href = "dashboard.html";
+            } catch (e) { alert(e.message); btn.innerText = "Publish Experience"; btn.disabled = false; }
+        };
+        // PASTE YOUR RESET BUTTON LOGIC RIGHT HERE
+        // ==========================================
+        document.getElementById('reset-form-btn').addEventListener('click', () => {
+            // Only allow reset if they are NOT editing an already published post
+            if (document.getElementById('editingId').value) {
+                alert("You cannot reset the form while editing an existing experience. Use 'Discard Changes' instead.");
+                return;
+            }
+
+            if (confirm("Are you sure you want to clear all data? This cannot be undone.")) {
+                safeRemoveItem('holiday_form_draft'); // Wipe the memory
+                window.location.reload(); // Refresh to give a perfectly clean slate
+            }
+        });
+        
+        // Check URL to see if we are editing an existing entry
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlEditId = urlParams.get('id');
+        if (urlEditId) {
+            loadEditData(urlEditId);
+        }
+    </script>
+<div id="site-footer"></div>
+    <script src="footer.js"></script>
+</body>
+</html>

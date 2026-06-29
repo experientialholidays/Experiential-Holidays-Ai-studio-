@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registry Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="config.js"></script>
+
+    <style>
+        :root { 
+            --slate: #4a4542; 
+            --accent: #a37c6b; 
+            --tag-bg: #f5ede8; 
+            --bg-warm: #faf7f4;
+            --border-soft: #f0e6e0;
+        }
+        body { font-family: 'Inter', sans-serif; color: var(--slate); font-size: 15px; background-color: var(--bg-warm); }
+        
+        /* Modernized Elegant Table Structuring */
+        .table-wrapper { background: white; border-radius: 20px; border: 1px solid var(--border-soft); overflow: hidden; }
+        th { background: #fafaf9; padding: 16px 14px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #a39e9b; border-bottom: 2px solid var(--border-soft); letter-spacing: 0.05em; white-space: nowrap; }
+        td { padding: 14px; border-bottom: 1px solid var(--border-soft); font-size: 14px; color: #57524f; vertical-align: top; }
+        
+        .filter-select { display: block; width: 100%; margin-top: 8px; font-size: 12px; padding: 4px 8px; border: 1px solid var(--border-soft); border-radius: 8px; color: var(--slate); background-color: white; outline: none; transition: all 0.2s; font-weight: 500; }
+        .filter-select:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--tag-bg); }
+        
+        /* Premium Soft Action Controls */
+        .btn-edit { color: #2563eb; font-weight: 700; font-size: 12px; padding: 6px 12px; border-radius: 8px; background: #eff6ff; border: 1px solid #dbeafe; transition: all 0.2s; }
+        .btn-edit:hover { background: #dbeafe; }
+        .btn-delete { color: #dc2626; font-weight: 700; font-size: 12px; padding: 6px 12px; border-radius: 8px; background: #fef2f2; border: 1px solid #fee2e2; margin-left: 4px; transition: all 0.2s; }
+        .btn-delete:hover { background: #fee2e2; }
+        
+        .scroll-cell { max-height: 75px; min-width: 180px; overflow-y: auto; font-size: 13px; line-height: 1.5; color: #6b6460; padding-right: 4px; }
+        /* Custom scrollbar style for cell lists */
+        .scroll-cell::-webkit-scrollbar { width: 4px; }
+        .scroll-cell::-webkit-scrollbar-thumb { background: var(--border-soft); border-radius: 4px; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+    <div id="site-navbar"></div>
+    <script src="navbar.js"></script>
+    
+    
+
+    
+
+    <div id="main-content" class="hidden p-4 md:p-8">
+        <div class="max-w-[1600px] mx-auto">
+            <header class="mb-6 flex flex-wrap justify-between items-center gap-4">
+                <div>
+                    <h2 class="text-2xl font-black text-stone-800 uppercase tracking-tight">Experience Registry</h2>
+                    <p class="text-xs text-stone-400 font-medium mt-1">Filter, modify, or manage your submission entries across active portfolios.</p>
+                </div>
+            </header>
+
+            <div id="tabs-container" class="mb-4 flex gap-4 border-b border-stone-200 hidden">
+                <button id="tab-active" onclick="switchTab('active')" class="px-4 py-2 font-bold text-stone-800 border-b-2 border-stone-800 transition-colors">Active Experiences</button>
+                <button id="tab-past" onclick="switchTab('past')" class="px-4 py-2 font-bold text-stone-400 border-b-2 border-transparent hover:text-stone-600 transition-colors">Past Experiences</button>
+            </div>
+
+            <div class="table-wrapper shadow-sm overflow-x-auto">
+                <!-- Removed the hardcoded 3400px width; we will add it dynamically for admins -->
+                <table id="dashboard-table" class="w-full text-left border-collapse transition-all">
+                    <thead>
+                        <tr>
+                            <!-- 1. STANDARD COLUMNS (Visible to everyone, filters hidden for normal users) -->
+                            <th class="w-24">Actions</th>
+                            <th>Title <select class="filter-select admin-only hidden mt-1" data-col="retreatName"><option value="">All</option></select></th>
+                            
+                            <!-- To show these to users again, remove the "admin-only hidden" classes -->
+                            <th class="text-center admin-only hidden">Views</th>
+                            <th class="text-center admin-only hidden">WA Clicks</th>
+                            <th class="text-center admin-only hidden">Link Clicks</th>
+                            
+                            <th>Location <select class="filter-select admin-only hidden mt-1" data-col="city"><option value="">All</option></select></th>
+                            <th>Date <select class="filter-select admin-only hidden mt-1" data-col="startDate"><option value="">All</option></select></th>
+                            
+                            <!-- 2. ADMIN ONLY COLUMNS (Hidden for normal users) -->
+                            <th class="admin-only hidden">Submitted by <select class="filter-select admin-only hidden mt-1" data-col="hostEmail"><option value="">All</option></select></th>
+                            <th class="admin-only hidden">State <select class="filter-select admin-only hidden mt-1" data-col="state"><option value="">All</option></select></th>
+                            <th class="admin-only hidden">Start Time <select class="filter-select admin-only hidden mt-1" data-col="startTime"><option value="">All</option></select></th>
+                            <th class="admin-only hidden">End Date <select class="filter-select admin-only hidden mt-1" data-col="endDate"><option value="">All</option></select></th>
+                            <th class="admin-only hidden">End Time <select class="filter-select admin-only hidden mt-1" data-col="endTime"><option value="">All</option></select></th>
+                            <th class="admin-only hidden">Categories <select class="filter-select admin-only hidden mt-1" data-col="categories"><option value="">All</option></select></th>
+                            <th class="admin-only hidden">Description <select class="filter-select admin-only hidden mt-1" data-col="description"><option value="">All</option></select></th>
+                            <th class="admin-only hidden">Contribution <select class="filter-select admin-only hidden mt-1" data-col="contribution"><option value="">All</option></select></th>
+                            <th class="admin-only hidden">Inclusions <select class="filter-select admin-only hidden mt-1" data-col="inclusionsExclusions"><option value="">All</option></select></th>
+                            <th class="admin-only hidden">Video Links <select class="filter-select admin-only hidden mt-1" data-col="videoLinks"><option value="">All</option></select></th>
+                            <th class="admin-only hidden">Media <select class="filter-select admin-only hidden mt-1" data-col="fileUrls"><option value="">All</option></select></th>
+                            <th class="admin-only hidden">Org Info <select class="filter-select admin-only hidden mt-1" data-col="orgInfo"><option value="">All</option></select></th>
+                            <th class="admin-only hidden">Contact Person <select class="filter-select admin-only hidden mt-1" data-col="contactName"><option value="">All</option></select></th>
+                            <th class="admin-only hidden">Contact Email <select class="filter-select admin-only hidden mt-1" data-col="orgContactEmail"><option value="">All</option></select></th>
+                            <th class="admin-only hidden">WhatsApp Number <select class="filter-select admin-only hidden mt-1" data-col="contactWhatsApp"><option value="">All</option></select></th>
+                            <th class="admin-only hidden">Contact Number <select class="filter-select admin-only hidden mt-1" data-col="contactNumber"><option value="">All</option></select></th>
+                            <th class="admin-only hidden">External Links <select class="filter-select admin-only hidden mt-1" data-col="externalLinks"><option value="">All</option></select></th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="login-prompt" class="max-w-md mx-auto mt-24 p-8 bg-white rounded-2xl border text-center shadow-sm" style="border-color: var(--border-soft)">
+        <h3 class="text-xl font-black text-stone-800 uppercase tracking-tight mb-2">Registry Access</h3>
+        <p class="text-stone-400 text-sm mb-6">Sign in to manage and view your submitted experiential holiday operations.</p>
+        <button id="login-btn" class="w-full bg-[#f5ede8] text-[#a37c6b] px-5 py-3 rounded-xl font-bold border border-[#e8dad0] hover:bg-[#e8dad0] transition uppercase tracking-wider text-sm">Sign In with Google</button>
+    </div>
+
+    <script type="module">
+        
+        import { initializeApp, getApp, getApps } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, getDocs, query, where, deleteDoc, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // ADD THIS LINE HERE (Connects to our central config file)
+        const firebaseConfig = window.GLOBAL_FIREBASE_CONFIG;
+
+        const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
+        let rawData = [];
+        let filteredData = [];
+        let isAdminGlobal = false;
+        let activeTab = 'active';
+
+        window.switchTab = (tab) => {
+            activeTab = tab;
+            const tabActive = document.getElementById('tab-active');
+            const tabPast = document.getElementById('tab-past');
+            
+            if (tab === 'active') {
+                tabActive.className = "px-4 py-2 font-bold text-stone-800 border-b-2 border-stone-800 transition-colors";
+                tabPast.className = "px-4 py-2 font-bold text-stone-400 border-b-2 border-transparent hover:text-stone-600 transition-colors";
+            } else {
+                tabPast.className = "px-4 py-2 font-bold text-stone-800 border-b-2 border-stone-800 transition-colors";
+                tabActive.className = "px-4 py-2 font-bold text-stone-400 border-b-2 border-transparent hover:text-stone-600 transition-colors";
+            }
+            renderTable();
+        };
+
+        window.toggleHide = async (id, currentStatus) => {
+            try {
+                await updateDoc(doc(db, "retreats", id), { isHidden: !currentStatus });
+                const item = rawData.find(x => x.id === id);
+                if(item) item.isHidden = !currentStatus;
+                applyFilters();
+            } catch(e) { alert(e.message); }
+        };
+
+        onAuthStateChanged(auth, async (user) => {
+            const dropdownProfile = document.getElementById('dropdown-profile');
+            const userEmailEl = document.getElementById('user-email');
+            const logoutBtn = document.getElementById('logout-btn');
+            const loginBtnMenu = document.getElementById('login-btn-menu');
+            const adminBadge = document.getElementById('admin-badge');
+            const mainContent = document.getElementById('main-content');
+            const loginPrompt = document.getElementById('login-prompt');
+
+            if (user) {
+                if (loginPrompt) loginPrompt.classList.add('hidden');
+                if (mainContent) mainContent.classList.remove('hidden');
+                if (userEmailEl) userEmailEl.innerText = user.email;
+                if (dropdownProfile) dropdownProfile.classList.remove('hidden');
+                if (logoutBtn) logoutBtn.classList.remove('hidden');
+                if (loginBtnMenu) loginBtnMenu.classList.add('hidden');
+                document.getElementById('tabs-container').classList.remove('hidden');
+
+                try {
+                    const adminSnap = await getDoc(doc(db, "admins", user.email.toLowerCase().trim()));
+                    const isAdmin = adminSnap.exists();
+                    if (typeof isAdminGlobal !== 'undefined') isAdminGlobal = isAdmin; 
+                    
+                    if (isAdmin) {
+                        if (adminBadge) adminBadge.classList.remove('hidden');
+                        document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+                        document.getElementById('dashboard-table').classList.add('min-w-[3400px]');
+                    } else {
+                        document.getElementById('dashboard-table').classList.add('min-w-[800px]'); // Clean width for normal view
+                    }
+                    
+                    
+                    if (typeof fetchData === "function") {
+                        fetchData(user.email, isAdmin);
+                    }
+                } catch (error) {}
+
+            } else {
+                if (loginPrompt) loginPrompt.classList.remove('hidden');
+                if (mainContent) mainContent.classList.add('hidden');
+                if (dropdownProfile) dropdownProfile.classList.add('hidden');
+                if (adminBadge) adminBadge.classList.add('hidden');
+                if (logoutBtn) logoutBtn.classList.add('hidden');
+                if (loginBtnMenu) loginBtnMenu.classList.remove('hidden');
+                document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
+            }
+        });
+
+        const loginBtnMenuEl = document.getElementById('login-btn-menu');
+        if (loginBtnMenuEl) loginBtnMenuEl.onclick = () => signInWithPopup(auth, provider);
+
+        // FIX: Attach logic to the big prompt login button
+        const loginPromptBtnEl = document.getElementById('login-btn');
+        if (loginPromptBtnEl) loginPromptBtnEl.onclick = () => signInWithPopup(auth, provider);
+
+        const logoutBtnEl = document.getElementById('logout-btn');
+        if (logoutBtnEl) logoutBtnEl.onclick = () => signOut(auth);
+
+        window.deleteEntry = async (id) => {
+            if(confirm("Are you sure you want to delete this experience?")) {
+                await deleteDoc(doc(db, "retreats", id));
+                rawData = rawData.filter(r => r.id !== id);
+                applyFilters();
+            }
+        };
+
+        async function fetchData(email, isAdmin) {
+            const q = isAdmin ? collection(db, "retreats") : query(collection(db, "retreats"), where("hostEmail", "==", email));
+            const snap = await getDocs(q);
+            rawData = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            filteredData = [...rawData];
+            populateFilters();
+            renderTable();
+        }
+
+        function populateFilters() {
+            const selects = document.querySelectorAll('.filter-select');
+            selects.forEach(select => {
+                const col = select.dataset.col;
+                let uniqueVals = new Set();
+
+                rawData.forEach(r => {
+                    if (r[col]) {
+                        if (col === 'categories' && Array.isArray(r[col])) {
+                            r[col].forEach(cat => uniqueVals.add(cat.trim()));
+                        } else if (Array.isArray(r[col])) {
+                            uniqueVals.add(r[col].join(', '));
+                        } else {
+                            uniqueVals.add(r[col]);
+                        }
+                    }
+                });
+
+                const currentVal = select.value;
+                select.innerHTML = '<option value="">All</option>';
+                Array.from(uniqueVals).sort().forEach(val => {
+                    if(val) select.innerHTML += `<option value="${val}">${val}</option>`;
+                });
+                select.value = currentVal;
+
+                select.onchange = applyFilters;
+            });
+        }
+
+        function applyFilters() {
+            filteredData = rawData.filter(r => {
+                let match = true;
+                document.querySelectorAll('.filter-select').forEach(select => {
+                    const col = select.dataset.col;
+                    const val = select.value;
+                    if (val) {
+                        if (col === 'categories' && Array.isArray(r[col])) {
+                            if (!r[col].includes(val)) match = false;
+                        } else if (Array.isArray(r[col])) {
+                            if (r[col].join(', ') !== val) match = false;
+                        } else {
+                            if (r[col] != val) match = false;
+                        }
+                    }
+                });
+                return match;
+            });
+            renderTable();
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+            
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            const todayStr = today.toISOString().split('T')[0];
+
+            const displayData = filteredData.filter(r => {
+                const cmpDate = r.endDate || r.startDate || "";
+                const isPast = cmpDate && cmpDate < todayStr;
+                return activeTab === 'active' ? !isPast : isPast;
+            });
+
+            displayData.forEach(r => {
+                let catHtml = (r.categories || []).join(', ');
+                let vidHtml = (r.videoLinks || []).map(l => `<a href="${l}" target="_blank" class="text-blue-600 hover:underline block break-all font-medium mb-1">🔗 Video Link</a>`).join('');
+                let extHtml = (r.externalLinks || []).map(l => `<a href="${l}" target="_blank" class="text-blue-600 hover:underline block break-all font-medium mb-1">🔗 Link</a>`).join('');
+                
+                let mediaHtml = (r.fileUrls || []).map((l, i) => {
+                    let fileName = `📁 File ${i + 1}`;
+                    try {
+                        const decoded = decodeURIComponent(l);
+                        const parts = decoded.split('/').pop().split('?')[0];
+                        if (parts) fileName = "📁 " + parts;
+                    } catch(e) {}
+                    return `<a href="${l}" target="_blank" class="text-stone-600 hover:text-blue-600 hover:underline block truncate max-w-xs font-medium mb-1" title="${fileName}">${fileName}</a>`;
+                }).join('');
+                
+                const canEditDelete = isAdminGlobal || activeTab === 'active';
+                const actionButtons = canEditDelete ? `
+                    <a href="submit.html?id=${r.id}" class="btn-edit">Edit</a>
+                    <button onclick="deleteEntry('${r.id}')" class="btn-delete">Del</button>
+                ` : `<span class="text-xs text-stone-400 font-bold bg-stone-100 px-2 py-1 rounded">Archived</span>`;
+
+                const hideBtn = isAdminGlobal ? `
+                    <button onclick="toggleHide('${r.id}', ${!!r.isHidden})" class="btn-hide ${r.isHidden ? 'bg-stone-500' : 'bg-stone-300'} text-white px-2 py-1 rounded text-xs ml-1 mt-1 font-bold uppercase transition hover:bg-stone-700">${r.isHidden ? 'Unhide' : 'Hide'}</button>
+                ` : '';
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-stone-50/50 transition ${r.isHidden && isAdminGlobal ? 'opacity-60 bg-stone-100' : ''}">
+                        <!-- STANDARD VIEW -->
+                        <td class="whitespace-nowrap font-medium align-middle">
+                            <div class="flex items-center">
+                                ${actionButtons}
+                                ${hideBtn}
+                            </div>
+                        </td>
+                        <td class="font-semibold text-stone-800">${r.retreatName || ''}</td>
+                        <!-- To show these to users again, remove the "admin-only \${isAdminGlobal ? '' : 'hidden'}" classes -->
+                        <td class="admin-only ${isAdminGlobal ? '' : 'hidden'} font-black text-blue-600 text-center bg-blue-50/50 border-x align-middle" style="border-color: var(--border-soft);">${r.views || 0}</td>
+                        <td class="admin-only ${isAdminGlobal ? '' : 'hidden'} font-black text-emerald-600 text-center bg-emerald-50/50 border-r align-middle" style="border-color: var(--border-soft);">${r.whatsappClicks || 0}</td>
+                        <td class="admin-only ${isAdminGlobal ? '' : 'hidden'} font-black text-indigo-600 text-center bg-indigo-50/50 border-r align-middle" style="border-color: var(--border-soft);">${r.externalLinkClicks || 0}</td>
+                        <td><span class="font-medium">${r.city || ''}${r.state ? `, ${r.state}` : ''}</span></td>
+                        <td class="whitespace-nowrap">${r.startDate || ''} <span class="text-xs text-stone-400 block">${r.endDate ? 'to ' + r.endDate : ''}</span></td>
+
+                        <!-- ADMIN ONLY DATA -->
+                        <td class="admin-only ${isAdminGlobal ? '' : 'hidden'} font-medium text-stone-500">${r.hostEmail || ''}</td>
+                        <td class="admin-only ${isAdminGlobal ? '' : 'hidden'}"><span class="bg-stone-100 px-2.5 py-1 rounded-md text-xs font-bold text-stone-600">${r.state || ''}</span></td>
+                        <td class="admin-only ${isAdminGlobal ? '' : 'hidden'}">${r.startTime || ''}</td>
+                        <td class="admin-only ${isAdminGlobal ? '' : 'hidden'} whitespace-nowrap">${r.endDate || ''}</td>
+                        <td class="admin-only ${isAdminGlobal ? '' : 'hidden'}">${r.endTime || ''}</td>
+                        <td class="admin-only ${isAdminGlobal ? '' : 'hidden'}"><div class="scroll-cell font-medium text-stone-600">${catHtml}</div></td>
+                        <td class="admin-only ${isAdminGlobal ? '' : 'hidden'}"><div class="scroll-cell">${r.description || ''}</div></td>
+                        <td class="admin-only ${isAdminGlobal ? '' : 'hidden'}"><div class="scroll-cell font-semibold text-emerald-700">${r.contribution || '—'}</div></td>
+                        <td class="admin-only ${isAdminGlobal ? '' : 'hidden'}"><div class="scroll-cell">${r.inclusionsExclusions || '—'}</div></td>
+                        <td class="admin-only ${isAdminGlobal ? '' : 'hidden'}"><div class="scroll-cell">${vidHtml || '—'}</div></td>
+                        <td class="admin-only ${isAdminGlobal ? '' : 'hidden'}"><div class="scroll-cell">${mediaHtml || '—'}</div></td>
+                        <td class="admin-only ${isAdminGlobal ? '' : 'hidden'}"><div class="scroll-cell">${r.orgInfo || ''}</div></td>
+                        <td class="admin-only ${isAdminGlobal ? '' : 'hidden'} whitespace-nowrap font-medium text-stone-800">${r.contactName || ''}</td>
+                        <td class="admin-only ${isAdminGlobal ? '' : 'hidden'}"><a href="mailto:${r.orgContactEmail}" class="text-blue-600 hover:underline">${r.orgContactEmail || ''}</a></td>
+                        <td class="admin-only ${isAdminGlobal ? '' : 'hidden'} whitespace-nowrap font-medium">${r.contactWhatsApp || ''}</td>
+                        <td class="admin-only ${isAdminGlobal ? '' : 'hidden'} whitespace-nowrap font-medium">${r.contactNumber || '—'}</td>
+                        <td class="admin-only ${isAdminGlobal ? '' : 'hidden'}"><div class="scroll-cell">${extHtml || '—'}</div></td>
+                    </tr>
+                `;
+            });
+        }
+    </script>
+<div id="site-footer"></div>
+    <script src="footer.js"></script>
+</body>
+</html>

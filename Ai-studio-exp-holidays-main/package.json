@@ -1,0 +1,17 @@
+{
+  "name": "experiential-holidays",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && node copy-static.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.20.0",
+    "vite": "^5.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
