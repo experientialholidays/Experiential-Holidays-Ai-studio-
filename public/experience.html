@@ -603,6 +603,11 @@
             currentMedia = media;
 
             let locString = `${i.City || ''}${(i.City && i.State) ? ', ' : ''}${i.State || ''}`;
+            if (locString) {
+                locString += ', India';
+            } else {
+                locString = 'India';
+            }
             let dateString = `${i.StartDisplay || i.Start} ${i.EndDisplay ? ' - ' + i.EndDisplay : ''}`;
             
             let timestampHtml = '';

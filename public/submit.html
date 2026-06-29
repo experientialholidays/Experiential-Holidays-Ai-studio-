@@ -173,7 +173,9 @@
                         <!-- generated via js -->
                     </div>
                     <div id="selected-categories-tags" class="flex flex-wrap gap-2 mt-3"></div>
-                    <input type="text" id="otherCategory" class="hidden mt-3 custom-input" placeholder="Custom category...">
+                    
+                    <label class="input-label mt-5 block">Can't find your category? Add a custom one:</label>
+                    <input type="text" id="otherCategory" class="custom-input mt-1" placeholder="Type custom category or subcategory name...">
                 </div>
                 <div><label class="input-label">General Description *</label><textarea id="description" rows="4" class="custom-input" required></textarea></div>
                 <div>
@@ -434,15 +436,13 @@ function lookForAndRestoreDraft() {
                 document.querySelectorAll('input[name="cat"]').forEach(cb => {
                     if (draft.categories.includes(cb.value)) {
                         cb.checked = true;
-                        if (cb.value === 'Other') {
-                            const otherInput = document.getElementById('otherCategory');
-                            if (otherInput) {
-                                otherInput.classList.remove('hidden');
-                                otherInput.value = draft.otherCategoryText || "";
-                            }
-                        }
                     }
                 });
+                
+                const otherInput = document.getElementById('otherCategory');
+                if (otherInput && draft.otherCategoryText) {
+                    otherInput.value = draft.otherCategoryText;
+                }
                 if (window.updateSelectedTags) window.updateSelectedTags();
             }
             
@@ -529,7 +529,7 @@ initAutoSaveSystem();
                     <div id="sub-${safeId}" class="hidden px-4 pb-3 pt-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sub-cats-container bg-stone-50/50">
                         ${subCats.map(sub => `
                             <label class="flex items-center gap-2 text-sm bg-white p-2 rounded-xl border border-stone-100 cursor-pointer hover:bg-stone-50 transition sub-cat-lbl" data-sub="${sub}">
-                                <input type="checkbox" name="cat" value="${sub}" class="w-3.5 h-3.5 rounded text-[#a37c6b] focus:ring-[#f5ede8]" onchange="window.handleCatChange(this)">
+                                <input type="checkbox" name="cat" value="${sub}" data-main="${mainCat}" class="w-3.5 h-3.5 rounded text-[#a37c6b] focus:ring-[#f5ede8]" onchange="window.handleCatChange(this)">
                                 <span class="text-stone-600">${sub}</span>
                             </label>
                         `).join('')}
@@ -555,13 +555,6 @@ initAutoSaveSystem();
         };
 
         window.handleCatChange = (cb) => {
-            if (cb.value === 'Other') {
-                const otherInput = document.getElementById('otherCategory');
-                if (otherInput) {
-                    otherInput.classList.toggle('hidden', !cb.checked);
-                    if(cb.checked) otherInput.focus();
-                }
-            }
             if (window.updateSelectedTags) window.updateSelectedTags();
             if (typeof captureAndSaveDraft === 'function') captureAndSaveDraft();
         };
@@ -842,7 +835,7 @@ initAutoSaveSystem();
                 document.getElementById('contactCall').value = r.contactNumber || "";
             }
 
-            const savedCats = r.categories || [];
+            const savedCats = r.subCategories || r.categories || [];
             const checkboxes = document.querySelectorAll('input[name="cat"]');
             let hasOther = false;
             savedCats.forEach(cat => {
@@ -850,11 +843,10 @@ initAutoSaveSystem();
                 checkboxes.forEach(cb => {
                     if (cb.value === cat) { cb.checked = true; found = true; }
                 });
-                if (!found) { hasOther = true; document.getElementById('otherCategory').value = cat; }
+                if (!found && cat !== 'Other') { hasOther = true; document.getElementById('otherCategory').value = cat; }
             });
             if(hasOther) {
                 checkboxes.forEach(cb => { if(cb.value === 'Other') cb.checked = true; });
-                document.getElementById('otherCategory').classList.remove('hidden');
             }
             if (window.updateSelectedTags) window.updateSelectedTags();
 
@@ -884,8 +876,9 @@ initAutoSaveSystem();
             e.preventDefault();
 
             const selectedCatsCheck = document.querySelectorAll('input[name="cat"]:checked');
-            if (selectedCatsCheck.length === 0) {
-                alert("Please select at least one category.");
+            const customCatText = document.getElementById('otherCategory')?.value.trim();
+            if (selectedCatsCheck.length === 0 && !customCatText) {
+                alert("Please select at least one category or add a custom one.");
                 document.getElementById('category-accordion').scrollIntoView({ behavior: 'smooth' });
                 return;
             }
@@ -907,12 +900,23 @@ initAutoSaveSystem();
 
                 const finalFileUrls = [...existingFileUrls, ...newFileUrls];
 
-                let selectedCats = Array.from(document.querySelectorAll('input[name="cat"]:checked')).map(c => c.value);
-                if(selectedCats.includes('Other')) {
-                    const custom = document.getElementById('otherCategory').value;
-                    if(custom) selectedCats.push(custom);
-                    selectedCats = selectedCats.filter(c => c !== 'Other');
+                let selectedSubCats = [];
+                let selectedMainCatsSet = new Set();
+                document.querySelectorAll('input[name="cat"]:checked').forEach(c => {
+                    selectedSubCats.push(c.value);
+                    if(c.getAttribute('data-main')) {
+                        selectedMainCatsSet.add(c.getAttribute('data-main'));
+                    }
+                });
+
+                const custom = document.getElementById('otherCategory').value.trim();
+                if(custom) {
+                    selectedSubCats.push(custom);
+                    selectedMainCatsSet.add('Other');
                 }
+                selectedSubCats = selectedSubCats.filter(c => c !== 'Other');
+                
+                let selectedMainCats = Array.from(selectedMainCatsSet);
                 // Auto-format external links to ensure they work correctly
                 let externalLinksArray = Array.from(document.querySelectorAll('.external-link-input'))
                     .map(input => input.value.trim())
@@ -952,7 +956,8 @@ initAutoSaveSystem();
                     endTime: document.getElementById('endTime').value || "",
                     description: document.getElementById('description').value,
                     hashtags: hashtagsArray,
-                    categories: selectedCats,
+                    categories: selectedMainCats,
+                    subCategories: selectedSubCats,
                     contribution: document.getElementById('contribution').value,
                     inclusionsExclusions: document.getElementById('inclusionsExclusions').value,
                     
