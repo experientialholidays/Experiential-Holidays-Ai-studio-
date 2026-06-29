@@ -39,7 +39,7 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght=400;600;700;800&display=swap" rel="stylesheet">
-    <script src="config.js"></script>
+    <script src="config.js?v=1.1"></script>
     
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -335,7 +335,7 @@
 <body class="pb-10">
 
     <div id="site-navbar"></div>
-    <script src="navbar.js"></script>
+    <script src="navbar.js?v=1.1"></script>
 
     <div id="connectionStatus" style="display:none; background:#f5ede8; color:var(--accent); font-family:monospace; padding:6px; font-size:11px; text-align:center; border-bottom:1px solid var(--border-soft); font-weight:600;">
         Connecting to Firebase...
@@ -719,53 +719,59 @@
             const currentTimeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
             snapshot.forEach((doc) => {
-                const r = doc.data();
-                if (r.isHidden) return;
-                
-                let end_date = (r.endDate || '').trim();
-                let end_time = (r.endTime || '').trim();
-                
-                if (!end_date) {
-                    end_date = (r.startDate || '').trim();
-                    end_time = (r.startTime || '').trim();
-                }
-                if (!end_time) end_time = "23:59";
-                if (end_time.length === 4 && end_time[1] === ':') end_time = "0" + end_time;
-                
-                if (end_date && (end_date < currentDateStr || (end_date === currentDateStr && end_time < currentTimeStr))) {
-                    return; // Skip expired experiences
-                }
+                try {
+                    const r = doc.data();
+                    if (r.isHidden) return;
+                    
+                    let end_date = String(r.endDate || '').trim();
+                    let end_time = String(r.endTime || '').trim();
+                    let start_date = String(r.startDate || '').trim();
+                    let start_time = String(r.startTime || '').trim();
+                    
+                    if (!end_date || end_date === 'undefined') {
+                        end_date = start_date;
+                        end_time = start_time;
+                    }
+                    if (!end_time || end_time === 'undefined') end_time = "23:59";
+                    if (end_time.length === 4 && end_time[1] === ':') end_time = "0" + end_time;
+                    
+                    if (end_date && end_date !== 'undefined' && (end_date < currentDateStr || (end_date === currentDateStr && end_time < currentTimeStr))) {
+                        return; // Skip expired experiences
+                    }
 
-                let media = Array.isArray(r.fileUrls) ? [...r.fileUrls] : [];
-                let v_links = Array.isArray(r.videoLinks) ? [...r.videoLinks] : [];
-                media = media.concat(v_links);
-                let cats = Array.isArray(r.categories) ? r.categories : [];
+                    let media = Array.isArray(r.fileUrls) ? [...r.fileUrls] : [];
+                    let v_links = Array.isArray(r.videoLinks) ? [...r.videoLinks] : [];
+                    media = media.concat(v_links);
+                    let cats = Array.isArray(r.categories) ? r.categories : [];
 
-                allData.push({
-                    id: doc.id,
-                    Name: r.retreatName || 'Untitled',
-                    Description: r.description || '', 
-                    Categories: Array.isArray(r.categories) ? r.categories : [],
-                    Hashtags: Array.isArray(r.hashtags) ? r.hashtags : [],
-                    State: r.state || '',
-                    City: r.city || '',
-                    Start: r.startDate || '',
-                    StartDisplay: formatDisplayDate(r.startDate || ''),
-                    StartTime: r.startTime || '',
-                    End: r.endDate || '',
-                    EndDisplay: formatDisplayDate(r.endDate || ''),
-                    EndTime: r.endTime || '',
-                    Cost: r.contribution || '',
-                    Inclusions: r.inclusionsExclusions || '',
-                    Org: r.orgInfo || '',
-                    CName: r.contactName || '',
-                    CEmail: r.orgContactEmail || '',
-                    CPhone: r.contactWhatsApp || '',
-                    CNum: r.contactNumber || '',
-                    ExternalLinks: Array.isArray(r.externalLinks) ? r.externalLinks : [],
-                    MediaArray: media,
-                    Timestamp: r.timestamp || Date.now()
-                });
+                    allData.push({
+                        id: doc.id,
+                        Name: String(r.retreatName || 'Untitled'),
+                        Description: String(r.description || ''), 
+                        Categories: cats,
+                        Hashtags: Array.isArray(r.hashtags) ? r.hashtags : [],
+                        State: String(r.state || ''),
+                        City: String(r.city || ''),
+                        Start: start_date,
+                        StartDisplay: formatDisplayDate(start_date),
+                        StartTime: start_time,
+                        End: end_date,
+                        EndDisplay: formatDisplayDate(end_date),
+                        EndTime: end_time,
+                        Cost: String(r.contribution || ''),
+                        Inclusions: String(r.inclusionsExclusions || ''),
+                        Org: String(r.orgInfo || ''),
+                        CName: String(r.contactName || ''),
+                        CEmail: String(r.orgContactEmail || ''),
+                        CPhone: String(r.contactWhatsApp || ''),
+                        CNum: String(r.contactNumber || ''),
+                        ExternalLinks: Array.isArray(r.externalLinks) ? r.externalLinks : [],
+                        MediaArray: media,
+                        Timestamp: r.timestamp || Date.now()
+                    });
+                } catch (err) {
+                    console.error("Error parsing document data:", doc.id, err);
+                }
             });
 
             allData.sort((a, b) => {
@@ -790,7 +796,10 @@
 
             runFilter();
         }, (error) => {
-            document.getElementById('connectionStatus').innerText = "Connection Failed: " + error.message;
+            const el = document.getElementById('connectionStatus');
+            el.innerText = "Connection Failed: " + error.message;
+            el.style.display = 'block';
+            console.error("Firestore Error:", error);
         });
 
         // Media Parsing Functions
@@ -1172,6 +1181,6 @@
     </script>
 <!-- Build timestamp to ensure new deployment hash: 2026-06-29T10:17 -->
 <div id="site-footer"></div>
-    <script src="footer.js"></script>
+    <script src="footer.js?v=1.1"></script>
 </body>
 </html>
