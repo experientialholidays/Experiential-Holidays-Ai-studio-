@@ -36,4 +36,10 @@ function copyFolderSync(from, to) {
 }
 
 copyFolderSync(srcAssets, destAssets);
+const distIndex = path.join(destDir, 'index.html');
+if (fs.existsSync(distIndex)) {
+  const ts = new Date().toISOString();
+  fs.appendFileSync(distIndex, `\n<!-- Build TS: ${ts} -->\n`);
+}
+
 console.log('Static assets folder copied to dist/');
