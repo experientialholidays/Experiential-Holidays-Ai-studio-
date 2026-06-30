@@ -240,6 +240,15 @@
             position: relative; 
         }
 
+        .lazy-video {
+            opacity: 0;
+            transition: opacity 0.4s ease-in-out;
+        }
+
+        .lazy-video.loaded {
+            opacity: 1;
+        }
+
         @media (min-width: 768px) { 
             .card-media-container { height: 220px; } 
         }
@@ -420,20 +429,20 @@
         let selectedSubCategories = [];
 
         const CATEGORY_DATA = {
-            "Wellness & Healing": ["Yoga", "Meditation", "Ayurveda", "Reiki", "Sound Healing", "Breathwork", "Detox", "Spa & Massage", "Acupuncture"],
-            "Mental Health & Emotional Growth": ["Therapy & Counseling", "Mindfulness", "Trauma Release", "Stress Management", "Self-Love & Compassion", "Emotional Intelligence", "Journaling"],
-            "Spirituality & Consciousness": ["Vipassana", "Zen", "Tantra", "Shamanic Journeys", "Astrology", "Tarot & Oracle", "Energy Work", "Plant Medicine", "Mysticism"],
-            "Fitness, Movement & Martial Arts": ["Pilates", "Dance", "Tai Chi", "Qigong", "Martial Arts", "Calisthenics", "Running & Trekking", "Somatics"],
-            "Adventure & Outdoor Exploration": ["Hiking & Trekking", "Surfing", "Scuba Diving", "Rock Climbing", "Wildlife Safari", "Camping", "Kayaking", "Cycling"],
-            "Nature, Sustainability & Eco Living": ["Permaculture", "Eco-Volunteering", "Foraging", "Organic Farming", "Forest Bathing", "Sustainable Architecture"],
-            "Leadership, Business & Career": ["Entrepreneurship", "Public Speaking", "Networking", "Financial Literacy", "Productivity", "Team Building", "Executive Coaching"],
-            "Technology & Innovation": ["Web3 & Crypto", "AI & Machine Learning", "Coding Bootcamps", "Design Thinking", "Maker Spaces"],
-            "Creativity & Arts": ["Painting & Drawing", "Pottery & Ceramics", "Photography", "Writing & Poetry", "Music Production", "Acting & Improv", "Culinary Arts"],
-            "Relationships & Connection": ["Couples Retreats", "Men's Groups", "Women's Circles", "Conscious Dating", "Community Living", "Non-Violent Communication"],
-            "Culture, Philosophy & Learning": ["Language Immersion", "History & Heritage", "Philosophy", "Traditional Arts & Crafts", "Culinary Tours"],
-            "Lifestyle & Personal Transformation": ["Habit Building", "Minimalism", "Life Coaching", "Digital Detox", "Biohacking"],
-            "Luxury, Leisure & Travel": ["Luxury Retreats", "Boutique Hotels", "Glamping", "Cruises", "Wine Tasting"],
-            "Identity & Belonging": ["LGBTQ+ Retreats", "BIPOC Retreats", "Youth & Teen Programs", "Elder & Wisdom Circles"],
+            "Wellness & Healing": ["Yoga", "Breathwork", "Ayurveda", "Traditional Healing", "Detox Programs", "Nutrition", "Longevity", "Sleep Optimization", "Sound Healing", "Energy Healing"],
+            "Mental Health & Emotional Growth": ["Burnout Recovery", "Emotional Healing", "Psychology", "Shadow Work", "Trauma Recovery", "Resilience", "Emotional Intelligence", "Stress Management"],
+            "Spirituality & Consciousness": ["Meditation", "Silent Retreats", "Mindfulness", "Mysticism", "Religious Retreats", "Pilgrimage", "Sacred Practices", "Consciousness Exploration"],
+            "Fitness, Movement & Martial Arts": ["Fitness Training", "Martial Arts", "Dance", "Mobility", "Physical Therapy", "Functional Fitness", "Movement Arts", "Body Conditioning"],
+            "Adventure & Outdoor Exploration": ["Trekking", "Hiking", "Mountaineering", "Wilderness Survival", "Water Sports", "Extreme Sports", "Cycling Tours", "Overland Expeditions"],
+            "Nature, Sustainability & Eco Living": ["Permaculture", "Sustainable Living", "Eco Retreats", "Regenerative Living", "Off-Grid Living", "Forest Bathing", "Organic Farming", "Environmental Stewardship"],
+            "Leadership, Business & Career": ["Executive Leadership", "Entrepreneurship", "Business Growth", "Team Building", "Sales", "Networking", "Productivity", "Career Development"],
+            "Technology & Innovation": ["AI & Emerging Tech", "Agile Methodologies", "Software Development", "STEM Learning", "Digital Skills", "Innovation Labs", "Crypto & Web3", "Future Trends"],
+            "Creativity & Arts": ["Writing", "Literature", "Visual Arts", "Music", "Performing Arts", "Film & Media", "Photography", "Culinary Arts", "Handicrafts"],
+            "Relationships & Connection": ["Couples Retreats", "Intimacy", "Family Retreats", "Parenting", "Communication Skills", "Conscious Relationships", "Friendship & Social Connection", "Community Experiences"],
+            "Culture, Philosophy & Learning": ["Philosophy", "Ethics", "Cultural Immersion", "Language Learning", "Archaeology", "History", "Indigenous Wisdom", "Educational Travel"],
+            "Lifestyle & Personal Transformation": ["Digital Detox", "Life Design", "Habit Change", "Minimalism", "Workations", "Nomadic Living", "Purpose Discovery", "Personal Development"],
+            "Luxury, Leisure & Travel": ["Luxury Escapes", "Spa Retreats", "Boutique Travel", "Slow Travel", "Island Escapes", "Glamping", "Curated Holidays", "Premium Experiences"],
+            "Identity & Belonging": ["Women's Retreats", "Men's Retreats", "LGBTQ+ Retreats", "Senior Retreats", "Faith-Based Communities", "Cultural Identity Groups", "Support Networks", "Shared Experience Groups"],
             "Other": ["Other"]
         };
         const STATES = ["Andaman and Nicobar Islands", "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chandigarh", "Chhattisgarh", "Dadra and Nagar Haveli and Daman and Diu", "Delhi", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jammu and Kashmir", "Jharkhand", "Karnataka", "Kerala", "Ladakh", "Lakshadweep", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Puducherry", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal"];
@@ -959,11 +968,23 @@
                     if (entry.isIntersecting) {
                         if (!iframe.src) {
                             iframe.src = iframe.dataset.src;
+                            iframe.onload = () => {
+                                iframe.classList.add('loaded');
+                            };
+                            // Safety fallback for cached videos / slow trigger
+                            setTimeout(() => {
+                                iframe.classList.add('loaded');
+                            }, 1000);
                         }
                     }
                 });
-            }, { threshold: 0.1, rootMargin: "1000px"});
-            document.querySelectorAll('.lazy-video').forEach(vid => observer.observe(vid));
+            }, { threshold: 0.01, rootMargin: "0px 0px 1200px 0px"});
+            document.querySelectorAll('.lazy-video').forEach(vid => {
+                if (vid.src) {
+                    vid.classList.add('loaded');
+                }
+                observer.observe(vid);
+            });
         }
 
 
