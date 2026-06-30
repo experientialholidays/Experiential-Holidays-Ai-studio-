@@ -173,19 +173,16 @@
                         <!-- generated via js -->
                     </div>
                     <div id="selected-categories-tags" class="flex flex-wrap gap-2 mt-3"></div>
-                    
-                    <label class="input-label mt-5 block">Can't find your category? Add a custom one:</label>
-                    <input type="text" id="otherCategory" class="custom-input mt-1" placeholder="Type custom category or subcategory name...">
                 </div>
                 <div><label class="input-label">General Description *</label><textarea id="description" rows="4" class="custom-input" required></textarea></div>
                 <div>
-                    <label class="input-label">Provide exactly 5 hashtags to help users search your experience (should be different from title, location, and categories) *</label>
+                    <label class="input-label">Add up to 5 hashtags to help users search your experience (optional)</label>
                     <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-2">
-                        <input type="text" id="hashtag1" placeholder="#Tag1 (e.g. #peaceful)" class="custom-input text-xs sm:text-sm" required>
-                        <input type="text" id="hashtag2" placeholder="#Tag2" class="custom-input text-xs sm:text-sm" required>
-                        <input type="text" id="hashtag3" placeholder="#Tag3" class="custom-input text-xs sm:text-sm" required>
-                        <input type="text" id="hashtag4" placeholder="#Tag4" class="custom-input text-xs sm:text-sm" required>
-                        <input type="text" id="hashtag5" placeholder="#Tag5" class="custom-input text-xs sm:text-sm" required>
+                        <input type="text" id="hashtag1" placeholder="#Tag1 (e.g. #peaceful)" class="custom-input text-xs sm:text-sm">
+                        <input type="text" id="hashtag2" placeholder="#Tag2" class="custom-input text-xs sm:text-sm">
+                        <input type="text" id="hashtag3" placeholder="#Tag3" class="custom-input text-xs sm:text-sm">
+                        <input type="text" id="hashtag4" placeholder="#Tag4" class="custom-input text-xs sm:text-sm">
+                        <input type="text" id="hashtag5" placeholder="#Tag5" class="custom-input text-xs sm:text-sm">
                     </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -527,12 +524,27 @@ initAutoSaveSystem();
                         <span class="text-stone-400 text-xl font-medium w-6 h-6 flex items-center justify-center expand-icon" id="icon-${safeId}">+</span>
                     </div>
                     <div id="sub-${safeId}" class="hidden px-4 pb-3 pt-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sub-cats-container bg-stone-50/50">
-                        ${subCats.map(sub => `
+                        ${subCats.map(sub => {
+                            if (sub === 'Other') {
+                                return `
+                                <div class="col-span-full space-y-2 mt-1 mb-1">
+                                    <label class="flex items-center gap-2 text-sm bg-white p-2 rounded-xl border border-stone-100 cursor-pointer hover:bg-stone-50 transition sub-cat-lbl" data-sub="Other">
+                                        <input type="checkbox" id="otherCheckbox" name="cat" value="Other" data-main="${mainCat}" class="w-3.5 h-3.5 rounded text-[#a37c6b] focus:ring-[#f5ede8]" onchange="window.handleCatChange(this)">
+                                        <span class="text-stone-600 font-bold">Others (Type custom category/subcategory)</span>
+                                    </label>
+                                    <div id="otherInputContainer" class="hidden pl-1 pr-1 pb-1">
+                                        <input type="text" id="otherCategory" class="custom-input bg-white w-full text-sm" placeholder="Type custom category or subcategory name..." oninput="if(typeof captureAndSaveDraft==='function')captureAndSaveDraft()">
+                                    </div>
+                                </div>
+                                `;
+                            }
+                            return `
                             <label class="flex items-center gap-2 text-sm bg-white p-2 rounded-xl border border-stone-100 cursor-pointer hover:bg-stone-50 transition sub-cat-lbl" data-sub="${sub}">
                                 <input type="checkbox" name="cat" value="${sub}" data-main="${mainCat}" class="w-3.5 h-3.5 rounded text-[#a37c6b] focus:ring-[#f5ede8]" onchange="window.handleCatChange(this)">
                                 <span class="text-stone-600">${sub}</span>
                             </label>
-                        `).join('')}
+                            `;
+                        }).join('')}
                     </div>
                 </div>
                 `;
@@ -563,9 +575,21 @@ initAutoSaveSystem();
             const container = document.getElementById('selected-categories-tags');
             if (!container) return;
             const checked = Array.from(document.querySelectorAll('input[name="cat"]:checked'));
+            
+            // Auto toggle display of custom category input
+            const otherCheckbox = document.getElementById('otherCheckbox');
+            const otherInputContainer = document.getElementById('otherInputContainer');
+            if (otherCheckbox && otherInputContainer) {
+                if (otherCheckbox.checked) {
+                    otherInputContainer.classList.remove('hidden');
+                } else {
+                    otherInputContainer.classList.add('hidden');
+                }
+            }
+
             container.innerHTML = checked.map(cb => `
                 <span class="inline-flex items-center gap-1 bg-[#f5ede8] text-[#a37c6b] text-xs font-bold px-2.5 py-1 rounded-lg border border-[#e8dad0]">
-                    ${cb.value}
+                    ${cb.value === 'Other' ? 'Other (Custom)' : cb.value}
                     <span class="cursor-pointer hover:text-stone-800 ml-1" onclick="window.uncheckCat('${cb.value.replace(/'/g, "\\'")}')">×</span>
                 </span>
             `).join('');
