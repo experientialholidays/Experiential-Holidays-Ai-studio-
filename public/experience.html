@@ -387,6 +387,53 @@
         <div class="lightbox-next" onclick="changeLightbox(1)">&#10095;</div>
     </div>
 
+    <!-- Floating Share Button Container -->
+    <div id="floating-share-container" class="fixed bottom-6 right-6 z-50 flex flex-col-reverse items-end gap-3 font-sans hidden">
+        <!-- Dropup Menu of Sharing Options (Initially Hidden) -->
+        <div id="shareMenu" class="hidden flex flex-col gap-2 bg-white p-3 rounded-2xl border border-stone-200 shadow-xl transition-all duration-300 scale-95 opacity-0 origin-bottom-right w-56">
+            <!-- Copy Link Option -->
+            <button onclick="copyExperienceLink()" class="flex items-center gap-3 w-full px-4 py-2.5 text-stone-700 hover:bg-stone-50 rounded-xl transition font-semibold text-sm text-left">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-stone-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                Copy Link
+            </button>
+            <!-- WhatsApp Option -->
+            <a id="shareWA" target="_blank" class="flex items-center gap-3 w-full px-4 py-2.5 text-stone-700 hover:bg-[#25D366]/10 hover:text-[#128C7E] rounded-xl transition font-semibold text-sm">
+                <svg class="w-4 h-4 text-[#25D366]" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.414 9.863-9.847.002-2.63-1.023-5.101-2.887-6.968a9.782 9.782 0 0 0-6.973-2.885c-5.437 0-9.865 4.415-9.869 9.85-.001 1.76.46 3.477 1.336 5.01L1.874 21.67l6.096-1.597-.132.079z" />
+                </svg>
+                WhatsApp Share
+            </a>
+            <!-- Instagram Option -->
+            <button onclick="shareOnInstagram()" class="flex items-center gap-3 w-full px-4 py-2.5 text-stone-700 hover:bg-pink-50 hover:text-pink-600 rounded-xl transition font-semibold text-sm text-left">
+                <svg class="w-4 h-4 text-pink-500" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/>
+                </svg>
+                Instagram Share
+            </button>
+            <!-- Native Share Option -->
+            <button id="nativeShareBtn" onclick="triggerNativeShare()" class="hidden flex items-center gap-3 w-full px-4 py-2.5 text-stone-700 hover:bg-stone-50 rounded-xl transition font-semibold text-sm text-left">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-stone-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 10.742l4.576-2.288m0 0a3 3 0 113.882 3.882l-4.576 2.288M8.684 13.258l-4.576 2.288m0 0a3 3 0 11-3.882-3.882l4.576-2.288M8.684 13.258a3 3 0 110-2.516" />
+                </svg>
+                More Options...
+            </button>
+        </div>
+
+        <!-- Main FAB -->
+        <button onclick="toggleShareMenu()" id="shareFab" class="flex items-center justify-center w-14 h-14 bg-[#a37c6b] text-white rounded-full shadow-lg hover:bg-[#8e6b5c] hover:scale-105 active:scale-95 transition-all duration-300">
+            <svg xmlns="http://www.w3.org/2000/svg" id="shareFabIcon" class="w-6 h-6 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8.684 10.742l4.576-2.288m0 0a3 3 0 113.882 3.882l-4.576 2.288M8.684 13.258l-4.576 2.288m0 0a3 3 0 11-3.882-3.882l4.576-2.288M8.684 13.258a3 3 0 110-2.516" />
+            </svg>
+        </button>
+    </div>
+
+    <!-- Simple Toast Notification -->
+    <div id="toast" class="fixed bottom-24 right-6 z-50 transform translate-y-4 opacity-0 transition-all duration-300 bg-stone-800 text-white text-sm px-4 py-2.5 rounded-xl shadow-lg pointer-events-none">
+        Copied to clipboard!
+    </div>
+
     <script>
         const firebaseConfig = window.GLOBAL_FIREBASE_CONFIG;
         // Initialize Firebase SDK
@@ -399,6 +446,198 @@
         let currentMedia = [];
         let currentMediaIndex = 0;
         let activeDetailMedia = 0;
+
+        // Floating Share Button Logic
+        function initShareButton(exp) {
+            const container = document.getElementById('floating-share-container');
+            if (container) {
+                container.classList.remove('hidden');
+            }
+
+            const nativeShareBtn = document.getElementById('nativeShareBtn');
+            if (navigator.share) {
+                if (nativeShareBtn) nativeShareBtn.classList.remove('hidden');
+            }
+
+            // Set up sharing URLs and content
+            const shareUrl = window.location.href;
+            
+            let locString = `${exp.City || ''}${(exp.City && exp.State) ? ', ' : ''}${exp.State || ''}`;
+            locString = locString ? locString + ', India' : 'India';
+            let dateString = `${exp.StartDisplay || exp.Start} ${exp.EndDisplay ? ' - ' + exp.EndDisplay : ''}`;
+            
+            const waMsg = `Check out this amazing experience *${exp.Name}* happening at ${locString} on ${dateString}:\n\n${shareUrl}`;
+            const shareWA = document.getElementById('shareWA');
+            if (shareWA) {
+                shareWA.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(waMsg)}`;
+            }
+
+            window.currentExperienceForShare = exp;
+        }
+
+        window.toggleShareMenu = function() {
+            const menu = document.getElementById('shareMenu');
+            const fabIcon = document.getElementById('shareFabIcon');
+            if (!menu || !fabIcon) return;
+
+            if (menu.classList.contains('hidden')) {
+                menu.classList.remove('hidden');
+                setTimeout(() => {
+                    menu.classList.remove('scale-95', 'opacity-0');
+                    menu.classList.add('scale-100', 'opacity-100');
+                    fabIcon.classList.add('rotate-45');
+                }, 10);
+            } else {
+                menu.classList.add('scale-95', 'opacity-0');
+                menu.classList.remove('scale-100', 'opacity-100');
+                fabIcon.classList.remove('rotate-45');
+                setTimeout(() => {
+                    menu.classList.add('hidden');
+                }, 300);
+            }
+        };
+
+        // Close sharing menu when clicking outside
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('shareMenu');
+            const fab = document.getElementById('shareFab');
+            const fabIcon = document.getElementById('shareFabIcon');
+            if (!menu || !fab) return;
+
+            if (!menu.contains(e.target) && !fab.contains(e.target)) {
+                if (!menu.classList.contains('hidden')) {
+                    menu.classList.add('scale-95', 'opacity-0');
+                    menu.classList.remove('scale-100', 'opacity-100');
+                    if (fabIcon) fabIcon.classList.remove('rotate-45');
+                    setTimeout(() => {
+                        menu.classList.add('hidden');
+                    }, 300);
+                }
+            }
+        });
+
+        window.copyExperienceLink = function() {
+            const shareUrl = window.location.href;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    showToast("Link copied to clipboard!");
+                }).catch(err => {
+                    fallbackCopyText(shareUrl, "Link copied to clipboard!");
+                });
+            } else {
+                fallbackCopyText(shareUrl, "Link copied to clipboard!");
+            }
+            window.toggleShareMenu();
+        };
+
+        window.shareOnInstagram = function() {
+            const exp = window.currentExperienceForShare;
+            if (!exp) return;
+            const shareUrl = window.location.href;
+            
+            let locString = `${exp.City || ''}${(exp.City && exp.State) ? ', ' : ''}${exp.State || ''}`;
+            locString = locString ? locString + ', India' : 'India';
+            let dateString = `${exp.StartDisplay || exp.Start} ${exp.EndDisplay ? ' - ' + exp.EndDisplay : ''}`;
+            
+            const caption = `✨ ${exp.Name} ✨\n\n📍 Location: ${locString}\n📅 Dates: ${dateString}\n\nCheck out the full details here:\n${shareUrl}`;
+            
+            const handleSuccess = () => {
+                showToast("Caption copied! Opening Instagram...");
+                setTimeout(() => {
+                    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                    if (isMobile) {
+                        window.open("instagram://", "_blank");
+                        setTimeout(() => {
+                            window.open("https://www.instagram.com/", "_blank");
+                        }, 1200);
+                    } else {
+                        window.open("https://www.instagram.com/", "_blank");
+                    }
+                }, 1000);
+            };
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(caption).then(handleSuccess).catch(err => {
+                    fallbackCopyText(caption, "Caption copied! Please share on Instagram.");
+                });
+            } else {
+                fallbackCopyText(caption, "Caption copied! Please share on Instagram.");
+            }
+            window.toggleShareMenu();
+        };
+
+        window.triggerNativeShare = async function() {
+            const exp = window.currentExperienceForShare;
+            if (!exp) return;
+            let locString = `${exp.City || ''}${(exp.City && exp.State) ? ', ' : ''}${exp.State || ''}`;
+            locString = locString ? locString + ', India' : 'India';
+            const shareUrl = window.location.href;
+            
+            const shareData = {
+                title: exp.Name,
+                text: `Check out ${exp.Name} happening at ${locString}!`,
+                url: shareUrl
+            };
+
+            // Attempt to fetch and attach the primary image if Web Share API supports file sharing
+            if (exp.Media && exp.Media.length > 0 && navigator.canShare) {
+                try {
+                    showToast("Preparing shareable card...");
+                    const response = await fetch(exp.Media[0], { mode: 'cors' });
+                    const blob = await response.blob();
+                    // Get file extension from mime type or default to jpg
+                    const ext = blob.type.split('/')[1] || 'jpg';
+                    const file = new File([blob], `experience.${ext}`, { type: blob.type });
+                    
+                    if (navigator.canShare({ files: [file] })) {
+                        shareData.files = [file];
+                    }
+                } catch (err) {
+                    console.log('Image fetch for sharing bypassed (likely CORS or network):', err);
+                }
+            }
+            
+            if (navigator.share) {
+                try {
+                    await navigator.share(shareData);
+                } catch (err) {
+                    // Fallback to text-only share if file share fails
+                    if (shareData.files) {
+                        delete shareData.files;
+                        navigator.share(shareData).catch(e => console.log('Fallback share error:', e));
+                    } else {
+                        console.log('Error sharing:', err);
+                    }
+                }
+            }
+            window.toggleShareMenu();
+        };
+
+        function fallbackCopyText(text, toastMsg) {
+            const el = document.createElement('textarea');
+            el.value = text;
+            el.setAttribute('readonly', '');
+            el.style.position = 'absolute';
+            el.style.left = '-9999px';
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            showToast(toastMsg);
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            if (!toast) return;
+            toast.innerText = msg;
+            toast.classList.remove('translate-y-4', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-4', 'opacity-0');
+            }, 3000);
+        }
 
         function formatDisplayDate(dateStr) {
             if (!dateStr || typeof dateStr !== 'string') return "";
@@ -442,6 +681,7 @@
                     id: doc.id,
                     Name: r.retreatName || 'Untitled',
                     Categories: Array.isArray(r.categories) ? r.categories : [],
+                    SubCategories: Array.isArray(r.subCategories) ? r.subCategories : [],
                     Hashtags: Array.isArray(r.hashtags) ? r.hashtags : [],
                     State: r.state || '',
                     City: r.city || '',
@@ -466,6 +706,7 @@
                 };
 
                 renderExperience(experience);
+                initShareButton(experience);
             }).catch((error) => {
                 console.error(error);
             });
@@ -630,12 +871,24 @@
             let topHtml = ``;
             if(i.Categories && i.Categories.length > 0) {
                 topHtml += `
-                <div class="mb-4 flex flex-row flex-wrap gap-2 pr-12">
+                <div class="mb-3 flex flex-row flex-wrap gap-2 pr-12">
                     ${i.Categories.map(c => `
                         <div>
-                            <span class="cat-badge cursor-pointer hover:bg-stone-100 transition inline-block" 
+                            <span class="cat-badge cursor-pointer hover:bg-[#ebdcd4] transition inline-block text-xs font-bold bg-[#f5ede8] text-[#a37c6b] px-3 py-1.5 rounded-full border border-[#e8dad0]" 
                                  onclick="window.location.href='index.html?category=${encodeURIComponent(c)}'">
                                 ${c}
+                             </span>
+                        </div>`).join('')}
+                </div>`;
+            }
+            if(i.SubCategories && i.SubCategories.length > 0) {
+                topHtml += `
+                <div class="mb-3 flex flex-row flex-wrap gap-2 pr-12">
+                    ${i.SubCategories.map(sub => `
+                        <div>
+                            <span class="subcat-badge cursor-pointer hover:bg-[#ebdcd4] transition inline-block text-sm font-bold bg-[#f5ede8] text-[#a37c6b] px-3 py-1.5 rounded-full border border-[#e8dad0]" 
+                                 onclick="window.location.href='index.html?subcategory=${encodeURIComponent(sub)}'">
+                                ${sub}
                              </span>
                         </div>`).join('')}
                 </div>`;
@@ -644,7 +897,8 @@
                 topHtml += `
                 <div class="mb-4 flex flex-row flex-wrap gap-1.5 pr-12">
                     ${i.Hashtags.map(tag => `
-                        <span class="text-xs font-semibold text-[#a37c6b] bg-[#f5ede8]/50 px-2 py-0.5 rounded-md">
+                        <span class="text-sm font-semibold text-[#a37c6b] bg-[#f5ede8]/50 px-2.5 py-1 rounded-md cursor-pointer hover:bg-[#ebdcd4] transition"
+                              onclick="window.location.href='index.html?tag=${encodeURIComponent(tag)}'">
                             ${tag}
                         </span>`).join('')}
                 </div>`;

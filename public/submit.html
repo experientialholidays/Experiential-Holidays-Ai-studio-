@@ -581,7 +581,19 @@ initAutoSaveSystem();
             const otherInputContainer = document.getElementById('otherInputContainer');
             if (otherCheckbox && otherInputContainer) {
                 if (otherCheckbox.checked) {
+                    const wasHidden = otherInputContainer.classList.contains('hidden');
                     otherInputContainer.classList.remove('hidden');
+                    if (wasHidden) {
+                        setTimeout(() => {
+                            // Smooth scroll the input container within the parent scrollable container
+                            otherInputContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                            // Also focus the text input
+                            const otherCategoryInput = document.getElementById('otherCategory');
+                            if (otherCategoryInput) {
+                                otherCategoryInput.focus();
+                            }
+                        }, 150);
+                    }
                 } else {
                     otherInputContainer.classList.add('hidden');
                 }

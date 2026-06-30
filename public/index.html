@@ -1287,7 +1287,8 @@
         });
 
         const urlParams = new URLSearchParams(window.location.search);
-        const categoryParam = urlParams.get('category') || urlParams.get('search'); // Handles both fallback styles
+        const categoryParam = urlParams.get('category') || urlParams.get('subcategory') || urlParams.get('search');
+        const tagParam = urlParams.get('tag');
 
         if (categoryParam) {
             // Assign directly to the database category filter instead of the text input box
@@ -1304,10 +1305,17 @@
                     }
                 }, 500);
             }
-    
-            if (typeof allData !== 'undefined' && allData.length > 0) {
-                runFilter();
+        }
+
+        if (tagParam) {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.value = tagParam;
             }
+        }
+
+        if ((categoryParam || tagParam) && typeof allData !== 'undefined' && allData.length > 0) {
+            runFilter();
         }
         const loginBtnMenuEl = document.getElementById('login-btn-menu');
         if (loginBtnMenuEl) loginBtnMenuEl.onclick = () => signInWithPopup(auth, provider);
