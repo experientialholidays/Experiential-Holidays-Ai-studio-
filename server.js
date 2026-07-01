@@ -35,7 +35,7 @@ app.get('/experience.html', async (req, res, next) => {
                 
                 const description = (fields.ShortDescription?.stringValue || `Discover ${name} at ${location}.`).replace(/"/g, '&quot;');
                 
-                let imageUrl = 'https://experientialholidays.info/assets/share-image.jpg';
+                let imageUrl = 'https://firebasestorage.googleapis.com/v0/b/submit-a.firebasestorage.app/o/file_00000000644071fa82872ccf94d36b6f.png?alt=media&token=28d7ea2e-7eb8-486f-aa51-3a6d8a438eb1';
                 if (fields.Media?.arrayValue?.values && fields.Media.arrayValue.values.length > 0) {
                     imageUrl = fields.Media.arrayValue.values[0].stringValue.replace(/"/g, '&quot;');
                 }
