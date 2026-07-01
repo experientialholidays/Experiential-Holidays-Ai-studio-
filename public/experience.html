@@ -39,7 +39,7 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght=400;600;700;800&display=swap" rel="stylesheet">
-    <script src="config.js"></script>
+    <script src="/config.js"></script>
     
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -368,7 +368,7 @@
 <body class="pb-10">
 
     <div id="site-navbar"></div>
-    <script src="navbar.js"></script>
+    <script src="/navbar.js"></script>
 
     <div id="loading-state" class="max-w-4xl mx-auto py-20 text-center text-stone-400 font-bold">
         Loading experience...
@@ -750,7 +750,7 @@
                     ${i.Categories.map(c => `
                         <div>
                             <span class="cat-badge cursor-pointer hover:bg-[#ebdcd4] transition inline-block text-xs font-bold bg-[#f5ede8] text-[#a37c6b] px-3 py-1.5 rounded-full border border-[#e8dad0]" 
-                                 onclick="window.location.href='index.html?category=${encodeURIComponent(c)}'">
+                                 onclick="window.location.href='/?category=${encodeURIComponent(c)}'">
                                 ${c}
                              </span>
                         </div>`).join('')}
@@ -761,7 +761,7 @@
                 <div class="mb-4 flex flex-row flex-wrap gap-1.5 pr-12">
                     ${i.Hashtags.map(tag => `
                         <span class="text-sm font-semibold text-[#a37c6b] bg-[#f5ede8]/50 px-2.5 py-1 rounded-md cursor-pointer hover:bg-[#ebdcd4] transition"
-                              onclick="window.location.href='index.html?tag=${encodeURIComponent(tag.replace(/^#/, ''))}'">
+                              onclick="window.location.href='/?tag=${encodeURIComponent(tag.replace(/^#/, ''))}'">
                             ${tag}
                         </span>`).join('')}
                 </div>`;
@@ -1055,6 +1055,6 @@
         if (logoutBtnEl) logoutBtnEl.onclick = () => signOut(auth);
     </script>
 <div id="site-footer"></div>
-<script src="footer.js"></script>
+<script src="/footer.js"></script>
 </body>
 </html>

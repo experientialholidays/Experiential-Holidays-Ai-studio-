@@ -3,7 +3,7 @@ const navbarHTML = `
     <nav class="bg-white px-4 py-4 sticky top-0 z-50 border-b shadow-sm" style="border-bottom-color: var(--border-soft);">
         <div class="max-w-[1600px] w-full mx-auto px-4 md:px-8 flex flex-wrap justify-between items-center gap-4 relative">
             <h1 class="text-base md:text-xl font-black tracking-widest uppercase text-stone-800 shrink-0">
-                 <a href="index.html" class="hover:opacity-80 transition">Experiential <span style="color:var(--accent)">Holidays</span></a>
+                 <a href="/" class="hover:opacity-80 transition">Experiential <span style="color:var(--accent)">Holidays</span></a>
             </h1>
             
             <button id="mobile-menu-btn" class="text-stone-600 hover:text-stone-900 focus:outline-none p-1 transition shrink-0 ml-auto" title="Account Menu">
