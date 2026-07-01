@@ -73,6 +73,7 @@
                             <th class="text-center admin-only hidden">Views</th>
                             <th class="text-center admin-only hidden">WA Clicks</th>
                             <th class="text-center admin-only hidden">Link Clicks</th>
+                            <th class="text-center admin-only hidden">Shares</th>
                             
                             <th>Location <select class="filter-select admin-only hidden mt-1" data-col="city"><option value="">All</option></select></th>
                             <th>Date <select class="filter-select admin-only hidden mt-1" data-col="startDate"><option value="">All</option></select></th>
@@ -358,6 +359,7 @@
                         <td class="admin-only ${isAdminGlobal ? '' : 'hidden'} font-black text-blue-600 text-center bg-blue-50/50 border-x align-middle" style="border-color: var(--border-soft);">${r.views || 0}</td>
                         <td class="admin-only ${isAdminGlobal ? '' : 'hidden'} font-black text-emerald-600 text-center bg-emerald-50/50 border-r align-middle" style="border-color: var(--border-soft);">${r.whatsappClicks || 0}</td>
                         <td class="admin-only ${isAdminGlobal ? '' : 'hidden'} font-black text-indigo-600 text-center bg-indigo-50/50 border-r align-middle" style="border-color: var(--border-soft);">${r.externalLinkClicks || 0}</td>
+                        <td class="admin-only ${isAdminGlobal ? '' : 'hidden'} font-black text-rose-600 text-center bg-rose-50/50 border-r align-middle" style="border-color: var(--border-soft);">${r.shares || 0}</td>
                         <td><span class="font-medium">${r.city ? r.city + ', ' : ''}${r.state ? r.state + ', ' : ''}India</span></td>
                         <td class="whitespace-nowrap">${r.startDate || ''} <span class="text-xs text-stone-400 block">${r.endDate ? 'to ' + r.endDate : ''}</span></td>
 
