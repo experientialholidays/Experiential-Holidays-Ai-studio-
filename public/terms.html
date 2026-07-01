@@ -253,7 +253,7 @@
             const loginBtnMenu = document.getElementById('login-btn-menu');
 
             if (user) {
-                if (userEmailEl) userEmailEl.innerText = user.email;
+                if (userEmailEl) userEmailEl.innerText = user.email.split('@')[0];
                 if (dropdownProfile) dropdownProfile.classList.remove('hidden');
                 if (logoutBtn) logoutBtn.classList.remove('hidden');
                 if (loginBtnMenu) loginBtnMenu.classList.add('hidden');

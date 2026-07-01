@@ -701,7 +701,7 @@ initAutoSaveSystem();
             if (user) {
                 if (loginPrompt) loginPrompt.classList.add('hidden');
                 if (mainContent) mainContent.classList.remove('hidden');
-                if (userEmailEl) userEmailEl.innerText = user.email;
+                if (userEmailEl) userEmailEl.innerText = user.email.split('@')[0];
                 if (dropdownProfile) dropdownProfile.classList.remove('hidden');
                 if (logoutBtn) logoutBtn.classList.remove('hidden');
                 if (loginBtnMenu) loginBtnMenu.classList.add('hidden');
