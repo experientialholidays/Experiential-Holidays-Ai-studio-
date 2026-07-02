@@ -58,48 +58,69 @@
             <div id="tabs-container" class="mb-4 flex gap-4 border-b border-stone-200 hidden">
                 <button id="tab-active" onclick="switchTab('active')" class="px-4 py-2 font-bold text-stone-800 border-b-2 border-stone-800 transition-colors">Active Experiences</button>
                 <button id="tab-past" onclick="switchTab('past')" class="px-4 py-2 font-bold text-stone-400 border-b-2 border-transparent hover:text-stone-600 transition-colors">Past Experiences</button>
+                <button id="tab-feedback" onclick="switchTab('feedback')" class="px-4 py-2 font-bold text-stone-400 border-b-2 border-transparent hover:text-stone-600 transition-colors admin-only hidden">Feedback & Suggestions</button>
             </div>
 
-            <div class="table-wrapper shadow-sm overflow-x-auto">
-                <!-- Removed the hardcoded 3400px width; we will add it dynamically for admins -->
-                <table id="dashboard-table" class="w-full text-left border-collapse transition-all">
-                    <thead>
-                        <tr>
-                            <!-- 1. STANDARD COLUMNS (Visible to everyone, filters hidden for normal users) -->
-                            <th class="w-24">Actions</th>
-                            <th>Title <select class="filter-select admin-only hidden mt-1" data-col="retreatName"><option value="">All</option></select></th>
-                            
-                            <!-- To show these to users again, remove the "admin-only hidden" classes -->
-                            <th class="text-center admin-only hidden">Views</th>
-                            <th class="text-center admin-only hidden">WA Clicks</th>
-                            <th class="text-center admin-only hidden">Link Clicks</th>
-                            <th class="text-center admin-only hidden">Shares</th>
-                            
-                            <th>Location <select class="filter-select admin-only hidden mt-1" data-col="city"><option value="">All</option></select></th>
-                            <th>Date <select class="filter-select admin-only hidden mt-1" data-col="startDate"><option value="">All</option></select></th>
-                            
-                            <!-- 2. ADMIN ONLY COLUMNS (Hidden for normal users) -->
-                            <th class="admin-only hidden">Submitted by <select class="filter-select admin-only hidden mt-1" data-col="hostEmail"><option value="">All</option></select></th>
-                            <th class="admin-only hidden">State <select class="filter-select admin-only hidden mt-1" data-col="state"><option value="">All</option></select></th>
-                            <th class="admin-only hidden">Start Time <select class="filter-select admin-only hidden mt-1" data-col="startTime"><option value="">All</option></select></th>
-                            <th class="admin-only hidden">End Date <select class="filter-select admin-only hidden mt-1" data-col="endDate"><option value="">All</option></select></th>
-                            <th class="admin-only hidden">End Time <select class="filter-select admin-only hidden mt-1" data-col="endTime"><option value="">All</option></select></th>
-                            <th class="admin-only hidden">Categories <select class="filter-select admin-only hidden mt-1" data-col="categories"><option value="">All</option></select></th>
-                            <th class="admin-only hidden">Description <select class="filter-select admin-only hidden mt-1" data-col="description"><option value="">All</option></select></th>
-                            <th class="admin-only hidden">Contribution <select class="filter-select admin-only hidden mt-1" data-col="contribution"><option value="">All</option></select></th>
-                            <th class="admin-only hidden">Inclusions <select class="filter-select admin-only hidden mt-1" data-col="inclusionsExclusions"><option value="">All</option></select></th>
-                            <th class="admin-only hidden">Video Links <select class="filter-select admin-only hidden mt-1" data-col="videoLinks"><option value="">All</option></select></th>
-                            <th class="admin-only hidden">Media <select class="filter-select admin-only hidden mt-1" data-col="fileUrls"><option value="">All</option></select></th>
-                            <th class="admin-only hidden">Org Info <select class="filter-select admin-only hidden mt-1" data-col="orgInfo"><option value="">All</option></select></th>
-                            <th class="admin-only hidden">Contact Person <select class="filter-select admin-only hidden mt-1" data-col="contactName"><option value="">All</option></select></th>
-                            <th class="admin-only hidden">Contact Email <select class="filter-select admin-only hidden mt-1" data-col="orgContactEmail"><option value="">All</option></select></th>
-                            <th class="admin-only hidden">WhatsApp Number <select class="filter-select admin-only hidden mt-1" data-col="contactWhatsApp"><option value="">All</option></select></th>
-                            <th class="admin-only hidden">Contact Number <select class="filter-select admin-only hidden mt-1" data-col="contactNumber"><option value="">All</option></select></th>
-                            <th class="admin-only hidden">External Links <select class="filter-select admin-only hidden mt-1" data-col="externalLinks"><option value="">All</option></select></th>
-                        </tr>
-                    </thead>
-                    <tbody id="table-body"></tbody>
-                </table>
+            <div id="experiences-container">
+                <div class="table-wrapper shadow-sm overflow-x-auto">
+                    <!-- Removed the hardcoded 3400px width; we will add it dynamically for admins -->
+                    <table id="dashboard-table" class="w-full text-left border-collapse transition-all">
+                        <thead>
+                            <tr>
+                                <!-- 1. STANDARD COLUMNS (Visible to everyone, filters hidden for normal users) -->
+                                <th class="w-24">Actions</th>
+                                <th>Title <select class="filter-select admin-only hidden mt-1" data-col="retreatName"><option value="">All</option></select></th>
+                                
+                                <!-- To show these to users again, remove the "admin-only hidden" classes -->
+                                <th class="text-center admin-only hidden">Views</th>
+                                <th class="text-center admin-only hidden">WA Clicks</th>
+                                <th class="text-center admin-only hidden">Link Clicks</th>
+                                <th class="text-center admin-only hidden">Shares</th>
+                                
+                                <th>Location <select class="filter-select admin-only hidden mt-1" data-col="city"><option value="">All</option></select></th>
+                                <th>Date <select class="filter-select admin-only hidden mt-1" data-col="startDate"><option value="">All</option></select></th>
+                                
+                                <!-- 2. ADMIN ONLY COLUMNS (Hidden for normal users) -->
+                                <th class="admin-only hidden">Submitted by <select class="filter-select admin-only hidden mt-1" data-col="hostEmail"><option value="">All</option></select></th>
+                                <th class="admin-only hidden">State <select class="filter-select admin-only hidden mt-1" data-col="state"><option value="">All</option></select></th>
+                                <th class="admin-only hidden">Start Time <select class="filter-select admin-only hidden mt-1" data-col="startTime"><option value="">All</option></select></th>
+                                <th class="admin-only hidden">End Date <select class="filter-select admin-only hidden mt-1" data-col="endDate"><option value="">All</option></select></th>
+                                <th class="admin-only hidden">End Time <select class="filter-select admin-only hidden mt-1" data-col="endTime"><option value="">All</option></select></th>
+                                <th class="admin-only hidden">Categories <select class="filter-select admin-only hidden mt-1" data-col="categories"><option value="">All</option></select></th>
+                                <th class="admin-only hidden">Description <select class="filter-select admin-only hidden mt-1" data-col="description"><option value="">All</option></select></th>
+                                <th class="admin-only hidden">Contribution <select class="filter-select admin-only hidden mt-1" data-col="contribution"><option value="">All</option></select></th>
+                                <th class="admin-only hidden">Inclusions <select class="filter-select admin-only hidden mt-1" data-col="inclusionsExclusions"><option value="">All</option></select></th>
+                                <th class="admin-only hidden">Video Links <select class="filter-select admin-only hidden mt-1" data-col="videoLinks"><option value="">All</option></select></th>
+                                <th class="admin-only hidden">Media <select class="filter-select admin-only hidden mt-1" data-col="fileUrls"><option value="">All</option></select></th>
+                                <th class="admin-only hidden">Org Info <select class="filter-select admin-only hidden mt-1" data-col="orgInfo"><option value="">All</option></select></th>
+                                <th class="admin-only hidden">Contact Person <select class="filter-select admin-only hidden mt-1" data-col="contactName"><option value="">All</option></select></th>
+                                <th class="admin-only hidden">Contact Email <select class="filter-select admin-only hidden mt-1" data-col="orgContactEmail"><option value="">All</option></select></th>
+                                <th class="admin-only hidden">WhatsApp Number <select class="filter-select admin-only hidden mt-1" data-col="contactWhatsApp"><option value="">All</option></select></th>
+                                <th class="admin-only hidden">Contact Number <select class="filter-select admin-only hidden mt-1" data-col="contactNumber"><option value="">All</option></select></th>
+                                <th class="admin-only hidden">External Links <select class="filter-select admin-only hidden mt-1" data-col="externalLinks"><option value="">All</option></select></th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="feedback-container" class="hidden">
+                <div class="table-wrapper shadow-sm overflow-x-auto">
+                    <table id="feedback-table" class="w-full text-left border-collapse transition-all">
+                        <thead>
+                            <tr>
+                                <th class="w-24">Actions</th>
+                                <th>Submitted At</th>
+                                <th>Email</th>
+                                <th>Logged-In Account</th>
+                                <th>Contact Number</th>
+                                <th>Message</th>
+                            </tr>
+                        </thead>
+                        <tbody id="feedback-table-body"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -130,21 +151,117 @@
         let activeTab = 'active';
         let activeFilters = {};
         let pastFilters = {};
+        let feedbackData = [];
 
         window.switchTab = (tab) => {
             activeTab = tab;
             const tabActive = document.getElementById('tab-active');
             const tabPast = document.getElementById('tab-past');
+            const tabFeedback = document.getElementById('tab-feedback');
             
             if (tab === 'active') {
                 tabActive.className = "px-4 py-2 font-bold text-stone-800 border-b-2 border-stone-800 transition-colors";
                 tabPast.className = "px-4 py-2 font-bold text-stone-400 border-b-2 border-transparent hover:text-stone-600 transition-colors";
-            } else {
+                if (tabFeedback) tabFeedback.className = "px-4 py-2 font-bold text-stone-400 border-b-2 border-transparent hover:text-stone-600 transition-colors admin-only";
+            } else if (tab === 'past') {
                 tabPast.className = "px-4 py-2 font-bold text-stone-800 border-b-2 border-stone-800 transition-colors";
                 tabActive.className = "px-4 py-2 font-bold text-stone-400 border-b-2 border-transparent hover:text-stone-600 transition-colors";
+                if (tabFeedback) tabFeedback.className = "px-4 py-2 font-bold text-stone-400 border-b-2 border-transparent hover:text-stone-600 transition-colors admin-only";
+            } else if (tab === 'feedback') {
+                if (tabFeedback) tabFeedback.className = "px-4 py-2 font-bold text-stone-800 border-b-2 border-stone-800 transition-colors admin-only";
+                tabActive.className = "px-4 py-2 font-bold text-stone-400 border-b-2 border-transparent hover:text-stone-600 transition-colors";
+                tabPast.className = "px-4 py-2 font-bold text-stone-400 border-b-2 border-transparent hover:text-stone-600 transition-colors";
             }
-            populateFilters();
-            applyFilters();
+
+            const expContainer = document.getElementById('experiences-container');
+            const feedContainer = document.getElementById('feedback-container');
+
+            if (tab === 'feedback') {
+                if (expContainer) expContainer.classList.add('hidden');
+                if (feedContainer) feedContainer.classList.remove('hidden');
+                fetchFeedbackData();
+            } else {
+                if (feedContainer) feedContainer.classList.add('hidden');
+                if (expContainer) expContainer.classList.remove('hidden');
+                populateFilters();
+                applyFilters();
+            }
+        };
+
+        async function fetchFeedbackData() {
+            try {
+                const tbody = document.getElementById('feedback-table-body');
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-stone-400 font-medium">Loading feedback messages...</td></tr>';
+                
+                const q = collection(db, "feedback");
+                const snap = await getDocs(q);
+                feedbackData = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                
+                // Sort by submittedAt desc
+                feedbackData.sort((a, b) => {
+                    const t1 = a.submittedAt?.seconds || 0;
+                    const t2 = b.submittedAt?.seconds || 0;
+                    return t2 - t1;
+                });
+                
+                renderFeedbackTable();
+            } catch (error) {
+                console.error("Error fetching feedback:", error);
+                document.getElementById('feedback-table-body').innerHTML = `<tr><td colspan="6" class="text-center py-8 text-red-500 font-medium">Failed to load feedback: ${error.message}</td></tr>`;
+            }
+        }
+
+        function renderFeedbackTable() {
+            const tbody = document.getElementById('feedback-table-body');
+            tbody.innerHTML = '';
+            
+            if (feedbackData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-stone-400 font-medium">No feedback or suggestions found.</td></tr>';
+                return;
+            }
+            
+            feedbackData.forEach(f => {
+                let dateStr = "—";
+                if (f.submittedAt) {
+                    try {
+                        const dateObj = f.submittedAt.toDate ? f.submittedAt.toDate() : new Date(f.submittedAt);
+                        dateStr = dateObj.toLocaleString();
+                    } catch(e) {
+                        dateStr = String(f.submittedAt);
+                    }
+                }
+                
+                const deleteBtn = `<button onclick="deleteFeedback('${f.id}')" class="btn-delete">Del</button>`;
+                
+                tbody.innerHTML += `
+                    <tr class="hover:bg-stone-50/50 transition">
+                        <td class="whitespace-nowrap font-medium align-middle">
+                            <div class="flex items-center">
+                                ${deleteBtn}
+                            </div>
+                        </td>
+                        <td class="whitespace-nowrap font-medium text-stone-500">${dateStr}</td>
+                        <td class="font-semibold text-stone-800">${f.email || '—'}</td>
+                        <td class="text-stone-500">${f.loggedInAccount || 'Anonymous'}</td>
+                        <td class="whitespace-nowrap font-medium text-stone-600">${f.contactNumber || '—'}</td>
+                        <td>
+                            <div class="max-w-xl whitespace-pre-wrap text-stone-700 leading-relaxed font-medium bg-stone-50 p-3 rounded-lg border border-stone-100">${f.message || ''}</div>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        window.deleteFeedback = async (id) => {
+            if (confirm("Are you sure you want to delete this feedback entry?")) {
+                try {
+                    await deleteDoc(doc(db, "feedback", id));
+                    feedbackData = feedbackData.filter(f => f.id !== id);
+                    renderFeedbackTable();
+                } catch(e) {
+                    alert("Error deleting feedback: " + e.message);
+                }
+            }
         };
 
         window.toggleHide = async (id, currentStatus) => {

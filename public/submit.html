@@ -491,6 +491,18 @@ function initAutoSaveSystem() {
 
 // Run the system
 initAutoSaveSystem();
+
+const startDateInput = document.getElementById('startDate');
+const endDateInput = document.getElementById('endDate');
+
+if (startDateInput && endDateInput) {
+    startDateInput.addEventListener('change', function() {
+        endDateInput.min = this.value;
+        if (endDateInput.value && endDateInput.value < this.value) {
+            endDateInput.value = this.value;
+        }
+    });
+}
 // ==========================================
     
 
@@ -916,6 +928,14 @@ initAutoSaveSystem();
             if (selectedCatsCheck.length === 0 && !customCatText) {
                 alert("Please select at least one category or add a custom one.");
                 document.getElementById('category-accordion').scrollIntoView({ behavior: 'smooth' });
+                return;
+            }
+
+            const startDateVal = document.getElementById('startDate').value;
+            const endDateVal = document.getElementById('endDate').value;
+            if (startDateVal && endDateVal && endDateVal < startDateVal) {
+                alert("End Date cannot be before Start Date.");
+                document.getElementById('endDate').focus();
                 return;
             }
 
