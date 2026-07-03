@@ -347,6 +347,9 @@
             const todayStr = today.toISOString().split('T')[0];
             
             return rawData.filter(r => {
+                if (r.flexibleDates) {
+                    return tab === 'active';
+                }
                 const cmpDate = r.endDate || r.startDate || "";
                 const isPast = cmpDate && cmpDate < todayStr;
                 return tab === 'active' ? !isPast : isPast;
@@ -478,7 +481,7 @@
                         <td class="admin-only ${isAdminGlobal ? '' : 'hidden'} font-black text-indigo-600 text-center bg-indigo-50/50 border-r align-middle" style="border-color: var(--border-soft);">${r.externalLinkClicks || 0}</td>
                         <td class="admin-only ${isAdminGlobal ? '' : 'hidden'} font-black text-rose-600 text-center bg-rose-50/50 border-r align-middle" style="border-color: var(--border-soft);">${r.shares || 0}</td>
                         <td><span class="font-medium">${r.city ? r.city + ', ' : ''}${r.state ? r.state + ', ' : ''}India</span></td>
-                        <td class="whitespace-nowrap">${r.startDate || ''} <span class="text-xs text-stone-400 block">${r.endDate ? 'to ' + r.endDate : ''}</span></td>
+                        <td class="whitespace-nowrap">${r.flexibleDates ? '<span class="text-[#a37c6b] font-bold">Flexible Dates</span>' : (r.startDate || '')} <span class="text-xs text-stone-400 block">${(!r.flexibleDates && r.endDate) ? 'to ' + r.endDate : ''}</span></td>
 
                         <!-- ADMIN ONLY DATA -->
                         <td class="admin-only ${isAdminGlobal ? '' : 'hidden'} font-medium text-stone-500">${r.hostEmail || ''}</td>

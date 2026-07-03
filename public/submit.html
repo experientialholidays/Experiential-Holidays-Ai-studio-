@@ -160,6 +160,10 @@
                 <div><label class="input-label">Location *</label><input type="text" id="city" class="custom-input" required></div>
                 <div><label class="input-label">Start Date & Time</label><div class="flex gap-2"><input type="date" id="startDate" class="custom-input"><input type="time" id="startTime" class="custom-input w-28"></div></div>
                 <div><label class="input-label">End Date & Time</label><div class="flex gap-2"><input type="date" id="endDate" class="custom-input"><input type="time" id="endTime" class="custom-input w-28"></div></div>
+                <div class="md:col-span-2 flex items-center gap-2.5 mt-2 bg-stone-50 p-3 rounded-2xl border border-stone-200/60">
+                    <input type="checkbox" id="flexibleDates" class="rounded border-stone-300 text-[#a37c6b] focus:ring-[#a37c6b] w-4.5 h-4.5 cursor-pointer">
+                    <label for="flexibleDates" class="text-sm font-semibold text-stone-700 cursor-pointer select-none">This experience has flexible dates</label>
+                </div>
             </div>
         </div>
 
@@ -176,13 +180,11 @@
                 </div>
                 <div><label class="input-label">General Description *</label><textarea id="description" rows="4" class="custom-input" required></textarea></div>
                 <div>
-                    <label class="input-label">Add up to 5 hashtags to help users search your experience (optional)</label>
-                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-2">
+                    <label class="input-label">Add up to 3 hashtags to help users search your experience (optional) — Choose tags other than Title, Categories, Dates, or Location.</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-2">
                         <input type="text" id="hashtag1" placeholder="#Tag1 (e.g. #peaceful)" class="custom-input text-xs sm:text-sm">
                         <input type="text" id="hashtag2" placeholder="#Tag2" class="custom-input text-xs sm:text-sm">
                         <input type="text" id="hashtag3" placeholder="#Tag3" class="custom-input text-xs sm:text-sm">
-                        <input type="text" id="hashtag4" placeholder="#Tag4" class="custom-input text-xs sm:text-sm">
-                        <input type="text" id="hashtag5" placeholder="#Tag5" class="custom-input text-xs sm:text-sm">
                     </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -326,13 +328,12 @@ function captureAndSaveDraft() {
             startTime: document.getElementById('startTime')?.value || "",
             endDate: document.getElementById('endDate')?.value || "",
             endTime: document.getElementById('endTime')?.value || "",
+            flexibleDates: document.getElementById('flexibleDates')?.checked || false,
             description: document.getElementById('description')?.value || "",
             hashtags: [
                 document.getElementById('hashtag1')?.value || "",
                 document.getElementById('hashtag2')?.value || "",
-                document.getElementById('hashtag3')?.value || "",
-                document.getElementById('hashtag4')?.value || "",
-                document.getElementById('hashtag5')?.value || ""
+                document.getElementById('hashtag3')?.value || ""
             ],
             contribution: document.getElementById('contribution')?.value || "",
             inclusionsExclusions: document.getElementById('inclusionsExclusions')?.value || "",
@@ -373,13 +374,18 @@ function lookForAndRestoreDraft() {
         setVal('startTime', draft.startTime);
         setVal('endDate', draft.endDate);
         setVal('endTime', draft.endTime);
+        if (draft.flexibleDates) {
+            const chk = document.getElementById('flexibleDates');
+            if (chk) {
+                chk.checked = true;
+                chk.dispatchEvent(new Event('change'));
+            }
+        }
         setVal('description', draft.description);
         if (draft.hashtags && Array.isArray(draft.hashtags)) {
             setVal('hashtag1', draft.hashtags[0] || "");
             setVal('hashtag2', draft.hashtags[1] || "");
             setVal('hashtag3', draft.hashtags[2] || "");
-            setVal('hashtag4', draft.hashtags[3] || "");
-            setVal('hashtag5', draft.hashtags[4] || "");
         }
         setVal('contribution', draft.contribution);
         setVal('inclusionsExclusions', draft.inclusionsExclusions);
@@ -503,6 +509,26 @@ if (startDateInput && endDateInput) {
         }
     });
 }
+
+const flexibleDatesCheckbox = document.getElementById('flexibleDates');
+if (flexibleDatesCheckbox) {
+    flexibleDatesCheckbox.addEventListener('change', function() {
+        const dateFields = ['startDate', 'startTime', 'endDate', 'endTime'];
+        dateFields.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                if (this.checked) {
+                    el.value = '';
+                    el.disabled = true;
+                    el.classList.add('opacity-50');
+                } else {
+                    el.disabled = false;
+                    el.classList.remove('opacity-50');
+                }
+            }
+        });
+    });
+}
 // ==========================================
     
 
@@ -579,6 +605,14 @@ if (startDateInput && endDateInput) {
         };
 
         window.handleCatChange = (cb) => {
+            const checked = Array.from(document.querySelectorAll('input[name="cat"]:checked'));
+            if (checked.length > 3) {
+                alert("You can select a maximum of 3 categories/subcategories.");
+                if (cb) {
+                    cb.checked = false;
+                }
+                return;
+            }
             if (window.updateSelectedTags) window.updateSelectedTags();
             if (typeof captureAndSaveDraft === 'function') captureAndSaveDraft();
         };
@@ -823,6 +857,12 @@ if (startDateInput && endDateInput) {
             document.getElementById('retreatName').value = r.retreatName || "";
             if (r.state) stateDropdown.setValue(r.state);
             document.getElementById('city').value = r.city || "";
+            const isFlexible = !!r.flexibleDates;
+            const chk = document.getElementById('flexibleDates');
+            if (chk) {
+                chk.checked = isFlexible;
+                chk.dispatchEvent(new Event('change'));
+            }
             document.getElementById('startDate').value = r.startDate || "";
             document.getElementById('startTime').value = r.startTime || "";
             document.getElementById('endDate').value = r.endDate || "";
@@ -832,14 +872,10 @@ if (startDateInput && endDateInput) {
                 document.getElementById('hashtag1').value = r.hashtags[0] || "";
                 document.getElementById('hashtag2').value = r.hashtags[1] || "";
                 document.getElementById('hashtag3').value = r.hashtags[2] || "";
-                document.getElementById('hashtag4').value = r.hashtags[3] || "";
-                document.getElementById('hashtag5').value = r.hashtags[4] || "";
             } else {
                 document.getElementById('hashtag1').value = "";
                 document.getElementById('hashtag2').value = "";
                 document.getElementById('hashtag3').value = "";
-                document.getElementById('hashtag4').value = "";
-                document.getElementById('hashtag5').value = "";
             }
             document.getElementById('contribution').value = r.contribution || "";
             document.getElementById('inclusionsExclusions').value = r.inclusionsExclusions || "";
@@ -931,6 +967,21 @@ if (startDateInput && endDateInput) {
                 return;
             }
 
+            let subCatsCheck = [];
+            selectedCatsCheck.forEach(c => {
+                subCatsCheck.push(c.value);
+            });
+            if (customCatText) {
+                subCatsCheck.push(customCatText);
+            }
+            subCatsCheck = subCatsCheck.filter(c => c !== 'Other');
+
+            if (subCatsCheck.length > 3) {
+                alert("Please select a maximum of 3 categories/subcategories.");
+                document.getElementById('category-accordion').scrollIntoView({ behavior: 'smooth' });
+                return;
+            }
+
             const startDateVal = document.getElementById('startDate').value;
             const endDateVal = document.getElementById('endDate').value;
             if (startDateVal && endDateVal && endDateVal < startDateVal) {
@@ -991,9 +1042,7 @@ if (startDateInput && endDateInput) {
                 const hashtagsArray = [
                     document.getElementById('hashtag1').value.trim(),
                     document.getElementById('hashtag2').value.trim(),
-                    document.getElementById('hashtag3').value.trim(),
-                    document.getElementById('hashtag4').value.trim(),
-                    document.getElementById('hashtag5').value.trim()
+                    document.getElementById('hashtag3').value.trim()
                 ].map(tag => {
                     if (tag && !tag.startsWith('#')) {
                         return '#' + tag;
@@ -1010,6 +1059,7 @@ if (startDateInput && endDateInput) {
                     startTime: document.getElementById('startTime').value || "",
                     endDate: document.getElementById('endDate').value || "",
                     endTime: document.getElementById('endTime').value || "",
+                    flexibleDates: document.getElementById('flexibleDates').checked || false,
                     description: document.getElementById('description').value,
                     hashtags: hashtagsArray,
                     categories: selectedMainCats,

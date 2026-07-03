@@ -789,7 +789,8 @@
                     if (!end_time || end_time === 'undefined') end_time = "23:59";
                     if (end_time.length === 4 && end_time[1] === ':') end_time = "0" + end_time;
                     
-                    if (end_date && end_date !== 'undefined' && (end_date < currentDateStr || (end_date === currentDateStr && end_time < currentTimeStr))) {
+                    const isFlexible = !!r.flexibleDates;
+                    if (!isFlexible && end_date && end_date !== 'undefined' && (end_date < currentDateStr || (end_date === currentDateStr && end_time < currentTimeStr))) {
                         return; // Skip expired experiences
                     }
 
@@ -823,7 +824,8 @@
                         CNum: String(r.contactNumber || ''),
                         ExternalLinks: Array.isArray(r.externalLinks) ? r.externalLinks : [],
                         MediaArray: media,
-                        Timestamp: r.timestamp || Date.now()
+                        Timestamp: r.timestamp || Date.now(),
+                        FlexibleDates: isFlexible
                     });
                 } catch (err) {
                     console.error("Error parsing document data:", doc.id, err);
@@ -832,9 +834,12 @@
 
             allData.sort((a, b) => {
                 // 1. Handle entries with no dates (push to bottom)
-                if (!a.Start && b.Start) return 1;
-                if (a.Start && !b.Start) return -1;
-                if (!a.Start && !b.Start) {
+                const startA = a.FlexibleDates && !a.Start ? "9999-12-31" : (a.Start || "");
+                const startB = b.FlexibleDates && !b.Start ? "9999-12-31" : (b.Start || "");
+
+                if (!startA && startB) return 1;
+                if (startA && !startB) return -1;
+                if (!startA && !startB) {
                     return a.Name.localeCompare(b.Name); 
                 }
 
@@ -845,7 +850,7 @@
                 if (timeB.length === 4 && timeB[1] === ':') timeB = "0" + timeB;
     
                 // 3. Sort by Date -> If same, sort by Time -> If same, sort Alphabetically by Name
-                return a.Start.localeCompare(b.Start) || 
+                return startA.localeCompare(startB) || 
                        timeA.localeCompare(timeB) || 
                        a.Name.localeCompare(b.Name);
             });
@@ -949,7 +954,7 @@
                         <h3>${item.Name}</h3>
                         <p class="text-stone-500 text-base font-medium">📍 ${item.City ? item.City + ', ' : ''}${item.State ? item.State + ', ' : ''}India</p>
                         <p class="text-stone-400 text-base font-medium">
-                            📅 ${item.StartDisplay || item.Start} ${item.EndDisplay ? ' - ' + item.EndDisplay : ''}
+                            📅 ${item.FlexibleDates ? '<span class="text-[#a37c6b] font-semibold">Flexible Dates</span>' : (item.StartDisplay || item.Start) + (item.EndDisplay ? ' - ' + item.EndDisplay : '')}
                         </p>
                         ${hashtagsHtml}
                     </div>
@@ -1107,15 +1112,19 @@
                 
                 let matchDate = true;
                 if (dStart || dEnd) {
-                    const expStart = i.Start;
-                    const expEnd = i.End || i.Start; 
-                    
-                    if (dStart && dEnd) {
-                        matchDate = (expStart <= dEnd) && (expEnd >= dStart);
-                    } else if (dStart) {
-                        matchDate = (expEnd >= dStart);
-                    } else if (dEnd) {
-                        matchDate = (expStart <= dEnd);
+                    if (i.FlexibleDates) {
+                        matchDate = true;
+                    } else {
+                        const expStart = i.Start;
+                        const expEnd = i.End || i.Start; 
+                        
+                        if (dStart && dEnd) {
+                            matchDate = (expStart <= dEnd) && (expEnd >= dStart);
+                        } else if (dStart) {
+                            matchDate = (expEnd >= dStart);
+                        } else if (dEnd) {
+                            matchDate = (expStart <= dEnd);
+                        }
                     }
                 }
                 return matchText && matchCategory && matchDate && matchState;
@@ -1134,14 +1143,18 @@
 
                             let matchDate = true;
                             if (dStart || dEnd) {
-                                const expStart = item.Start;
-                                const expEnd = item.End || item.Start; 
-                                if (dStart && dEnd) {
-                                    matchDate = (expStart <= dEnd) && (expEnd >= dStart);
-                                } else if (dStart) {
-                                    matchDate = (expEnd >= dStart);
-                                } else if (dEnd) {
-                                    matchDate = (expStart <= dEnd);
+                                if (item.FlexibleDates) {
+                                    matchDate = true;
+                               } else {
+                                    const expStart = item.Start;
+                                    const expEnd = item.End || item.Start; 
+                                    if (dStart && dEnd) {
+                                        matchDate = (expStart <= dEnd) && (expEnd >= dStart);
+                                    } else if (dStart) {
+                                        matchDate = (expEnd >= dStart);
+                                    } else if (dEnd) {
+                                        matchDate = (expStart <= dEnd);
+                                    }
                                 }
                             }
                             if (!matchDate) return false;

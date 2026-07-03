@@ -29,32 +29,45 @@ const navbarHTML = `
     </nav>
 `;
 
-// Inject the HTML into the page immediately
-document.getElementById('site-navbar').innerHTML = navbarHTML;
+function initNavbar() {
+    const targetNavbar = document.getElementById('site-navbar');
+    if (!targetNavbar) return false;
+    
+    targetNavbar.innerHTML = navbarHTML;
 
-// Attach the mobile menu opening/closing logic
-const menuBtn = document.getElementById('mobile-menu-btn');
-const dropdownMenu = document.getElementById('dropdown-menu');
+    // Attach the mobile menu opening/closing logic
+    const menuBtn = document.getElementById('mobile-menu-btn');
+    const dropdownMenu = document.getElementById('dropdown-menu');
 
-function toggleMenu(forceClose = false) {
-    if (forceClose || dropdownMenu.classList.contains('scale-100')) {
-        dropdownMenu.classList.remove('scale-100', 'opacity-100', 'pointer-events-auto');
-        dropdownMenu.classList.add('scale-95', 'opacity-0', 'pointer-events-none');
-    } else {
-        dropdownMenu.classList.remove('scale-95', 'opacity-0', 'pointer-events-none');
-        dropdownMenu.classList.add('scale-100', 'opacity-100', 'pointer-events-auto');
-    }
-}
-
-if (menuBtn && dropdownMenu) {
-    menuBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleMenu();
-    });
-
-    document.addEventListener('click', (e) => {
-        if (!dropdownMenu.contains(e.target) && !menuBtn.contains(e.target)) {
-            toggleMenu(true);
+    function toggleMenu(forceClose = false) {
+        if (!dropdownMenu) return;
+        if (forceClose || dropdownMenu.classList.contains('scale-100')) {
+            dropdownMenu.classList.remove('scale-100', 'opacity-100', 'pointer-events-auto');
+            dropdownMenu.classList.add('scale-95', 'opacity-0', 'pointer-events-none');
+        } else {
+            dropdownMenu.classList.remove('scale-95', 'opacity-0', 'pointer-events-none');
+            dropdownMenu.classList.add('scale-100', 'opacity-100', 'pointer-events-auto');
         }
-    });
+    }
+
+    if (menuBtn && dropdownMenu) {
+        menuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleMenu();
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!dropdownMenu.contains(e.target) && !menuBtn.contains(e.target)) {
+                toggleMenu(true);
+            }
+        });
+    }
+    return true;
 }
+
+// Attempt immediate execution
+if (!initNavbar()) {
+    // Fallback to DOMContentLoaded if the element wasn't ready yet
+    document.addEventListener("DOMContentLoaded", initNavbar);
+}
+
