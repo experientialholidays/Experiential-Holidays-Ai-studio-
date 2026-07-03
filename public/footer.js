@@ -4,11 +4,11 @@ document.addEventListener("DOMContentLoaded", function() {
         <footer class="w-full text-center py-2 mt-4 border-t text-stone-400" style="border-top-color: var(--border-soft);">
             <!-- Added flex-nowrap, whitespace-nowrap, and responsive text/gap sizes to force one line -->
             <div class="max-w-[1200px] mx-auto flex justify-center items-center flex-nowrap whitespace-nowrap gap-0.5 sm:gap-2 md:gap-4 font-semibold text-[11px] sm:text-xs md:text-sm px-1">
-                <a href="contact.html" class="hover:text-[#a37c6b] transition">Contact</a>
+                <a href="contact" class="hover:text-[#a37c6b] transition">Contact</a>
                 <span class="text-stone-300 select-none">|</span>
-                <a href="privacy.html" class="hover:text-[#a37c6b] transition">Privacy Policy</a>
+                <a href="privacy" class="hover:text-[#a37c6b] transition">Privacy Policy</a>
                 <span class="text-stone-300 select-none">|</span>
-                <a href="terms.html" class="hover:text-[#a37c6b] transition">Terms & Conditions</a>
+                <a href="terms" class="hover:text-[#a37c6b] transition">Terms & Conditions</a>
                 <span class="text-stone-300 select-none">|</span>
                 <a href="https://www.instagram.com/experiential_holidays" target="_blank" rel="noopener noreferrer" class="hover:text-[#a37c6b] transition">Instagram</a>
             </div>

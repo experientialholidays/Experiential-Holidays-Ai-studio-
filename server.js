@@ -8,7 +8,7 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-app.get('/experience.html', async (req, res, next) => {
+app.get(['/experience', '/experience.html'], async (req, res, next) => {
     const id = req.query.id;
     if (!id) {
         return next();
@@ -65,7 +65,7 @@ app.get('/experience.html', async (req, res, next) => {
     }
 });
 
-app.use(express.static(path.join(__dirname, 'dist')));
+app.use(express.static(path.join(__dirname, 'dist'), { extensions: ['html'] }));
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {

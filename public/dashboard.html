@@ -454,7 +454,7 @@
                 
                 const canEditDelete = isAdminGlobal || activeTab === 'active';
                 const actionButtons = canEditDelete ? `
-                    <a href="submit.html?id=${r.id}" class="btn-edit">Edit</a>
+                    <a href="submit?id=${r.id}" class="btn-edit">Edit</a>
                     <button onclick="deleteEntry('${r.id}')" class="btn-delete">Del</button>
                 ` : `<span class="text-xs text-stone-400 font-bold bg-stone-100 px-2 py-1 rounded">Archived</span>`;
 

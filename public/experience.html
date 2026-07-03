@@ -750,7 +750,7 @@
                     ${i.SubCategories.map(c => `
                         <div>
                             <span class="cat-badge cursor-pointer hover:bg-[#ebdcd4] transition inline-block text-xs font-bold bg-[#f5ede8] text-[#a37c6b] px-3 py-1.5 rounded-full border border-[#e8dad0]" 
-                                 onclick="window.location.href='index.html?category=${encodeURIComponent(c)}'">
+                                 onclick="window.location.href='/?category=${encodeURIComponent(c)}'">
                                 ${c}
                              </span>
                         </div>`).join('')}
@@ -761,7 +761,7 @@
                 <div class="mb-4 flex flex-row flex-wrap gap-1.5 pr-12">
                     ${i.Hashtags.map(tag => `
                         <span class="text-sm font-semibold text-[#a37c6b] bg-[#f5ede8]/50 px-2.5 py-1 rounded-md cursor-pointer hover:bg-[#ebdcd4] transition"
-                              onclick="window.location.href='index.html?tag=${encodeURIComponent(tag.replace(/^#/, ''))}'">
+                              onclick="window.location.href='/?tag=${encodeURIComponent(tag.replace(/^#/, ''))}'">
                             ${tag}
                         </span>`).join('')}
                 </div>`;

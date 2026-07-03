@@ -815,7 +815,7 @@ if (startDateInput && endDateInput) {
 
             if (r.hostEmail.toLowerCase().trim() !== currentUserEmail && !isUserAdmin) {
                 alert("Security Alert: You are not authorized to modify this document.");
-                window.location.href = "dashboard.html";
+                window.location.href = "dashboard";
                 return;
     
             }
@@ -1043,7 +1043,7 @@ if (startDateInput && endDateInput) {
                 if(editId) await updateDoc(doc(db, "retreats", editId), data);
                 else await addDoc(collection(db, "retreats"), data);
                 safeRemoveItem('holiday_form_draft');
-                window.location.href = "dashboard.html";
+                window.location.href = "dashboard";
             } catch (e) { alert(e.message); btn.innerText = "Publish Experience"; btn.disabled = false; }
         };
         // PASTE YOUR RESET BUTTON LOGIC RIGHT HERE
