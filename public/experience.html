@@ -744,10 +744,10 @@
 
             // 1. TOP HTML
             let topHtml = ``;
-            if(i.Categories && i.Categories.length > 0) {
+            if(i.SubCategories && i.SubCategories.length > 0) {
                 topHtml += `
                 <div class="mb-3 flex flex-row flex-wrap gap-2 pr-12">
-                    ${i.Categories.map(c => `
+                    ${i.SubCategories.map(c => `
                         <div>
                             <span class="cat-badge cursor-pointer hover:bg-[#ebdcd4] transition inline-block text-xs font-bold bg-[#f5ede8] text-[#a37c6b] px-3 py-1.5 rounded-full border border-[#e8dad0]" 
                                  onclick="window.location.href='index.html?category=${encodeURIComponent(c)}'">

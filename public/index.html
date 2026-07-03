@@ -894,7 +894,7 @@
             let html = '';
             
             data.forEach(item => {
-                const cats = item.Categories.map(c => `<span class="cat-badge mr-1">${c}</span>`).join('');
+                const cats = (item.SubCategories || []).map(c => `<span class="cat-badge mr-1">${c}</span>`).join('');
                 let mediaArr = item.MediaArray;
                 let primaryMedia = '';
                 
