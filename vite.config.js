@@ -20,7 +20,8 @@ export default defineConfig({
         experience: resolve(__dirname, 'public/experience.html'),
         privacy: resolve(__dirname, 'public/privacy.html'),
         submit: resolve(__dirname, 'public/submit.html'),
-        terms: resolve(__dirname, 'public/terms.html')
+        terms: resolve(__dirname, 'public/terms.html'),
+        generateslugs: resolve(__dirname, 'public/generate-slugs.html')
       }
     }
   }

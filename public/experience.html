@@ -543,17 +543,25 @@
                 </div>
             `;
         } else {
-            db.collection('retreats').doc(experienceId).get().then((doc) => {
-                if (!doc.exists) {
-                    document.body.innerHTML = `
-                        <div style="padding:40px;text-align:center;">
-                            <h1>Experience not found</h1>
-                        </div>
-                    `;
-                    return;
+            db.collection('retreats').where('slug', '==', experienceId).limit(1).get().then((querySnapshot) => {
+                let docPromise;
+                if (!querySnapshot.empty) {
+                    docPromise = Promise.resolve(querySnapshot.docs[0]);
+                } else {
+                    docPromise = db.collection('retreats').doc(experienceId).get();
                 }
+                
+                docPromise.then((doc) => {
+                    if (!doc || !doc.exists) {
+                        document.body.innerHTML = `
+                            <div style="padding:40px;text-align:center;">
+                                <h1>Experience not found</h1>
+                            </div>
+                        `;
+                        return;
+                    }
 
-                const r = doc.data();
+                    const r = doc.data();
                 let media = Array.isArray(r.fileUrls) ? [...r.fileUrls] : [];
                 let videos = Array.isArray(r.videoLinks) ? [...r.videoLinks] : [];
                 media = media.concat(videos);

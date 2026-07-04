@@ -584,13 +584,14 @@
         window.trackClickAndNavigate = function(element) {
             const id = element.getAttribute('data-id');
             const name = element.getAttribute('data-name');
+            const slug = element.getAttribute('data-slug') || id;
             if (typeof gtag === 'function') {
                 gtag('event', 'click_experience_card', {
                     'experience_id': id,
                     'experience_name': name
                 });
             }
-            window.location.href = `/experience/${id}`;
+            window.location.href = `/experience/${slug}`;
         };
 
         function trackSearchEvent(resultsCount) {
@@ -825,7 +826,8 @@
                         ExternalLinks: Array.isArray(r.externalLinks) ? r.externalLinks : [],
                         MediaArray: media,
                         Timestamp: r.timestamp || Date.now(),
-                        FlexibleDates: isFlexible
+                        FlexibleDates: isFlexible,
+                        slug: String(r.slug || '')
                     });
                 } catch (err) {
                     console.error("Error parsing document data:", doc.id, err);
@@ -944,7 +946,7 @@
                 }
 
                 html += `
-                <div class="card relative" data-id="${item.id}" data-name="${item.Name.replace(/"/g, '&quot;')}" onclick="window.trackClickAndNavigate(this)">
+                <div class="card relative" data-id="${item.id}" data-slug="${item.slug || item.id}" data-name="${item.Name.replace(/"/g, '&quot;')}" onclick="window.trackClickAndNavigate(this)">
                     <div class="card-media-container">
                         ${primaryMedia}
                         <div class="absolute inset-0 bg-transparent z-10"></div>

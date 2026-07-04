@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Migrate Slugs</title>
+</head>
+<body>
+    <h1>Slug Migration</h1>
+    <button id="migrateBtn">Migrate Slugs</button>
+    <div id="output"></div>
+    
+    <script src="/config.js"></script>
+    <script type="module">
+        import { initializeApp, getApp, getApps } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, doc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = window.GLOBAL_FIREBASE_CONFIG;
+        const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function getUniqueSlug(baseSlug) {
+            let slug = baseSlug;
+            let counter = 1;
+            let isUnique = false;
+            
+            while (!isUnique) {
+                const q = query(collection(db, "retreats"), where("slug", "==", slug));
+                const snapshot = await getDocs(q);
+                if (snapshot.empty) {
+                    isUnique = true;
+                } else {
+                    counter++;
+                    slug = `${baseSlug}-${counter}`;
+                }
+            }
+            return slug;
+        }
+
+        document.getElementById('migrateBtn').addEventListener('click', async () => {
+            const output = document.getElementById('output');
+            output.innerHTML = "Starting migration...<br>";
+            
+            try {
+                const snapshot = await getDocs(collection(db, "retreats"));
+                let updated = 0;
+                
+                for (const document of snapshot.docs) {
+                    const data = document.data();
+                    if (!data.slug) {
+                        const name = data.retreatName || 'experience';
+                        const baseSlug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+                        const uniqueSlug = await getUniqueSlug(baseSlug);
+                        
+                        await updateDoc(doc(db, "retreats", document.id), {
+                            slug: uniqueSlug
+                        });
+                        output.innerHTML += `Updated ${document.id} -> ${uniqueSlug}<br>`;
+                        updated++;
+                    } else {
+                        output.innerHTML += `Skipped ${document.id} (already has slug: ${data.slug})<br>`;
+                    }
+                }
+                
+                output.innerHTML += `<b>Migration complete! Updated ${updated} records.</b>`;
+            } catch (err) {
+                output.innerHTML += `<span style="color:red">Error: ${err.message}</span>`;
+            }
+        });
+    </script>
+</body>
+</html>
