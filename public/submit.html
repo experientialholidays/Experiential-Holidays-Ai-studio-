@@ -232,7 +232,7 @@
         
         import { initializeApp, getApp, getApps } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         // ADDED: deleteObject imported here
         import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
@@ -1090,8 +1090,14 @@ if (flexibleDatesCheckbox) {
                     data.lastUpdated = Date.now();
                 }
 
-                if(editId) await updateDoc(doc(db, "retreats", editId), data);
-                else await addDoc(collection(db, "retreats"), data);
+                if(editId) {
+                    await updateDoc(doc(db, "retreats", editId), data);
+                } else {
+                    const baseSlug = (data.retreatName || 'experience').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+                    const randomStr = Date.now().toString(36).substring(4) + Math.random().toString(36).substring(2, 5);
+                    const docId = baseSlug ? `${baseSlug}-${randomStr}` : randomStr;
+                    await setDoc(doc(db, "retreats", docId), data);
+                }
                 safeRemoveItem('holiday_form_draft');
                 window.location.href = "dashboard";
             } catch (e) { alert(e.message); btn.innerText = "Publish Experience"; btn.disabled = false; }

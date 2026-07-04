@@ -408,7 +408,13 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const urlParams = new URLSearchParams(window.location.search);
-        const experienceId = urlParams.get('id');
+        let experienceId = urlParams.get('id');
+        if (!experienceId) {
+            const match = window.location.pathname.match(/\/experience\/([^\/]+)/);
+            if (match) {
+                experienceId = match[1];
+            }
+        }
 
         let allData = [];
         let currentMedia = [];

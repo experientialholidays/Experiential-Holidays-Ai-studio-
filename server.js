@@ -8,8 +8,8 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-app.get(['/experience', '/experience.html'], async (req, res, next) => {
-    const id = req.query.id;
+app.get(['/experience', '/experience/:id', '/experience.html'], async (req, res, next) => {
+    const id = req.params.id || req.query.id;
     if (!id) {
         return next();
     }
@@ -54,7 +54,36 @@ app.get(['/experience', '/experience.html'], async (req, res, next) => {
     <meta name="twitter:description" content="${description}">
     <meta name="twitter:image" content="${imageUrl}">
 `;
-                html = html.replace('</head>', `${twitterCard}</head>`);
+                
+                const startDate = fields.startDate?.stringValue || '';
+                const endDate = fields.endDate?.stringValue || '';
+                
+                const eventSchema = {
+                    "@context": "https://schema.org",
+                    "@type": "Event",
+                    "name": name,
+                    "description": description,
+                    "image": [imageUrl],
+                    "eventStatus": "https://schema.org/EventScheduled",
+                    "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+                    "location": {
+                        "@type": "Place",
+                        "name": location,
+                        "address": {
+                            "@type": "PostalAddress",
+                            "addressLocality": city,
+                            "addressRegion": state,
+                            "addressCountry": "IN"
+                        }
+                    }
+                };
+                
+                if (startDate) eventSchema.startDate = startDate;
+                if (endDate) eventSchema.endDate = endDate;
+
+                const schemaScript = `\n    <script type="application/ld+json">\n${JSON.stringify(eventSchema, null, 4)}\n    </script>\n`;
+
+                html = html.replace('</head>', `${twitterCard}${schemaScript}</head>`);
             }
         }
         
