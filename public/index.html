@@ -591,11 +591,7 @@
                     'experience_name': name
                 });
             }
-            if (slug && slug !== id && slug !== 'undefined' && slug.trim() !== '') {
-                window.location.href = `/experience/${slug}`;
-            } else {
-                window.location.href = `/experience.html?id=${id}`;
-            }
+            window.location.href = `/experience/${slug || id}`;
         };
 
         function trackSearchEvent(resultsCount) {

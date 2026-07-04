@@ -434,12 +434,7 @@
             }
 
             // Set up sharing URLs and content
-            let shareUrl = window.location.href;
-            if (exp.slug && exp.slug.trim() !== '' && exp.slug !== 'undefined') {
-                shareUrl = `${window.location.origin}/experience/${exp.slug}`;
-            } else {
-                shareUrl = `${window.location.origin}/experience.html?id=${exp.id}`;
-            }
+            const shareUrl = `${window.location.origin}/experience/${exp.slug || ''}`;
             
             let locString = `${exp.City || ''}${(exp.City && exp.State) ? ', ' : ''}${exp.State || ''}`;
             locString = locString ? locString + ', India' : 'India';
@@ -549,19 +544,12 @@
                 </div>
             `;
         } else {
-            // Try fetching by Document ID first (most efficient & index-independent)
-            db.collection('retreats').doc(experienceId).get().then((doc) => {
-                if (doc.exists) {
-                    return doc;
+            // Query only by slug as all experiences now have title slugs
+            db.collection('retreats').where('slug', '==', experienceId).limit(1).get().then((querySnapshot) => {
+                if (!querySnapshot.empty) {
+                    return querySnapshot.docs[0];
                 } else {
-                    // Fallback: Query by slug if document ID is not found
-                    return db.collection('retreats').where('slug', '==', experienceId).limit(1).get().then((querySnapshot) => {
-                        if (!querySnapshot.empty) {
-                            return querySnapshot.docs[0];
-                        } else {
-                            return null;
-                        }
-                    });
+                    return null;
                 }
             }).then((doc) => {
                 if (!doc || !doc.exists) {
@@ -580,17 +568,11 @@
 
                 const r = doc.data();
                 
-                // Rewrite URL to beautiful slug URL if available, else fall back to old query parameter format
+                // Rewrite URL to beautiful slug URL
                 if (r.slug && r.slug.trim() !== '' && r.slug !== 'undefined') {
                     const expectedPath = `/experience/${r.slug}`;
                     if (window.location.pathname !== expectedPath && !window.location.pathname.endsWith(expectedPath)) {
                         window.history.replaceState(null, '', expectedPath);
-                    }
-                } else {
-                    // Fall back to ?id=ID if no slug is defined
-                    const expectedSearch = `id=${doc.id}`;
-                    if (!window.location.search.includes(expectedSearch)) {
-                        window.history.replaceState(null, '', `/experience.html?id=${doc.id}`);
                     }
                 }
 
