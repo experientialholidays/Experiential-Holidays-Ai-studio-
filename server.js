@@ -18,25 +18,61 @@ app.get(['/experience', '/experience/:id', '/experience.html'], async (req, res,
         let html = fs.readFileSync(path.join(__dirname, 'dist', 'experience.html'), 'utf-8');
 
         const projectId = 'submit-a';
-        const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/retreats/${id}`;
+        let url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/retreats/${id}`;
         
-        const response = await fetch(url);
+        let response = await fetch(url);
+        let data = null;
+
         if (response.ok) {
-            const data = await response.json();
+            data = await response.json();
+        } else {
+            // Fallback: Try fetching by slug if document ID doesn't exist
+            const queryUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents:runQuery`;
+            const queryBody = {
+                structuredQuery: {
+                    from: [{ collectionId: "retreats" }],
+                    where: {
+                        fieldFilter: {
+                            field: { fieldPath: "slug" },
+                            op: "EQUAL",
+                            value: { stringValue: id }
+                        }
+                    },
+                    limit: 1
+                }
+            };
+            
+            const queryResponse = await fetch(queryUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(queryBody)
+            });
+            
+            if (queryResponse.ok) {
+                const queryData = await queryResponse.json();
+                if (queryData && queryData.length > 0 && queryData[0].document) {
+                    data = queryData[0].document;
+                }
+            }
+        }
+
+        if (data) {
             const fields = data.fields;
             
             if (fields) {
-                const name = (fields.Name?.stringValue || 'Experience Details').replace(/"/g, '&quot;');
-                const city = fields.City?.stringValue || '';
-                const state = fields.State?.stringValue || '';
+                const name = (fields.retreatName?.stringValue || fields.Name?.stringValue || 'Experience Details').replace(/"/g, '&quot;');
+                const city = fields.City?.stringValue || fields.city?.stringValue || '';
+                const state = fields.State?.stringValue || fields.state?.stringValue || '';
                 let location = `${city}${city && state ? ', ' : ''}${state}`;
                 if (location) location += ', India';
                 else location = 'India';
                 
-                const description = (fields.ShortDescription?.stringValue || `Discover ${name} at ${location}.`).replace(/"/g, '&quot;');
+                const description = (fields.description?.stringValue || fields.ShortDescription?.stringValue || `Discover ${name} at ${location}.`).replace(/"/g, '&quot;');
                 
                 let imageUrl = 'https://firebasestorage.googleapis.com/v0/b/submit-a.firebasestorage.app/o/file_00000000644071fa82872ccf94d36b6f.png?alt=media&token=28d7ea2e-7eb8-486f-aa51-3a6d8a438eb1';
-                if (fields.Media?.arrayValue?.values && fields.Media.arrayValue.values.length > 0) {
+                if (fields.fileUrls?.arrayValue?.values && fields.fileUrls.arrayValue.values.length > 0) {
+                    imageUrl = fields.fileUrls.arrayValue.values[0].stringValue.replace(/"/g, '&quot;');
+                } else if (fields.Media?.arrayValue?.values && fields.Media.arrayValue.values.length > 0) {
                     imageUrl = fields.Media.arrayValue.values[0].stringValue.replace(/"/g, '&quot;');
                 }
 

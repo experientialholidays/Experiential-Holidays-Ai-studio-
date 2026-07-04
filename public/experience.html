@@ -434,13 +434,19 @@
             }
 
             // Set up sharing URLs and content
-            const shareUrl = window.location.href;
+            let shareUrl = window.location.href;
+            if (exp.slug && exp.slug.trim() !== '' && exp.slug !== 'undefined') {
+                shareUrl = `${window.location.origin}/experience/${exp.slug}`;
+            } else {
+                shareUrl = `${window.location.origin}/experience.html?id=${exp.id}`;
+            }
             
             let locString = `${exp.City || ''}${(exp.City && exp.State) ? ', ' : ''}${exp.State || ''}`;
             locString = locString ? locString + ', India' : 'India';
             let dateString = exp.FlexibleDates ? "Flexible Dates (check description for dates)" : `${exp.StartDisplay || exp.Start} ${exp.EndDisplay ? ' - ' + exp.EndDisplay : ''}`;
             
             window.currentExperienceForShare = exp;
+            window.currentExperienceShareUrl = shareUrl;
         }
 
         window.handleFloatingShareClick = async function() {
@@ -448,7 +454,7 @@
             if (!exp) return;
             let locString = `${exp.City || ''}${(exp.City && exp.State) ? ', ' : ''}${exp.State || ''}`;
             locString = locString ? locString + ', India' : 'India';
-            const shareUrl = window.location.href;
+            const shareUrl = window.currentExperienceShareUrl || window.location.href;
             
             // TRACK SHARE CLICK
             db.collection('retreats').doc(exp.id).update({
@@ -543,31 +549,58 @@
                 </div>
             `;
         } else {
-            db.collection('retreats').where('slug', '==', experienceId).limit(1).get().then((querySnapshot) => {
-                let docPromise;
-                if (!querySnapshot.empty) {
-                    docPromise = Promise.resolve(querySnapshot.docs[0]);
+            // Try fetching by Document ID first (most efficient & index-independent)
+            db.collection('retreats').doc(experienceId).get().then((doc) => {
+                if (doc.exists) {
+                    return doc;
                 } else {
-                    docPromise = db.collection('retreats').doc(experienceId).get();
+                    // Fallback: Query by slug if document ID is not found
+                    return db.collection('retreats').where('slug', '==', experienceId).limit(1).get().then((querySnapshot) => {
+                        if (!querySnapshot.empty) {
+                            return querySnapshot.docs[0];
+                        } else {
+                            return null;
+                        }
+                    });
                 }
-                
-                docPromise.then((doc) => {
-                    if (!doc || !doc.exists) {
-                        document.body.innerHTML = `
-                            <div style="padding:40px;text-align:center;">
-                                <h1>Experience not found</h1>
+            }).then((doc) => {
+                if (!doc || !doc.exists) {
+                    const loading = document.getElementById('loading-state');
+                    if (loading) {
+                        loading.innerHTML = `
+                            <div class="py-12 text-center text-stone-500 max-w-md mx-auto px-4">
+                                <h1 class="text-2xl font-black text-stone-800 mb-2">Experience Not Found</h1>
+                                <p class="text-sm">We couldn't find the requested experience. It might have been removed or the link is invalid.</p>
+                                <a href="/" class="inline-block mt-6 px-5 py-2.5 bg-[#a37c6b] text-white rounded-xl text-sm font-bold shadow hover:bg-[#8e6b5c] transition">Go Back Home</a>
                             </div>
                         `;
-                        return;
                     }
+                    return;
+                }
 
-                    const r = doc.data();
+                const r = doc.data();
+                
+                // Rewrite URL to beautiful slug URL if available, else fall back to old query parameter format
+                if (r.slug && r.slug.trim() !== '' && r.slug !== 'undefined') {
+                    const expectedPath = `/experience/${r.slug}`;
+                    if (window.location.pathname !== expectedPath && !window.location.pathname.endsWith(expectedPath)) {
+                        window.history.replaceState(null, '', expectedPath);
+                    }
+                } else {
+                    // Fall back to ?id=ID if no slug is defined
+                    const expectedSearch = `id=${doc.id}`;
+                    if (!window.location.search.includes(expectedSearch)) {
+                        window.history.replaceState(null, '', `/experience.html?id=${doc.id}`);
+                    }
+                }
+
                 let media = Array.isArray(r.fileUrls) ? [...r.fileUrls] : [];
                 let videos = Array.isArray(r.videoLinks) ? [...r.videoLinks] : [];
                 media = media.concat(videos);
 
                 const experience = {
                     id: doc.id,
+                    slug: r.slug || '',
                     Name: r.retreatName || 'Untitled',
                     Categories: Array.isArray(r.categories) ? r.categories : [],
                     SubCategories: Array.isArray(r.subCategories) ? r.subCategories : [],
@@ -598,7 +631,17 @@
                 renderExperience(experience);
                 initShareButton(experience);
             }).catch((error) => {
-                console.error(error);
+                console.error("Firestore Loading Error:", error);
+                const loading = document.getElementById('loading-state');
+                if (loading) {
+                    loading.innerHTML = `
+                        <div class="py-12 text-center text-red-600 px-4 max-w-md mx-auto">
+                            <h1 class="text-2xl font-black mb-2">Error Loading Experience</h1>
+                            <p class="text-sm text-stone-500">${error.message || error}</p>
+                            <button onclick="window.location.reload()" class="inline-block mt-6 px-5 py-2.5 bg-[#a37c6b] text-white rounded-xl text-sm font-bold shadow hover:bg-[#8e6b5c] transition">Retry</button>
+                        </div>
+                    `;
+                }
             });
         }
 

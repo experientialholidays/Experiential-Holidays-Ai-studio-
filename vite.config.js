@@ -8,6 +8,21 @@ export default defineConfig({
     host: '0.0.0.0',
     hmr: false
   },
+  plugins: [
+    {
+      name: 'experience-rewrite',
+      configureServer(server) {
+        server.middlewares.use((req, res, next) => {
+          const url = new URL(req.url, 'http://localhost');
+          const pathname = url.pathname;
+          if ((pathname.startsWith('/experience/') || pathname === '/experience') && !pathname.includes('.')) {
+            req.url = '/experience.html' + url.search;
+          }
+          next();
+        });
+      }
+    }
+  ],
   build: {
     outDir: '../dist',
     emptyOutDir: true,
