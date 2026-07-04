@@ -25,7 +25,7 @@
     <div id="site-navbar"></div>
     <script src="/navbar.js"></script>
 
-    <div class="max-w-5xl w-full mx-auto px-4 md:px-8 mt-8 flex-grow">
+    <div id="main-content" class="max-w-5xl w-full mx-auto px-4 md:px-8 mt-8 flex-grow hidden">
         <!-- Title & Header -->
         <div class="mb-8">
             <h1 class="text-3xl font-black text-stone-800 tracking-tight">Slug Migration Dashboard</h1>
@@ -112,6 +112,20 @@
         </div>
     </div>
 
+    <!-- Login Prompt -->
+    <div id="login-prompt" class="max-w-md w-full mx-auto mt-24 p-8 bg-white rounded-2xl border text-center shadow-sm hidden" style="border-color: var(--border-soft)">
+        <h3 class="text-xl font-black text-stone-800 uppercase tracking-tight mb-2">Admin Migration Access</h3>
+        <p class="text-stone-400 text-sm mb-6">You must sign in as an administrator to run slug migrations.</p>
+        <button id="login-btn" class="w-full bg-[#f5ede8] text-[#a37c6b] px-5 py-3 rounded-xl font-bold border border-[#e8dad0] hover:bg-[#e8dad0] transition uppercase tracking-wider text-sm">Sign In with Google</button>
+    </div>
+
+    <!-- Unauthorized Prompt -->
+    <div id="unauthorized-prompt" class="max-w-md w-full mx-auto mt-24 p-8 bg-white rounded-2xl border text-center shadow-sm hidden" style="border-color: var(--border-soft)">
+        <h3 class="text-xl font-black text-red-600 uppercase tracking-tight mb-2">Access Denied</h3>
+        <p class="text-stone-400 text-sm mb-6">Your account does not have administrator privileges required to perform slug migrations.</p>
+        <button id="logout-btn" class="w-full bg-[#f5ede8] text-[#a37c6b] px-5 py-3 rounded-xl font-bold border border-[#e8dad0] hover:bg-[#e8dad0] transition uppercase tracking-wider text-sm">Sign Out / Switch Account</button>
+    </div>
+
     <!-- Footer -->
     <div id="site-footer" class="mt-12"></div>
     <script src="/footer.js"></script>
@@ -119,11 +133,14 @@
     <script src="/config.js"></script>
     <script type="module">
         import { initializeApp, getApp, getApps } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, updateDoc, query, where, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const firebaseConfig = window.GLOBAL_FIREBASE_CONFIG;
         const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
 
         async function getUniqueSlug(baseSlug) {
             let slug = baseSlug;
@@ -251,10 +268,45 @@
             }
         });
 
-        // Initialize status on load
-        window.addEventListener('DOMContentLoaded', () => {
-            loadStatus();
+        // Initialize Authentication listener and gate
+        onAuthStateChanged(auth, async (user) => {
+            const loginPrompt = document.getElementById('login-prompt');
+            const unauthorizedPrompt = document.getElementById('unauthorized-prompt');
+            const mainContent = document.getElementById('main-content');
+
+            if (user) {
+                try {
+                    const adminSnap = await getDoc(doc(db, "admins", user.email.toLowerCase().trim()));
+                    const isAdmin = adminSnap.exists();
+                    
+                    if (isAdmin) {
+                        loginPrompt.classList.add('hidden');
+                        unauthorizedPrompt.classList.add('hidden');
+                        mainContent.classList.remove('hidden');
+                        
+                        // Load status since the user is authorized!
+                        loadStatus();
+                    } else {
+                        loginPrompt.classList.add('hidden');
+                        unauthorizedPrompt.classList.remove('hidden');
+                        mainContent.classList.add('hidden');
+                    }
+                } catch (error) {
+                    console.error("Auth check error:", error);
+                    loginPrompt.classList.add('hidden');
+                    unauthorizedPrompt.classList.remove('hidden');
+                    mainContent.classList.add('hidden');
+                }
+            } else {
+                loginPrompt.classList.remove('hidden');
+                unauthorizedPrompt.classList.add('hidden');
+                mainContent.classList.add('hidden');
+            }
         });
+
+        // Attach login and logout triggers
+        document.getElementById('login-btn').onclick = () => signInWithPopup(auth, provider);
+        document.getElementById('logout-btn').onclick = () => signOut(auth);
     </script>
 </body>
 </html>
