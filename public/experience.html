@@ -432,7 +432,7 @@
             
             let locString = `${exp.City || ''}${(exp.City && exp.State) ? ', ' : ''}${exp.State || ''}`;
             locString = locString ? locString + ', India' : 'India';
-            let dateString = exp.FlexibleDates ? "Flexible Dates" : `${exp.StartDisplay || exp.Start} ${exp.EndDisplay ? ' - ' + exp.EndDisplay : ''}`;
+            let dateString = exp.FlexibleDates ? "Flexible Dates (check description for dates)" : `${exp.StartDisplay || exp.Start} ${exp.EndDisplay ? ' - ' + exp.EndDisplay : ''}`;
             
             window.currentExperienceForShare = exp;
         }
@@ -454,7 +454,7 @@
 
             const shareData = {
                 title: exp.Name,
-                text: `✨ ${exp.Name} ✨\n\n📍 ${locString}\n📅 ${exp.FlexibleDates ? 'Flexible Dates' : (exp.StartDisplay || exp.Start)}\n\nCheck out the details here: `,
+                text: `✨ ${exp.Name} ✨\n\n📍 ${locString}\n📅 ${exp.FlexibleDates ? 'Flexible Dates (check description for dates)' : (exp.StartDisplay || exp.Start)}\n\nCheck out the details here: `,
                 url: shareUrl
             };
 
@@ -466,7 +466,7 @@
                     // Try text-only fallback without the url property if it fails
                     const textOnlyData = {
                         title: exp.Name,
-                        text: `✨ ${exp.Name} ✨\n\n📍 ${locString}\n📅 ${exp.FlexibleDates ? 'Flexible Dates' : (exp.StartDisplay || exp.Start)}\n\nCheck out the details here:\n${shareUrl}`
+                        text: `✨ ${exp.Name} ✨\n\n📍 ${locString}\n📅 ${exp.FlexibleDates ? 'Flexible Dates (check description for dates)' : (exp.StartDisplay || exp.Start)}\n\nCheck out the details here:\n${shareUrl}`
                     };
                     try {
                         await navigator.share(textOnlyData);
@@ -759,12 +759,14 @@
             }
             if(i.Hashtags && i.Hashtags.length > 0) {
                 topHtml += `
-                <div class="mb-4 flex flex-row flex-wrap gap-1.5 pr-12">
-                    ${i.Hashtags.map(tag => `
-                        <span class="text-sm font-semibold text-[#a37c6b] bg-[#f5ede8]/50 px-2.5 py-1 rounded-md cursor-pointer hover:bg-[#ebdcd4] transition"
-                              onclick="window.location.href='/?tag=${encodeURIComponent(tag.replace(/^#/, ''))}'">
-                            ${tag}
-                        </span>`).join('')}
+                <div class="mb-4 pr-12">
+                    <p class="text-xl font-bold text-stone-500 mb-2">
+                        ${i.Hashtags.map(tag => `
+                            <span class="cursor-pointer hover:text-stone-700 transition"
+                                  onclick="window.location.href='/?tag=${encodeURIComponent(tag.replace(/^#/, ''))}'">
+                                ${tag}
+                            </span>`).join(' ')}
+                    </p>
                 </div>`;
             }
             if(i.Name) topHtml += `<h2 class="text-3xl font-black text-stone-800 leading-tight mb-2">${i.Name}</h2>`;
@@ -774,7 +776,7 @@
                 topHtml += `
                 <div class="bg-white p-5 rounded-2xl border border-slate-100 mt-4 mb-6" style="border-color: var(--border-soft);">
                     <p class="text-xs font-bold text-stone-400 uppercase mb-1 tracking-wider">Schedule</p>
-                    ${i.FlexibleDates ? `<p class="font-bold text-[#a37c6b] text-base flex items-center gap-1.5">📅 Flexible Dates</p>` : ''}
+                    ${i.FlexibleDates ? `<p class="font-bold text-[#a37c6b] text-base flex items-center gap-1.5">📅 Flexible Dates (check description for dates)</p>` : ''}
                     ${!i.FlexibleDates && i.Start ? `<p class="font-bold text-stone-700">Starts: ${i.StartDisplay || i.Start} ${i.StartTime ? 'at ' + i.StartTime : ''}</p>` : ''}
                     ${!i.FlexibleDates && i.End ? `<p class="font-bold text-stone-700">Ends: ${i.EndDisplay || i.End} ${i.EndTime ? 'at ' + i.EndTime : ''}</p>` : ''}
                 </div>`;

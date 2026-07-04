@@ -16,13 +16,13 @@ const navbarHTML = `
                     <span id="admin-badge" class="hidden inline-block mb-1 bg-stone-800 text-white px-2 py-0.5 rounded text-[10px] font-black tracking-wider uppercase">Admin</span>
                     <p id="user-email" class="text-xs font-semibold text-stone-500 truncate">user</p>
                 </div>
-                <a href="submit" class="block px-4 py-1.5 text-sm text-stone-600 hover:bg-[#f5ede8] hover:text-[#a37c6b] font-bold transition rounded-xl mx-2">Submit</a>
-                <a href="dashboard" class="block px-4 py-1.5 text-sm text-stone-600 hover:bg-[#f5ede8] hover:text-[#a37c6b] font-bold transition rounded-xl mx-2">Dashboard</a>
-                <a href="about" class="block px-4 py-1.5 text-sm text-stone-600 hover:bg-[#f5ede8] hover:text-[#a37c6b] font-bold transition rounded-xl mx-2">About</a>
-                <a href="contact" class="block px-4 py-1.5 text-sm text-stone-600 hover:bg-[#f5ede8] hover:text-[#a37c6b] font-bold transition rounded-xl mx-2">Contact</a>
+                <a href="submit" class="block px-4 py-1.5 text-base text-stone-500 hover:bg-[#f5ede8] hover:text-[#a37c6b] font-medium transition rounded-xl mx-2">Submit</a>
+                <a href="dashboard" class="block px-4 py-1.5 text-base text-stone-500 hover:bg-[#f5ede8] hover:text-[#a37c6b] font-medium transition rounded-xl mx-2">Dashboard</a>
+                <a href="about" class="block px-4 py-1.5 text-base text-stone-500 hover:bg-[#f5ede8] hover:text-[#a37c6b] font-medium transition rounded-xl mx-2">About</a>
+                <a href="contact" class="block px-4 py-1.5 text-base text-stone-500 hover:bg-[#f5ede8] hover:text-[#a37c6b] font-medium transition rounded-xl mx-2">Contact</a>
                 <div class="border-t border-stone-100 mt-1 pt-1 mb-1">
-                    <button id="login-btn-menu" class="w-[calc(100%-16px)] text-left px-4 py-1.5 text-sm text-stone-600 hover:bg-stone-50 hover:text-stone-900 font-bold transition rounded-xl mx-2">Sign In</button>
-                    <button id="logout-btn" class="hidden w-[calc(100%-16px)] text-left px-4 py-1.5 text-sm text-stone-600 hover:bg-[#f5ede8] hover:text-[#a37c6b] font-bold transition rounded-xl mx-2">Logout</button>
+                    <button id="login-btn-menu" class="w-[calc(100%-16px)] text-left px-4 py-1.5 text-base text-stone-500 hover:bg-stone-50 hover:text-stone-900 font-medium transition rounded-xl mx-2">Sign In</button>
+                    <button id="logout-btn" class="hidden w-[calc(100%-16px)] text-left px-4 py-1.5 text-base text-stone-500 hover:bg-[#f5ede8] hover:text-[#a37c6b] font-medium transition rounded-xl mx-2">Logout</button>
                 </div>
             </div>
         </div>

@@ -938,9 +938,9 @@
                 let hashtagsHtml = '';
                 if (item.Hashtags && item.Hashtags.length > 0) {
                     hashtagsHtml = `
-                        <div class="mt-2 flex flex-wrap gap-1 text-[11px] text-[#a37c6b] font-semibold tracking-wide">
-                            ${item.Hashtags.map(t => `<span class="bg-[#f5ede8]/50 px-1.5 py-0.5 rounded">${t}</span>`).join('')}
-                        </div>`;
+                        <p class="text-stone-500 text-base font-medium mt-1">
+                            ${item.Hashtags.join(' ')}
+                        </p>`;
                 }
 
                 html += `
@@ -953,8 +953,8 @@
                         <div class="mb-3 flex flex-wrap gap-1">${cats}</div>
                         <h3>${item.Name}</h3>
                         <p class="text-stone-500 text-base font-medium">📍 ${item.City ? item.City + ', ' : ''}${item.State ? item.State + ', ' : ''}India</p>
-                        <p class="text-stone-400 text-base font-medium">
-                            📅 ${item.FlexibleDates ? '<span class="text-[#a37c6b] font-semibold">Flexible Dates</span>' : (item.StartDisplay || item.Start) + (item.EndDisplay ? ' - ' + item.EndDisplay : '')}
+                        <p class="text-stone-500 text-base font-medium">
+                            📅 ${item.FlexibleDates ? 'Flexible Dates' : (item.StartDisplay || item.Start) + (item.EndDisplay ? ' - ' + item.EndDisplay : '')}
                         </p>
                         ${hashtagsHtml}
                     </div>
