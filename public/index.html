@@ -773,6 +773,27 @@
             const currentDateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
             const currentTimeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
+            function parseDateTime(dateStr, timeStr, defaultTime) {
+                if (!dateStr || dateStr === 'undefined' || dateStr.trim() === '') return null;
+                let time = (timeStr && timeStr !== 'undefined' && timeStr.trim() !== '') ? timeStr.trim() : defaultTime;
+                if (time.length === 4 && time[1] === ':') {
+                    time = "0" + time;
+                }
+                const parts = dateStr.split('-');
+                if (parts.length !== 3) return null;
+                const tParts = time.split(':');
+                const hh = tParts[0] ? parseInt(tParts[0], 10) : 0;
+                const mm = tParts[1] ? parseInt(tParts[1], 10) : 0;
+                return new Date(
+                    parseInt(parts[0], 10),
+                    parseInt(parts[1], 10) - 1,
+                    parseInt(parts[2], 10),
+                    hh,
+                    mm,
+                    0
+                );
+            }
+
             snapshot.forEach((doc) => {
                 try {
                     const r = doc.data();
@@ -791,8 +812,17 @@
                     if (end_time.length === 4 && end_time[1] === ':') end_time = "0" + end_time;
                     
                     const isFlexible = !!r.flexibleDates;
-                    if (!isFlexible && end_date && end_date !== 'undefined' && (end_date < currentDateStr || (end_date === currentDateStr && end_time < currentTimeStr))) {
-                        return; // Skip expired experiences
+                    if (!isFlexible) {
+                        const startObj = parseDateTime(start_date, start_time, "00:00");
+                        const endObj = parseDateTime(end_date, end_time, "23:59");
+                        if (startObj && endObj) {
+                            const midMs = (startObj.getTime() + endObj.getTime()) / 2;
+                            if (now.getTime() > midMs) {
+                                return; // Skip since the mid-day (halfway point) has crossed
+                            }
+                        } else if (end_date && end_date !== 'undefined' && (end_date < currentDateStr || (end_date === currentDateStr && end_time < currentTimeStr))) {
+                            return; // Fallback: Skip expired experiences
+                        }
                     }
 
                     let media = Array.isArray(r.fileUrls) ? [...r.fileUrls] : [];

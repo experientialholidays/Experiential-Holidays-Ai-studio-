@@ -342,16 +342,60 @@
         };
 
         function getTabData(tab) {
-            const today = new Date();
-            today.setHours(0,0,0,0);
-            const todayStr = today.toISOString().split('T')[0];
+            const now = new Date();
+            const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+            const currentTimeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
             
+            function parseDateTime(dateStr, timeStr, defaultTime) {
+                if (!dateStr || dateStr === 'undefined' || dateStr.trim() === '') return null;
+                let time = (timeStr && timeStr !== 'undefined' && timeStr.trim() !== '') ? timeStr.trim() : defaultTime;
+                if (time.length === 4 && time[1] === ':') {
+                    time = "0" + time;
+                }
+                const parts = dateStr.split('-');
+                if (parts.length !== 3) return null;
+                const tParts = time.split(':');
+                const hh = tParts[0] ? parseInt(tParts[0], 10) : 0;
+                const mm = tParts[1] ? parseInt(tParts[1], 10) : 0;
+                return new Date(
+                    parseInt(parts[0], 10),
+                    parseInt(parts[1], 10) - 1,
+                    parseInt(parts[2], 10),
+                    hh,
+                    mm,
+                    0
+                );
+            }
+
             return rawData.filter(r => {
                 if (r.flexibleDates) {
                     return tab === 'active';
                 }
-                const cmpDate = r.endDate || r.startDate || "";
-                const isPast = cmpDate && cmpDate < todayStr;
+                
+                let end_date = String(r.endDate || '').trim();
+                let end_time = String(r.endTime || '').trim();
+                let start_date = String(r.startDate || '').trim();
+                let start_time = String(r.startTime || '').trim();
+                
+                if (!end_date || end_date === 'undefined') {
+                    end_date = start_date;
+                    end_time = start_time;
+                }
+                if (!end_time || end_time === 'undefined') end_time = "23:59";
+                if (end_time.length === 4 && end_time[1] === ':') end_time = "0" + end_time;
+
+                const startObj = parseDateTime(start_date, start_time, "00:00");
+                const endObj = parseDateTime(end_date, end_time, "23:59");
+                
+                let isPast = false;
+                if (startObj && endObj) {
+                    const midMs = (startObj.getTime() + endObj.getTime()) / 2;
+                    isPast = now.getTime() > midMs;
+                } else {
+                    const cmpDate = r.endDate || r.startDate || "";
+                    isPast = cmpDate && cmpDate < todayStr;
+                }
+                
                 return tab === 'active' ? !isPast : isPast;
             });
         }
