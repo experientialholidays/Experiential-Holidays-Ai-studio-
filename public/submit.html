@@ -194,15 +194,24 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                         <label class="input-label">YouTube or Instagram link (Max 5)</label>
-                        <div id="video-links-container" class="space-y-2"><input type="url" class="video-link-input custom-input" placeholder="https://..."></div>
+                        <div id="video-links-container" class="space-y-2"></div>
                         <button type="button" id="add-video-link-btn" class="mt-3 btn-soft">+ Add Another Video Link</button>
                     </div>
                     <div>
                         <label class="input-label">Media Upload (Max 10)</label>
                         <div id="existing-files-container" class="space-y-1 mb-3"></div>
-                        <div id="file-upload-container" class="space-y-2"><input type="file" class="file-input-item block w-full text-xs text-stone-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-white file:border file:border-slate-200"></div>
+                        <div id="file-upload-container" class="space-y-2"></div>
                         <button type="button" id="add-file-btn" class="mt-3 btn-soft">+ Add Another File</button>
                     </div>
+                </div>
+                <div class="mt-4 pt-4 border-t" style="border-top-color: var(--border-soft);">
+                    <label class="input-label font-bold text-stone-800">Primary Media Display Priority</label>
+                    <p class="text-xs text-stone-500 mb-2">Choose which media type to prioritize first on your retreat cover card and gallery view:</p>
+                    <select id="mediaPriority" class="custom-input bg-white cursor-pointer font-medium">
+                        <option value="youtube_first">🎬 YouTube / Video First</option>
+                        <option value="image_first">🖼️ Image / Photo First</option>
+                        <option value="instagram_first">📱 Instagram Reel First</option>
+                    </select>
                 </div>
             </div>
         </div>
@@ -216,10 +225,13 @@
                 <div><label class="input-label">WhatsApp Number </label><div class="flex gap-2"><input type="text" id="countryCode" class="w-16 custom-input text-center" value="+91" required><input type="tel" id="contactWhatsApp" class="flex-1 custom-input"></div></div>
                 <div><label class="input-label">Contact Number</label><div class="flex gap-2"><input type="text" id="countryCodeCall" class="w-16 custom-input text-center" value="+91"><input type="tel" id="contactCall" class="flex-1 custom-input"></div></div>
                 <div class="md:col-span-2 pt-4 border-t" style="border-top-color: var(--border-soft);">
+                    <label class="input-label font-bold text-stone-800">Check Details</label>
+                    <p class="text-xs text-stone-500 mb-2">Direct link for full program details, brochure, or website.</p>
+                    <input type="text" id="moreDetailsLink" class="custom-input" placeholder="e.g. www.myretreat.com/program-details or https://...">
+                </div>
+                <div class="md:col-span-2 pt-4 border-t" style="border-top-color: var(--border-soft);">
                     <label class="input-label">External Links (Max 5)</label>
-                    <div id="external-links-container" class="space-y-2">
-                        <input type="text" class="external-link-input custom-input" placeholder="Website URL (e.g. www.example.com)">
-                    </div>
+                    <div id="external-links-container" class="space-y-2"></div>
                     <button type="button" id="add-link-btn" class="mt-3 btn-soft">+ Add Another Link</button>
                 </div>
             </div>
@@ -346,6 +358,8 @@ function captureAndSaveDraft() {
             countryCodeCall: document.getElementById('countryCodeCall')?.value || "",
             categories: Array.from(document.querySelectorAll('input[name="cat"]:checked')).map(cb => cb.value),
             otherCategoryText: document.getElementById('otherCategory')?.value || "",
+            mediaPriority: document.getElementById('mediaPriority')?.value || "youtube_first",
+            moreDetailsLink: document.getElementById('moreDetailsLink')?.value || "",
             videoLinks: getLinks('.video-link-input'),
             externalLinks: getLinks('.external-link-input')
         };
@@ -396,6 +410,8 @@ function lookForAndRestoreDraft() {
         setVal('contactCall', draft.contactCall);
         setVal('countryCode', draft.countryCode);
         setVal('countryCodeCall', draft.countryCodeCall);
+        setVal('mediaPriority', draft.mediaPriority || "youtube_first");
+        setVal('moreDetailsLink', draft.moreDetailsLink || "");
 
         if (draft.state && typeof stateDropdown !== 'undefined' && stateDropdown) {
             stateDropdown.setValue(draft.state);
@@ -408,13 +424,7 @@ function lookForAndRestoreDraft() {
             const vContainer = document.getElementById('video-links-container');
             if (vContainer) {
                 vContainer.innerHTML = ''; // Clear default
-                draft.videoLinks.forEach(link => {
-                    const input = document.createElement('input');
-                    input.type = 'url';
-                    input.className = 'video-link-input custom-input mt-2';
-                    input.value = link;
-                    vContainer.appendChild(input);
-                });
+                draft.videoLinks.forEach(link => createVideoLinkRow(link));
             }
         }
 
@@ -422,13 +432,7 @@ function lookForAndRestoreDraft() {
             const eContainer = document.getElementById('external-links-container');
             if (eContainer) {
                 eContainer.innerHTML = ''; // Clear default
-                draft.externalLinks.forEach(link => {
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.className = 'external-link-input custom-input mt-2';
-                    input.value = link;
-                    eContainer.appendChild(input);
-                });
+                draft.externalLinks.forEach(link => createExternalLinkRow(link));
             }
         }
         
@@ -699,38 +703,158 @@ if (flexibleDatesCheckbox) {
             });
         };
 
-        document.getElementById('add-file-btn').onclick = () => {
+        window.createFileInputRow = function() {
             const container = document.getElementById('file-upload-container');
-            if (container.querySelectorAll('input').length < 10) {
-                const input = document.createElement('input');
-                input.type = 'file';
-                input.className = "file-input-item block w-full text-xs text-stone-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-white file:border file:border-slate-200 mt-2";
-                container.appendChild(input);
-            }
+            if (container.querySelectorAll('.file-input-wrapper').length >= 10) return;
+
+            const row = document.createElement('div');
+            row.className = 'file-input-wrapper flex items-center justify-between gap-2 bg-stone-50 p-2.5 rounded-xl border border-stone-200 mt-2 transition';
+            
+            row.innerHTML = `
+                <input type="file" class="file-input-item hidden" accept="image/*,application/pdf">
+                <div class="file-preview-area flex items-center justify-between flex-1 min-w-0">
+                    <button type="button" class="select-file-btn text-xs font-semibold text-stone-700 bg-white hover:bg-stone-100 border border-stone-300 px-3 py-1.5 rounded-lg transition shadow-sm flex items-center gap-1.5">
+                        <span>📁</span> <span>Choose Image / File</span>
+                    </button>
+                    <span class="file-name-label text-xs text-stone-500 truncate ml-2">No file selected</span>
+                </div>
+                <button type="button" class="remove-file-row-btn text-stone-400 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-50 transition text-sm font-bold shrink-0" title="Remove File / Reset">
+                    ✕
+                </button>
+            `;
+
+            const fileInput = row.querySelector('.file-input-item');
+            const previewArea = row.querySelector('.file-preview-area');
+            const removeBtn = row.querySelector('.remove-file-row-btn');
+
+            const bindSelectBtn = () => {
+                const selectBtn = row.querySelector('.select-file-btn');
+                if (selectBtn) {
+                    selectBtn.onclick = () => fileInput.click();
+                }
+            };
+            bindSelectBtn();
+
+            fileInput.onchange = () => {
+                if (fileInput.files && fileInput.files[0]) {
+                    const file = fileInput.files[0];
+                    const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
+                    
+                    let previewThumb = '';
+                    if (file.type.startsWith('image/')) {
+                        const thumbUrl = URL.createObjectURL(file);
+                        previewThumb = `<img src="${thumbUrl}" class="w-10 h-10 object-cover rounded-lg border border-stone-200 shrink-0">`;
+                    } else {
+                        previewThumb = `<div class="w-10 h-10 bg-stone-200 rounded-lg flex items-center justify-center text-stone-600 font-bold shrink-0 text-xs">PDF</div>`;
+                    }
+
+                    previewArea.innerHTML = `
+                        <div class="flex items-center gap-3 min-w-0 flex-1">
+                            ${previewThumb}
+                            <div class="min-w-0 flex-1">
+                                <p class="text-xs font-bold text-stone-800 truncate">${file.name}</p>
+                                <p class="text-[10px] text-stone-500 font-medium">${sizeMb} MB</p>
+                            </div>
+                            <button type="button" class="reselect-file-btn text-[11px] font-semibold text-blue-600 hover:text-blue-800 underline ml-1 shrink-0">Change</button>
+                        </div>
+                    `;
+                    const reselectBtn = previewArea.querySelector('.reselect-file-btn');
+                    if (reselectBtn) reselectBtn.onclick = () => fileInput.click();
+
+                    row.classList.remove('bg-stone-50');
+                    row.classList.add('bg-white', 'border-emerald-300', 'shadow-sm');
+                    if (typeof captureAndSaveDraft === 'function') captureAndSaveDraft();
+                }
+            };
+
+            removeBtn.onclick = () => {
+                const allRows = container.querySelectorAll('.file-input-wrapper');
+                if (allRows.length > 1 || (fileInput.files && fileInput.files.length > 0)) {
+                    row.remove();
+                    if (container.querySelectorAll('.file-input-wrapper').length === 0) {
+                        createFileInputRow();
+                    }
+                } else {
+                    fileInput.value = '';
+                    previewArea.innerHTML = `
+                        <button type="button" class="select-file-btn text-xs font-semibold text-stone-700 bg-white hover:bg-stone-100 border border-stone-300 px-3 py-1.5 rounded-lg transition shadow-sm flex items-center gap-1.5">
+                            <span>📁</span> <span>Choose Image / File</span>
+                        </button>
+                        <span class="file-name-label text-xs text-stone-500 truncate ml-2">No file selected</span>
+                    `;
+                    bindSelectBtn();
+                    row.classList.add('bg-stone-50');
+                    row.classList.remove('bg-white', 'border-emerald-300', 'shadow-sm');
+                }
+                if (typeof captureAndSaveDraft === 'function') captureAndSaveDraft();
+            };
+
+            container.appendChild(row);
+            return row;
         };
 
-        document.getElementById('add-link-btn').onclick = () => {
-            const container = document.getElementById('external-links-container');
-            if (container.querySelectorAll('input').length < 5) {
-                const input = document.createElement('input');
-                input.type = 'text';
-                input.className = 'external-link-input custom-input mt-2';
-                input.placeholder = 'Website URL (e.g. www.example.com)';
-                container.appendChild(input);
-            }
-        };
-        
-
-        document.getElementById('add-video-link-btn').onclick = () => {
+        window.createVideoLinkRow = function(val = "") {
             const container = document.getElementById('video-links-container');
-            if (container.querySelectorAll('input').length < 5) {
-                const input = document.createElement('input');
-                input.type = 'url';
-                input.className = 'video-link-input custom-input mt-2';
-                input.placeholder = 'https://...';
-                container.appendChild(input);
-            }
+            if (container.querySelectorAll('.video-link-input').length >= 5) return;
+
+            const row = document.createElement('div');
+            row.className = 'video-link-wrapper flex items-center gap-2 mt-2';
+            row.innerHTML = `
+                <input type="url" class="video-link-input custom-input flex-1" placeholder="https://..." value="${val}">
+                <button type="button" class="remove-link-btn text-stone-400 hover:text-red-600 p-2 rounded-lg hover:bg-red-50 transition text-sm font-bold shrink-0" title="Remove Link">✕</button>
+            `;
+            const input = row.querySelector('input');
+            const btn = row.querySelector('.remove-link-btn');
+
+            btn.onclick = () => {
+                row.remove();
+                if (container.querySelectorAll('.video-link-wrapper').length === 0) {
+                    createVideoLinkRow();
+                }
+                if (typeof captureAndSaveDraft === 'function') captureAndSaveDraft();
+            };
+            input.oninput = () => {
+                if (typeof captureAndSaveDraft === 'function') captureAndSaveDraft();
+            };
+            container.appendChild(row);
+            return row;
         };
+
+        window.createExternalLinkRow = function(val = "") {
+            const container = document.getElementById('external-links-container');
+            if (container.querySelectorAll('.external-link-input').length >= 5) return;
+
+            const row = document.createElement('div');
+            row.className = 'external-link-wrapper flex items-center gap-2 mt-2';
+            row.innerHTML = `
+                <input type="text" class="external-link-input custom-input flex-1" placeholder="Website URL (e.g. www.example.com)" value="${val}">
+                <button type="button" class="remove-link-btn text-stone-400 hover:text-red-600 p-2 rounded-lg hover:bg-red-50 transition text-sm font-bold shrink-0" title="Remove Link">✕</button>
+            `;
+            const input = row.querySelector('input');
+            const btn = row.querySelector('.remove-link-btn');
+
+            btn.onclick = () => {
+                row.remove();
+                if (container.querySelectorAll('.external-link-wrapper').length === 0) {
+                    createExternalLinkRow();
+                }
+                if (typeof captureAndSaveDraft === 'function') captureAndSaveDraft();
+            };
+            input.oninput = () => {
+                if (typeof captureAndSaveDraft === 'function') captureAndSaveDraft();
+            };
+            container.appendChild(row);
+            return row;
+        };
+
+        document.getElementById('add-file-btn').onclick = () => window.createFileInputRow();
+        document.getElementById('add-link-btn').onclick = () => window.createExternalLinkRow();
+        document.getElementById('add-video-link-btn').onclick = () => window.createVideoLinkRow();
+
+        // Initialize default empty rows
+        if (document.getElementById('file-upload-container').children.length === 0) createFileInputRow();
+        if (document.getElementById('video-links-container').children.length === 0) createVideoLinkRow();
+        if (document.getElementById('external-links-container').children.length === 0) createExternalLinkRow();
         
 
 
@@ -882,6 +1006,8 @@ if (flexibleDatesCheckbox) {
             document.getElementById('orgInfo').value = r.orgInfo || "";
             document.getElementById('contactName').value = r.contactName || "";
             document.getElementById('orgContactEmail').value = r.orgContactEmail || "";
+            document.getElementById('mediaPriority').value = r.mediaPriority || "youtube_first";
+            document.getElementById('moreDetailsLink').value = r.moreDetailsLink || "";
 
             setTimeout(() => {
                 ['retreatName', 'description', 'contribution', 'inclusionsExclusions', 'orgInfo'].forEach(id => {
@@ -896,13 +1022,7 @@ if (flexibleDatesCheckbox) {
             if (r.videoLinks && r.videoLinks.length > 0) {
                 const container = document.getElementById('video-links-container');
                 container.innerHTML = '';
-                r.videoLinks.forEach(link => {
-                    const input = document.createElement('input');
-                    input.type = 'url';
-                    input.className = 'video-link-input custom-input mt-2';
-                    input.value = link;
-                    container.appendChild(input);
-                });
+                r.videoLinks.forEach(link => createVideoLinkRow(link));
             }
 
             if (r.contactWhatsApp && r.contactWhatsApp.includes('+')) {
@@ -937,13 +1057,7 @@ if (flexibleDatesCheckbox) {
             if (r.externalLinks && r.externalLinks.length > 0) {
                 const container = document.getElementById('external-links-container');
                 container.innerHTML = '';
-                r.externalLinks.forEach(link => {
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.className = 'external-link-input custom-input mt-2';
-                    input.value = link;
-                    container.appendChild(input);
-                });
+                r.externalLinks.forEach(link => createExternalLinkRow(link));
             }
             
             if (r.fileUrls && r.fileUrls.length > 0) {
@@ -1050,6 +1164,11 @@ if (flexibleDatesCheckbox) {
                     return tag;
                 }).filter(tag => tag !== "");
 
+                let rawMoreDetails = document.getElementById('moreDetailsLink')?.value.trim() || "";
+                if (rawMoreDetails && !/^https?:\/\//i.test(rawMoreDetails)) {
+                    rawMoreDetails = 'https://' + rawMoreDetails;
+                }
+
                 const data = {
                     retreatName: document.getElementById('retreatName').value,
                     hostEmail: auth.currentUser.email,
@@ -1066,7 +1185,8 @@ if (flexibleDatesCheckbox) {
                     subCategories: selectedSubCats,
                     contribution: document.getElementById('contribution').value,
                     inclusionsExclusions: document.getElementById('inclusionsExclusions').value,
-                    
+                    mediaPriority: document.getElementById('mediaPriority')?.value || "youtube_first",
+                    moreDetailsLink: rawMoreDetails,
                     orgInfo: document.getElementById('orgInfo').value,
                     contactName: document.getElementById('contactName').value,
                     contactWhatsApp: document.getElementById('countryCode').value + document.getElementById('contactWhatsApp').value,

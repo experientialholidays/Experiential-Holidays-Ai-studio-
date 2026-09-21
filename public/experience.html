@@ -43,6 +43,7 @@
     
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="/search-tracker.js"></script>
 
     <script type="application/ld+json">
     {
@@ -234,21 +235,26 @@
         }
 
         .btn-wa { 
-            display: block; 
-            text-align: center; 
-            padding: 18px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 10px; 
+            width: 100%; 
+            padding: 16px 24px; 
             background: #25D366; 
             color: white; 
             border-radius: 16px; 
             text-decoration: none; 
             font-weight: 800; 
-            margin-top: 40px; 
-            box-shadow: 0 8px 20px rgba(37, 211, 102, 0.2); 
-            transition: transform 0.2s; 
+            font-size: 16px; 
+            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.3); 
+            transition: all 0.2s ease; 
         }
 
         .btn-wa:hover { 
+            background: #20ba5a; 
             transform: translateY(-1px); 
+            box-shadow: 0 8px 24px rgba(37, 211, 102, 0.4); 
         }
 
         /* Lightbox Styles */
@@ -390,9 +396,9 @@
     <!-- Floating Share Button Container -->
     <div id="floating-share-container" class="fixed bottom-6 right-6 z-50 hidden">
         <!-- Main FAB -->
-        <button onclick="handleFloatingShareClick()" id="shareFab" class="flex items-center justify-center w-14 h-14 bg-[#a37c6b] text-white rounded-full shadow-lg hover:bg-[#8e6b5c] hover:scale-105 active:scale-95 transition-all duration-300" title="Share Experience">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8.684 10.742l4.576-2.288m0 0a3 3 0 113.882 3.882l-4.576 2.288M8.684 13.258l-4.576 2.288m0 0a3 3 0 11-3.882-3.882l4.576-2.288M8.684 13.258a3 3 0 110-2.516" />
+        <button onclick="handleFloatingShareClick()" id="shareFab" class="flex items-center justify-center w-14 h-14 bg-[#2b2623] text-white rounded-full shadow-2xl hover:bg-[#1e1a18] hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer border-2 border-white/20" title="Share Experience">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 fill-current" viewBox="0 0 24 24">
+                <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/>
             </svg>
         </button>
     </div>
@@ -604,6 +610,8 @@
                     CPhone: r.contactWhatsApp || '',
                     CNum: r.contactNumber || '',
                     ExternalLinks: Array.isArray(r.externalLinks) ? r.externalLinks : [],
+                    mediaPriority: r.mediaPriority || 'youtube_first',
+                    moreDetailsLink: r.moreDetailsLink || '',
                     MediaArray: media,
                     timestamp: r.timestamp || Date.now(),
                     lastUpdated: r.lastUpdated || null,
@@ -636,7 +644,7 @@
 
         function getInstagramId(url) {
             if (!url || typeof url !== 'string') return null;
-            const match = url.trim().match(/instagram\.com\/(?:reel|reels|p)\/([a-zA-Z0-9_-]+)/i);
+            const match = url.trim().match(/(?:instagram\.com|instagr\.am)\/(?:reel|reels|p|tv|share\/p|share\/reel)\/([a-zA-Z0-9_-]+)/i);
             return match ? match[1] : null;
         }
 
@@ -698,7 +706,7 @@
             } else if (instaId) {
                 html = `
                 <div class="carousel-item instagram-wrap">
-                    <iframe class="instagram-frame" src="https://www.instagram.com/reel/${instaId}/embed/" loading="lazy"></iframe> 
+                    <iframe class="instagram-frame" src="https://www.instagram.com/p/${instaId}/embed/" loading="lazy" frameborder="0" scrolling="no" allowtransparency="true"></iframe> 
                 </div>`;
             }
 
@@ -751,10 +759,14 @@
             if(!i) return;
             
             let media = [...i.MediaArray];
-            media.sort((a, b) => {
-                const priority = { youtube: 1, image: 2, instagram: 3, pdf: 4, unknown: 5 };
-                return priority[getMediaType(a)] - priority[getMediaType(b)];
-            });
+            let mediaPriority = i.mediaPriority || 'youtube_first';
+            let priorityMap = { youtube: 1, instagram: 2, image: 3, pdf: 4, unknown: 5 };
+            if (mediaPriority === 'image_first') {
+                priorityMap = { image: 1, instagram: 2, youtube: 3, pdf: 4, unknown: 5 };
+            } else if (mediaPriority === 'instagram_first') {
+                priorityMap = { instagram: 1, image: 2, youtube: 3, pdf: 4, unknown: 5 };
+            }
+            media.sort((a, b) => (priorityMap[getMediaType(a)] || 99) - (priorityMap[getMediaType(b)] || 99));
 
             currentMedia = media;
 
@@ -844,12 +856,18 @@
                             <img src="${url}">
                         </div>`;
                     } else if (instaId) {
-                        return `
-                        <div class="carousel-thumb relative" onclick="renderMainMedia(${index})">
-                            <img src="https://www.instagram.com/p/${instaId}/media/?size=m" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-                            <div class="absolute inset-0 hidden items-center justify-center bg-gradient-to-br from-pink-500 via-red-500 to-yellow-500 text-white text-xs font-bold">Instagram</div>
-                            <div class="absolute bottom-1 right-1 bg-black/70 text-white text-[10px] px-1 rounded">IG</div>
-                        </div>`;
+                        const coverImg = media.find(u => isImage(u));
+                        if (coverImg) {
+                            return `
+                            <div class="carousel-thumb relative" onclick="renderMainMedia(${index})">
+                                <img src="${coverImg}" class="w-full h-full object-cover">
+                            </div>`;
+                        } else {
+                            return `
+                            <div class="carousel-thumb relative overflow-hidden bg-stone-900" onclick="renderMainMedia(${index})">
+                                <iframe src="https://www.instagram.com/p/${instaId}/embed/" class="w-[240%] h-[240%] -ml-[70%] -mt-[40%] pointer-events-none border-0" frameborder="0" scrolling="no"></iframe>
+                            </div>`;
+                        }
                     } else if (pdfFile) {
                         return `
                         <div class="carousel-thumb flex flex-col bg-stone-100 text-stone-700" onclick="renderMainMedia(${index})">
@@ -866,9 +884,11 @@
             // 3. BOTTOM HTML
             let bottomHtml = ``;
             if(i.Description) {
+                const generalNote = `\n\n* For complete details or more information, please use the links provided below.`;
+                const combinedDesc = i.Description.trim() + generalNote;
                 bottomHtml += `
                     <div class="section-label">Overview</div>
-                    <p class="whitespace-pre-line text-stone-600 leading-relaxed mb-6">${i.Description}</p>`;
+                    <p class="whitespace-pre-line text-stone-600 leading-relaxed mb-6">${combinedDesc}</p>`;
             }
 
             if(i.Cost || i.Inclusions) {
@@ -901,10 +921,31 @@
                     </div>`;
             }
 
+            if(i.moreDetailsLink) {
+                let formattedDetailsUrl = i.moreDetailsLink.trim();
+                if (!/^https?:\/\//i.test(formattedDetailsUrl)) {
+                    formattedDetailsUrl = 'https://' + formattedDetailsUrl;
+                }
+                bottomHtml += `
+                    <div class="mt-8 mb-3">
+                        <a href="${formattedDetailsUrl}" target="_blank" rel="noopener noreferrer" class="btn-more-details block w-full text-center font-bold py-3.5 px-6 rounded-2xl transition shadow-md hover:opacity-90 flex items-center justify-center gap-2 text-white text-base" style="background-color: var(--accent);" data-url="${formattedDetailsUrl}">
+                            <span>🌐</span>
+                            <span>Check Details</span>
+                        </a>
+                    </div>`;
+            }
+
             if(hasValidPhone(i.CPhone)) {
-                let waMessage = `I came across the *${i.Name}* experience to be held on ${dateString} at ${locString} on experientialholidays.info. Can I get more details?`;
+                let waMessage = `I came across the *${i.Name}* experience to be held on ${dateString} at ${locString} on experientialholidays.info.\n\nCould you please share more details about the event?`;
                 let encodedMessage = encodeURIComponent(waMessage);
-                bottomHtml += `<a href="https://wa.me/${i.CPhone}?text=${encodedMessage}" target="_blank" class="btn-wa">Inquire on WhatsApp</a>`;
+                let waTopMargin = i.moreDetailsLink ? 'mt-3' : 'mt-8';
+                bottomHtml += `
+                    <div class="${waTopMargin}">
+                        <a href="https://wa.me/${i.CPhone}?text=${encodedMessage}" target="_blank" class="btn-wa">
+                            <svg class="w-6 h-6 fill-current inline-block" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                            <span>Inquire on WhatsApp</span>
+                        </a>
+                    </div>`;
             }
 
             bottomHtml += timestampHtml;
@@ -912,7 +953,7 @@
             document.getElementById('modal-content').innerHTML = bottomHtml;
 
             setTimeout(() => {
-                // WhatsApp Button Tracking (DB + GA4)
+                // WhatsApp Button Tracking (DB + GA4 + Activity Tracker)
                 const waBtn = document.querySelector('.btn-wa');
                 if(waBtn) {
                     waBtn.addEventListener('click', () => {
@@ -920,6 +961,16 @@
                         db.collection('retreats').doc(i.id).update({
                             whatsappClicks: firebase.firestore.FieldValue.increment(1)
                         }).catch(err => console.log("Click count update bypassed"));
+
+                        if (typeof trackUserActionToFirestore === 'function') {
+                            trackUserActionToFirestore({
+                                eventType: 'whatsapp_click',
+                                experienceId: i.id,
+                                experienceName: i.Name,
+                                targetUrl: waBtn.href || '',
+                                hostName: i.Org || 'Unknown'
+                            });
+                        }
 
                         // GA4 Tracking
                         if(typeof gtag === 'function'){
@@ -932,16 +983,27 @@
                     });
                 }
 
-                // External Links Tracking (DB + GA4)
-                const extLinks = document.querySelectorAll('.ext-link-btn');
+                // External Links Tracking (DB + GA4 + Activity Tracker)
+                const extLinks = document.querySelectorAll('.ext-link-btn, .btn-more-details');
                 extLinks.forEach(link => {
                     link.addEventListener('click', (e) => {
-                        const clickedUrl = e.currentTarget.getAttribute('data-url');
+                        const clickedUrl = e.currentTarget.getAttribute('data-url') || e.currentTarget.href;
+                        const isMoreDetails = e.currentTarget.classList.contains('btn-more-details');
                         
                         // NEW: Increment External Link Clicks in Database
                         db.collection('retreats').doc(i.id).update({
                             externalLinkClicks: firebase.firestore.FieldValue.increment(1)
                         }).catch(err => console.log("External link count update bypassed"));
+
+                        if (typeof trackUserActionToFirestore === 'function') {
+                            trackUserActionToFirestore({
+                                eventType: isMoreDetails ? 'more_details_click' : 'external_link_click',
+                                experienceId: i.id,
+                                experienceName: i.Name,
+                                targetUrl: clickedUrl,
+                                hostName: i.Org || 'Unknown'
+                            });
+                        }
 
                         // GA4 Event
                         if(typeof gtag === 'function'){

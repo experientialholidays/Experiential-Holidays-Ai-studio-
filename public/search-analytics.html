@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search & User Activity Analytics | Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+    <script src="/config.js"></script>
+
+    <style>
+        :root { 
+            --slate: #4a4542; 
+            --accent: #a37c6b; 
+            --tag-bg: #f5ede8; 
+            --bg-warm: #faf7f4;
+            --border-soft: #f0e6e0;
+        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; color: var(--slate); background-color: var(--bg-warm); }
+        .table-wrapper { background: white; border-radius: 20px; border: 1px solid var(--border-soft); overflow: hidden; }
+        th { background: #fafaf9; padding: 14px 16px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #a39e9b; border-bottom: 2px solid var(--border-soft); letter-spacing: 0.05em; white-space: nowrap; }
+        td { padding: 14px 16px; border-bottom: 1px solid var(--border-soft); font-size: 13px; color: #57524f; vertical-align: middle; }
+        .custom-input { width: 100%; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--border-soft); background: white; font-size: 13px; outline: none; transition: all 0.2s; }
+        .custom-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(163,124,107,0.15); }
+        .tab-btn { padding: 10px 18px; font-size: 13px; font-weight: 700; border-radius: 12px; transition: all 0.2s; }
+        .tab-btn.active { background-color: var(--accent); color: white; box-shadow: 0 4px 12px rgba(163,124,107,0.25); }
+        .tab-btn:not(.active) { background-color: white; color: var(--slate); border: 1px solid var(--border-soft); }
+        .tab-btn:not(.active):hover { background-color: #f5ede8; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+    <div id="site-navbar"></div>
+    <script src="/navbar.js"></script>
+
+    <!-- Login Protection Prompt -->
+    <div id="login-prompt" class="max-w-md mx-auto my-16 p-8 bg-white rounded-3xl border border-stone-200 text-center shadow-xl">
+        <div class="w-16 h-16 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl font-bold">🔒</div>
+        <h2 class="text-xl font-bold text-stone-800 mb-2">Admin Access Required</h2>
+        <p class="text-xs text-stone-500 mb-6">Please sign in with an authorized admin account to view the Search & Activity Analytics dashboard.</p>
+        <button id="admin-signin-btn" class="w-full py-3 px-6 rounded-xl font-bold text-white shadow-md transition hover:opacity-90" style="background-color: var(--accent);">Sign In with Google</button>
+    </div>
+
+    <!-- Main Dashboard Container -->
+    <div id="main-content" class="hidden p-4 md:p-8 flex-1">
+        <div class="max-w-[1600px] mx-auto">
+            
+            <!-- Page Header -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-6 border-b border-stone-200">
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="bg-amber-100 text-amber-800 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">Admin Tool</span>
+                        <a href="/dashboard" class="text-xs font-semibold text-blue-600 hover:underline flex items-center gap-1">← Back to Registry Dashboard</a>
+                    </div>
+                    <h1 class="text-2xl md:text-3xl font-black text-stone-800 tracking-tight">🔍 Search & User Activity Analytics</h1>
+                    <p class="text-xs text-stone-500 mt-1">Real-time visibility into exact terms typed by users, search results count, card clicks, and contact actions.</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button id="refresh-btn" class="px-4 py-2.5 bg-white border border-stone-200 rounded-xl text-xs font-bold text-stone-700 hover:bg-stone-50 transition shadow-sm flex items-center gap-1.5">
+                        <span>🔄</span> Refresh Data
+                    </button>
+                    <button id="export-csv-btn" class="px-4 py-2.5 rounded-xl text-xs font-bold text-white shadow-md transition hover:opacity-90 flex items-center gap-1.5" style="background-color: var(--accent);">
+                        <span>📥</span> Export CSV
+                    </button>
+                </div>
+            </div>
+
+            <!-- Top Metric Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+                <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm">
+                    <p class="text-xs font-bold text-stone-400 uppercase tracking-wider">Total Searches</p>
+                    <h3 id="stat-total-searches" class="text-2xl md:text-3xl font-black text-stone-800 mt-1">0</h3>
+                    <p id="stat-zero-searches" class="text-[11px] font-semibold text-red-500 mt-1">0 zero-result searches</p>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm">
+                    <p class="text-xs font-bold text-stone-400 uppercase tracking-wider">Card Clicks from Search</p>
+                    <h3 id="stat-card-clicks" class="text-2xl md:text-3xl font-black text-blue-600 mt-1">0</h3>
+                    <p id="stat-ctr" class="text-[11px] font-semibold text-stone-500 mt-1">0% search CTR</p>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm">
+                    <p class="text-xs font-bold text-stone-400 uppercase tracking-wider">WhatsApp Clicks</p>
+                    <h3 id="stat-wa-clicks" class="text-2xl md:text-3xl font-black text-emerald-600 mt-1">0</h3>
+                    <p class="text-[11px] font-semibold text-stone-500 mt-1">Direct inquiries</p>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm">
+                    <p class="text-xs font-bold text-stone-400 uppercase tracking-wider">More Details Link Clicks</p>
+                    <h3 id="stat-details-clicks" class="text-2xl md:text-3xl font-black text-amber-600 mt-1">0</h3>
+                    <p class="text-[11px] font-semibold text-stone-500 mt-1">Web brochure visits</p>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm">
+                    <p class="text-xs font-bold text-stone-400 uppercase tracking-wider">External Link Clicks</p>
+                    <h3 id="stat-ext-clicks" class="text-2xl md:text-3xl font-black text-purple-600 mt-1">0</h3>
+                    <p class="text-[11px] font-semibold text-stone-500 mt-1">Host websites/links</p>
+                </div>
+            </div>
+
+            <!-- Dashboard View Navigation Tabs -->
+            <div class="flex flex-wrap items-center gap-2 mb-6">
+                <button class="tab-btn active" data-tab="searches">🔍 Real-Time Search Log</button>
+                <button class="tab-btn" data-tab="popular">📊 Popular Keywords</button>
+                <button class="tab-btn" data-tab="zero">⚠️ Zero-Result Searches</button>
+                <button class="tab-btn" data-tab="activity">⚡ Clicks & Contact Actions</button>
+            </div>
+
+            <!-- Permission Error Banner (Hidden by Default) -->
+            <div id="permission-error-box" class="hidden p-6 bg-red-50 rounded-2xl border-2 border-red-200 mb-6 text-stone-800 shadow-sm">
+                <div class="flex items-start gap-4">
+                    <div class="w-12 h-12 bg-red-100 text-red-600 rounded-xl flex items-center justify-center text-2xl font-bold flex-shrink-0">🔒</div>
+                    <div class="flex-1">
+                        <h3 class="text-base font-black text-red-800 mb-1">Firestore Security Rules Action Required</h3>
+                        <p class="text-xs text-red-700 mb-3">Your Firebase Firestore database blocked reading from <code class="font-bold bg-red-100 px-1.5 py-0.5 rounded text-red-900">search_analytics</code> or <code class="font-bold bg-red-100 px-1.5 py-0.5 rounded text-red-900">activity_logs</code> because security rules haven't permitted these new collections yet.</p>
+                        
+                        <div class="bg-stone-900 text-stone-100 p-4 rounded-xl text-xs font-mono mb-3 overflow-x-auto">
+                            <p class="text-stone-400 mb-2 font-sans text-[11px] font-bold uppercase tracking-wider">// Paste this into your Firebase Console > Firestore Database > Rules tab:</p>
+                            <pre class="text-emerald-400">rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Existing rules...
+
+    match /search_analytics/{doc} {
+      allow read, write: if true;
+    }
+    match /activity_logs/{doc} {
+      allow read, write: if true;
+    }
+  }
+}</pre>
+                        </div>
+                        <p class="text-xs text-stone-600 font-medium">After pasting and clicking <strong>Publish</strong> in Firebase Console, click <button onclick="location.reload()" class="underline font-bold text-red-800 hover:text-red-900">Refresh Page</button>.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Controls Bar -->
+            <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-sm mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1">Filter by Word / Query</label>
+                    <input type="text" id="filter-keyword" placeholder="Search keywords..." class="custom-input">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1">Time Range</label>
+                    <select id="filter-timerange" class="custom-input cursor-pointer font-medium">
+                        <option value="all">All Time</option>
+                        <option value="today">Today</option>
+                        <option value="7days">Last 7 Days</option>
+                        <option value="30days">Last 30 Days</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1">Results Status</label>
+                    <select id="filter-result-status" class="custom-input cursor-pointer font-medium">
+                        <option value="all">All Results</option>
+                        <option value="has_results">Has Found Experiences (>0)</option>
+                        <option value="zero_results">Zero Results (0 Found)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- TAB 1: REAL-TIME SEARCH LOG -->
+            <div id="view-searches" class="tab-view">
+                <div class="table-wrapper shadow-sm overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr>
+                                <th class="w-40">Date & Time</th>
+                                <th>Typed Search Term</th>
+                                <th class="text-center w-28">Results Found</th>
+                                <th>Applied Filters</th>
+                                <th>Action Taken / Click</th>
+                                <th>Session ID</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-searches-body">
+                            <tr><td colspan="6" class="text-center py-8 text-stone-400 font-medium">Loading search history...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 2: POPULAR KEYWORDS -->
+            <div id="view-popular" class="tab-view hidden">
+                <div class="table-wrapper shadow-sm overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr>
+                                <th class="w-12">Rank</th>
+                                <th>Search Keyword / Phrase</th>
+                                <th class="text-center">Times Searched</th>
+                                <th class="text-center">Avg Results Found</th>
+                                <th class="text-center">Clicks Generated</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-popular-body">
+                            <tr><td colspan="5" class="text-center py-8 text-stone-400 font-medium">Loading popular search queries...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 3: ZERO-RESULT SEARCHES -->
+            <div id="view-zero" class="tab-view hidden">
+                <div class="p-4 bg-amber-50 rounded-2xl border border-amber-200 mb-4 flex items-center gap-3 text-xs text-amber-900">
+                    <span class="text-xl">💡</span>
+                    <div>
+                        <p class="font-bold">Host & Admin Opportunity Indicator</p>
+                        <p>These are exact search terms typed by users where <strong>0 experiences</strong> were returned. Adding retreats matching these keywords will capture interested users!</p>
+                    </div>
+                </div>
+                <div class="table-wrapper shadow-sm overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr>
+                                <th>Zero-Result Search Term</th>
+                                <th class="text-center">Times Searched</th>
+                                <th>Applied Filters</th>
+                                <th>Last Searched Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-zero-body">
+                            <tr><td colspan="4" class="text-center py-8 text-stone-400 font-medium">Loading zero-result search data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 4: CLICKS & CONTACT ACTIONS -->
+            <div id="view-activity" class="tab-view hidden">
+                <div class="table-wrapper shadow-sm overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr>
+                                <th class="w-40">Date & Time</th>
+                                <th>Action Type</th>
+                                <th>Experience Title</th>
+                                <th>Destination / Link URL</th>
+                                <th>Session ID</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-activity-body">
+                            <tr><td colspan="5" class="text-center py-8 text-stone-400 font-medium">Loading user click activity...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Firebase Script -->
+    <script type="module">
+        import { initializeApp, getApp, getApps } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, query, orderBy, limit, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = window.GLOBAL_FIREBASE_CONFIG;
+        const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
+        let searchLogsData = [];
+        let activityLogsData = [];
+        let currentTab = 'searches';
+
+        // 1. Auth & Admin Access Check
+        onAuthStateChanged(auth, async (user) => {
+            const loginPrompt = document.getElementById('login-prompt');
+            const mainContent = document.getElementById('main-content');
+
+            if (user) {
+                try {
+                    const adminSnap = await getDoc(doc(db, "admins", user.email.toLowerCase().trim()));
+                    if (adminSnap.exists()) {
+                        loginPrompt.classList.add('hidden');
+                        mainContent.classList.remove('hidden');
+                        loadAnalyticsData();
+                    } else {
+                        loginPrompt.classList.remove('hidden');
+                        mainContent.classList.add('hidden');
+                        alert("Access Denied: Your account (" + user.email + ") is not registered as an Admin.");
+                    }
+                } catch(e) {
+                    console.error("Admin check failed:", e);
+                }
+            } else {
+                loginPrompt.classList.remove('hidden');
+                mainContent.classList.add('hidden');
+            }
+        });
+
+        document.getElementById('admin-signin-btn').onclick = () => {
+            signInWithPopup(auth, provider);
+        };
+
+        // 2. Load Data from Firestore
+        async function loadAnalyticsData() {
+            const permBox = document.getElementById('permission-error-box');
+            if (permBox) permBox.classList.add('hidden');
+
+            try {
+                // Fetch Search Logs (fallback to plain collection query if index or query error occurs)
+                let searchSnap;
+                try {
+                    const searchQ = query(collection(db, "search_analytics"), orderBy("timestamp", "desc"), limit(500));
+                    searchSnap = await getDocs(searchQ);
+                } catch (e) {
+                    const plainQ = query(collection(db, "search_analytics"), limit(500));
+                    searchSnap = await getDocs(plainQ);
+                }
+
+                searchLogsData = [];
+                searchSnap.forEach(docSnap => {
+                    searchLogsData.push({ id: docSnap.id, ...docSnap.data() });
+                });
+                // Client-side sort by timestamp descending
+                searchLogsData.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+                // Fetch Activity Logs
+                let activitySnap;
+                try {
+                    const activityQ = query(collection(db, "activity_logs"), orderBy("timestamp", "desc"), limit(500));
+                    activitySnap = await getDocs(activityQ);
+                } catch (e) {
+                    const plainQ = query(collection(db, "activity_logs"), limit(500));
+                    activitySnap = await getDocs(plainQ);
+                }
+
+                activityLogsData = [];
+                activitySnap.forEach(docSnap => {
+                    activityLogsData.push({ id: docSnap.id, ...docSnap.data() });
+                });
+                // Client-side sort by timestamp descending
+                activityLogsData.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+                renderAllData();
+            } catch (err) {
+                console.error("Error loading analytics data:", err);
+                if (err && (err.code === 'permission-denied' || (err.message && err.message.includes('permissions')))) {
+                    if (permBox) permBox.classList.remove('hidden');
+                }
+            }
+        }
+
+        document.getElementById('refresh-btn').onclick = loadAnalyticsData;
+
+        // 3. Render Data Across Metrics and Tables
+        function renderAllData() {
+            const keywordFilter = document.getElementById('filter-keyword').value.toLowerCase().trim();
+            const timerangeFilter = document.getElementById('filter-timerange').value;
+            const statusFilter = document.getElementById('filter-result-status').value;
+
+            const now = Date.now();
+            let minTime = 0;
+            if (timerangeFilter === 'today') minTime = new Date().setHours(0,0,0,0);
+            else if (timerangeFilter === '7days') minTime = now - (7 * 24 * 60 * 60 * 1000);
+            else if (timerangeFilter === '30days') minTime = now - (30 * 24 * 60 * 60 * 1000);
+
+            // Filter Search Logs
+            const filteredSearches = searchLogsData.filter(s => {
+                if (s.timestamp && s.timestamp < minTime) return false;
+                if (statusFilter === 'has_results' && (s.resultsCount || 0) === 0) return false;
+                if (statusFilter === 'zero_results' && (s.resultsCount || 0) > 0) return false;
+                if (keywordFilter) {
+                    const q = (s.searchQuery || '').toLowerCase();
+                    if (!q.includes(keywordFilter)) return false;
+                }
+                return true;
+            });
+
+            // Filter Activity Logs
+            const filteredActivities = activityLogsData.filter(a => {
+                if (a.timestamp && a.timestamp < minTime) return false;
+                if (keywordFilter) {
+                    const name = (a.experienceName || '').toLowerCase();
+                    const queryStr = (a.searchQuery || '').toLowerCase();
+                    if (!name.includes(keywordFilter) && !queryStr.includes(keywordFilter)) return false;
+                }
+                return true;
+            });
+
+            // Update Summary Cards
+            const totalSearches = filteredSearches.length;
+            const zeroResultSearches = filteredSearches.filter(s => (s.resultsCount || 0) === 0).length;
+            const cardClicks = filteredActivities.filter(a => a.eventType === 'card_click').length;
+            const waClicks = filteredActivities.filter(a => a.eventType === 'whatsapp_click').length;
+            const detailsClicks = filteredActivities.filter(a => a.eventType === 'more_details_click').length;
+            const extClicks = filteredActivities.filter(a => a.eventType === 'external_link_click').length;
+
+            document.getElementById('stat-total-searches').innerText = totalSearches;
+            document.getElementById('stat-zero-searches').innerText = `${zeroResultSearches} zero-result searches`;
+            document.getElementById('stat-card-clicks').innerText = cardClicks;
+            document.getElementById('stat-ctr').innerText = totalSearches > 0 ? `${((cardClicks / totalSearches) * 100).toFixed(1)}% search CTR` : '0% search CTR';
+            document.getElementById('stat-wa-clicks').innerText = waClicks;
+            document.getElementById('stat-details-clicks').innerText = detailsClicks;
+            document.getElementById('stat-ext-clicks').innerText = extClicks;
+
+            renderSearchesTable(filteredSearches);
+            renderPopularTable(filteredSearches);
+            renderZeroTable(filteredSearches);
+            renderActivityTable(filteredActivities);
+        }
+
+        // Table 1: Real-Time Searches
+        function renderSearchesTable(searches) {
+            const tbody = document.getElementById('table-searches-body');
+            if (searches.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-stone-400">No search logs found matching filter criteria.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = searches.map(s => {
+                const date = s.timestamp ? new Date(s.timestamp).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : 'N/A';
+                const count = s.resultsCount || 0;
+                const badge = count > 0 
+                    ? `<span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-lg">${count} found</span>`
+                    : `<span class="bg-red-100 text-red-800 text-xs font-bold px-2.5 py-1 rounded-lg">0 found</span>`;
+                
+                let filterBadges = [];
+                if (s.filters) {
+                    if (s.filters.categories && s.filters.categories.length > 0) filterBadges.push(`Cat: ${s.filters.categories.join(', ')}`);
+                    if (s.filters.state) filterBadges.push(`State: ${s.filters.state}`);
+                    if (s.filters.startDate) filterBadges.push(`From: ${s.filters.startDate}`);
+                }
+                const filterStr = filterBadges.length > 0 ? filterBadges.join(' | ') : '<span class="text-stone-400">None</span>';
+
+                const actionStr = s.clickedExperience 
+                    ? `<span class="text-blue-600 font-bold">👆 Clicked: ${s.clickedExperience}</span>`
+                    : `<span class="text-stone-400">No click</span>`;
+
+                return `
+                    <tr>
+                        <td class="whitespace-nowrap font-medium text-stone-500">${date}</td>
+                        <td class="font-bold text-stone-800 text-sm">${s.searchQuery || '(empty)'}</td>
+                        <td class="text-center">${badge}</td>
+                        <td class="text-xs">${filterStr}</td>
+                        <td>${actionStr}</td>
+                        <td class="text-[11px] font-mono text-stone-400 truncate max-w-[120px]">${s.sessionId || 'N/A'}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Table 2: Popular Keywords
+        function renderPopularTable(searches) {
+            const tbody = document.getElementById('table-popular-body');
+            const map = {};
+
+            searches.forEach(s => {
+                const q = (s.searchQuery || '').trim().toLowerCase();
+                if (!q || q === '(empty)') return;
+                if (!map[q]) {
+                    map[q] = { query: s.searchQuery, count: 0, totalResults: 0, clicks: 0 };
+                }
+                map[q].count += 1;
+                map[q].totalResults += (s.resultsCount || 0);
+                if (s.hasClick) map[q].clicks += 1;
+            });
+
+            const sorted = Object.values(map).sort((a, b) => b.count - a.count);
+
+            if (sorted.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-stone-400">No search term data available.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = sorted.map((item, idx) => {
+                const avgResults = (item.totalResults / item.count).toFixed(1);
+                return `
+                    <tr>
+                        <td class="font-bold text-stone-400 text-center">${idx + 1}</td>
+                        <td class="font-bold text-stone-800 text-sm">${item.query}</td>
+                        <td class="text-center font-black text-stone-800">${item.count}</td>
+                        <td class="text-center font-semibold text-stone-600">${avgResults}</td>
+                        <td class="text-center font-bold text-blue-600">${item.clicks}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Table 3: Zero-Result Searches
+        function renderZeroTable(searches) {
+            const tbody = document.getElementById('table-zero-body');
+            const zeroSearches = searches.filter(s => (s.resultsCount || 0) === 0);
+
+            const map = {};
+            zeroSearches.forEach(s => {
+                const q = (s.searchQuery || '').trim().toLowerCase();
+                if (!q) return;
+                if (!map[q]) {
+                    map[q] = { query: s.searchQuery, count: 0, filters: s.filters, lastDate: s.timestamp };
+                }
+                map[q].count += 1;
+                if (s.timestamp > map[q].lastDate) map[q].lastDate = s.timestamp;
+            });
+
+            const sorted = Object.values(map).sort((a, b) => b.count - a.count);
+
+            if (sorted.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-emerald-600 font-bold">🎉 Excellent! No zero-result searches found. All queries matched existing retreats!</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = sorted.map(item => {
+                const date = item.lastDate ? new Date(item.lastDate).toLocaleDateString('en-IN') : 'N/A';
+                return `
+                    <tr>
+                        <td class="font-bold text-red-600 text-sm">"${item.query}"</td>
+                        <td class="text-center font-black text-stone-800">${item.count}</td>
+                        <td class="text-xs text-stone-500">${item.filters ? JSON.stringify(item.filters) : 'None'}</td>
+                        <td class="text-xs font-medium text-stone-500">${date}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Table 4: User Action Activity
+        function renderActivityTable(activities) {
+            const tbody = document.getElementById('table-activity-body');
+            if (activities.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-stone-400">No user click activities recorded yet.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = activities.map(a => {
+                const date = a.timestamp ? new Date(a.timestamp).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : 'N/A';
+                
+                let typeBadge = '';
+                if (a.eventType === 'whatsapp_click') {
+                    typeBadge = `<span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-lg">💬 WhatsApp Click</span>`;
+                } else if (a.eventType === 'more_details_click') {
+                    typeBadge = `<span class="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1 rounded-lg">🔗 More Details Link</span>`;
+                } else if (a.eventType === 'external_link_click') {
+                    typeBadge = `<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2.5 py-1 rounded-lg">🌐 External Link</span>`;
+                } else {
+                    typeBadge = `<span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-1 rounded-lg">👆 Card Click</span>`;
+                }
+
+                const urlStr = a.targetUrl ? `<a href="${a.targetUrl}" target="_blank" class="text-blue-600 underline truncate max-w-[250px] inline-block">${a.targetUrl}</a>` : '<span class="text-stone-400">-</span>';
+
+                return `
+                    <tr>
+                        <td class="whitespace-nowrap font-medium text-stone-500">${date}</td>
+                        <td>${typeBadge}</td>
+                        <td class="font-bold text-stone-800 text-sm">${a.experienceName || 'Unknown Experience'}</td>
+                        <td>${urlStr}</td>
+                        <td class="text-[11px] font-mono text-stone-400 truncate max-w-[120px]">${a.sessionId || 'N/A'}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Filter Listeners
+        document.getElementById('filter-keyword').oninput = renderAllData;
+        document.getElementById('filter-timerange').onchange = renderAllData;
+        document.getElementById('filter-result-status').onchange = renderAllData;
+
+        // Tab Switcher
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.onclick = () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                const targetTab = btn.getAttribute('data-tab');
+                currentTab = targetTab;
+
+                document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
+                document.getElementById(`view-${targetTab}`).classList.remove('hidden');
+            };
+        });
+
+        // CSV Export
+        document.getElementById('export-csv-btn').onclick = () => {
+            if (searchLogsData.length === 0) {
+                alert("No search data available to export.");
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,Timestamp,Query,ResultsFound,SessionID\n";
+            searchLogsData.forEach(s => {
+                const date = s.timestamp ? new Date(s.timestamp).toISOString() : '';
+                const query = `"${(s.searchQuery || '').replace(/"/g, '""')}"`;
+                const count = s.resultsCount || 0;
+                csvContent += `${date},${query},${count},${s.sessionId || ''}\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `search_analytics_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+    </script>
+</body>
+</html>

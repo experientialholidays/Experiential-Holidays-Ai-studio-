@@ -55,10 +55,11 @@
                 </div>
             </header>
 
-            <div id="tabs-container" class="mb-4 flex gap-4 border-b border-stone-200 hidden">
+            <div id="tabs-container" class="mb-4 flex flex-wrap gap-2 sm:gap-4 border-b border-stone-200 hidden">
                 <button id="tab-active" onclick="switchTab('active')" class="px-4 py-2 font-bold text-stone-800 border-b-2 border-stone-800 transition-colors">Active Experiences</button>
                 <button id="tab-past" onclick="switchTab('past')" class="px-4 py-2 font-bold text-stone-400 border-b-2 border-transparent hover:text-stone-600 transition-colors">Past Experiences</button>
                 <button id="tab-feedback" onclick="switchTab('feedback')" class="px-4 py-2 font-bold text-stone-400 border-b-2 border-transparent hover:text-stone-600 transition-colors admin-only hidden">Feedback & Suggestions</button>
+                <a href="/search-analytics" class="px-4 py-2 font-bold text-[#a37c6b] hover:text-stone-900 transition-colors admin-only hidden flex items-center gap-1 bg-[#f5ede8] rounded-xl text-xs">🔍 Search Analytics</a>
             </div>
 
             <div id="experiences-container">
@@ -487,7 +488,8 @@
             displayData.forEach(r => {
                 let catHtml = (r.categories || []).join(', ');
                 let vidHtml = (r.videoLinks || []).map(l => `<a href="${l}" target="_blank" class="text-blue-600 hover:underline block break-all font-medium mb-1">🔗 Video Link</a>`).join('');
-                let extHtml = (r.externalLinks || []).map(l => `<a href="${l}" target="_blank" class="text-blue-600 hover:underline block break-all font-medium mb-1">🔗 Link</a>`).join('');
+                let detailsLinkHtml = r.moreDetailsLink ? `<a href="${r.moreDetailsLink}" target="_blank" class="text-emerald-600 font-bold hover:underline block break-all mb-1">🌐 More Details Link</a>` : '';
+                let extHtml = detailsLinkHtml + (r.externalLinks || []).map(l => `<a href="${l}" target="_blank" class="text-blue-600 hover:underline block break-all font-medium mb-1">🔗 Link</a>`).join('');
                 
                 let mediaHtml = (r.fileUrls || []).map((l, i) => {
                     let fileName = `📁 File ${i + 1}`;
@@ -501,7 +503,7 @@
                 
                 const canEditDelete = isAdminGlobal || activeTab === 'active';
                 const actionButtons = canEditDelete ? `
-                    <a href="submit?id=${r.id}" class="btn-edit">Edit</a>
+                    <a href="/submit?id=${r.id}" class="btn-edit">Edit</a>
                     <button onclick="deleteEntry('${r.id}')" class="btn-delete">Del</button>
                 ` : `<span class="text-xs text-stone-400 font-bold bg-stone-100 px-2 py-1 rounded">Archived</span>`;
 

@@ -43,6 +43,7 @@
     
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="/search-tracker.js"></script>
 
     <script type="application/ld+json">
     {
@@ -199,16 +200,17 @@
             padding: 16px 8px; 
             max-width: 1400px; /* Match Navbar limit */
             margin: 0 auto; 
+            width: 100%;
         }
 
         @media (min-width: 768px) {
             .card-grid { 
-            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); 
-            justify-content: center;
-            gap: 28px; 
-            padding: 20px; 
-            max-width: 1400px; 
-            margin: 0 auto; 
+                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
+                justify-content: center;
+                gap: 28px; 
+                padding: 20px; 
+                max-width: 1400px; 
+                margin: 0 auto; 
             }
         }
 
@@ -222,7 +224,7 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
             position: relative; 
             width: 100%;
-            max-width: 420px; /* Acts as an absolute physical limit */
+            max-width: 100%;
             margin: 0 auto;
         }
 
@@ -336,7 +338,25 @@
             -ms-overflow-style: none;  /* IE and Edge */
             scrollbar-width: none;  /* Firefox */
         }
-        
+
+        /* Hero Marketing Header Banner Styles */
+        .hero-marketing-banner {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            max-height: 600px;
+            opacity: 1;
+            overflow: hidden;
+            transform: translateY(0);
+        }
+        .hero-marketing-banner.banner-hidden {
+            max-height: 0 !important;
+            opacity: 0 !important;
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+            transform: translateY(-12px);
+            pointer-events: none;
+        }
     </style>
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
@@ -351,12 +371,50 @@
         Connecting to Firebase...
     </div>
 
+    <!-- Big Marketing Header Banner -->
+    <div id="heroMarketingBanner" class="hero-marketing-banner" style="display: none !important;">
+        <div class="max-w-[1400px] mx-auto px-3 sm:px-6 pt-4 pb-2">
+            <div class="relative overflow-hidden bg-gradient-to-r from-[#f5ede8]/90 via-[#faf5f2] to-[#f5ede8]/90 border border-[#e8dad0] rounded-3xl p-6 sm:p-8 shadow-xs">
+                <!-- Close Button for explicit user dismissal -->
+                <button type="button" onclick="dismissBanner()" class="absolute top-4 right-4 z-20 w-8 h-8 flex items-center justify-center rounded-full bg-stone-200/60 hover:bg-stone-300/80 text-stone-600 transition-colors cursor-pointer text-sm font-bold" title="Dismiss Banner">
+                    ✕
+                </button>
+                <!-- Ambient decorative glow -->
+                <div class="absolute -right-10 -top-10 w-48 h-48 bg-[#a37c6b]/10 rounded-full blur-2xl pointer-events-none"></div>
+                
+                <div class="relative z-10 max-w-3xl pr-6">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#a37c6b]/12 border border-[#a37c6b]/20 text-[#a37c6b] text-xs font-black uppercase tracking-wider mb-3">
+                        <span>✨</span> Experiential Holidays
+                    </div>
+                    <h2 class="text-xl sm:text-3xl font-black text-stone-800 tracking-tight leading-snug mb-2">
+                        Curated Retreats, Wellness &amp; Authentic Travel Escapes
+                    </h2>
+                    <p class="text-sm sm:text-base font-medium text-stone-600 leading-relaxed mb-4">
+                        Discover handpicked yoga retreats, wellness immersions, cultural journeys, and offbeat local stays across India.
+                    </p>
+                    
+                    <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs font-semibold text-stone-600">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/90 border border-stone-200/80 shadow-2xs">
+                            🌿 100% Handpicked
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/90 border border-stone-200/80 shadow-2xs">
+                            🧘 Authentic Wellness
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/90 border border-stone-200/80 shadow-2xs">
+                            🏔️ Offbeat Local Journeys
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="filter-container">
         <!-- Search and Toggle Row -->
         <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-end">
             <div class="flex-1 relative">
                 <h5 class="filter-header mb-2">Universal Search</h5>
-                <input type="text" id="searchInput" placeholder="Search experiences, locations, categories or dates (e.g. 'Goa', '21 July', 'Yoga')..." class="custom-input">
+                <input type="text" id="searchInput" placeholder="Search experiences, locations, categories or dates individually (e.g. 'Goa', '21 July', 'Wellness') or combined (e.g. 'Yoga Rishikesh Dec')..." class="custom-input">
             </div>
             <div class="flex flex-col justify-end">
                 <button type="button" id="filterToggleBtn" onclick="toggleFilterOptions()" class="flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl border font-bold text-[#a37c6b] hover:bg-[#f5ede8]/30 transition bg-white cursor-pointer h-[50px] shadow-sm" style="border-color: var(--border-soft);">
@@ -418,6 +476,34 @@
     <div id="cardContainer" class="card-grid"></div>
 
     <script>
+        // Enforce manual scroll restoration on fresh load
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+        window.scrollTo(0, 0);
+
+        // Safeguard to prevent video iframes (YouTube/Instagram) from stealing focus or auto-scrolling on load
+        window.isUserScrolling = false;
+        window.addEventListener('scroll', () => { window.isUserScrolling = true; }, { passive: true });
+        window.addEventListener('touchstart', () => { window.isUserScrolling = true; }, { passive: true });
+        window.addEventListener('wheel', () => { window.isUserScrolling = true; }, { passive: true });
+        window.addEventListener('keydown', (e) => {
+            if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(e.key)) {
+                window.isUserScrolling = true;
+            }
+        }, { passive: true });
+
+        window.addEventListener('blur', () => {
+            if (document.activeElement && document.activeElement.tagName === 'IFRAME') {
+                if (!window.isUserScrolling && !window.userHasInteractedWithFilters) {
+                    window.scrollTo(0, 0);
+                    if (typeof document.activeElement.blur === 'function') {
+                        document.activeElement.blur();
+                    }
+                }
+            }
+        });
+
         const firebaseConfig = window.GLOBAL_FIREBASE_CONFIG;
 
         // Initialize Firebase SDK
@@ -427,6 +513,15 @@
         let allData = [];
         let activeCategory = null; // fallback for backward compatibility
         let selectedSubCategories = [];
+        window.selectedSubCategories = selectedSubCategories;
+        window.userHasInteractedWithFilters = false;
+        ['mousedown', 'keydown', 'touchstart'].forEach(evt => {
+            document.addEventListener(evt, (e) => {
+                if (e.isTrusted && e.target.closest('.filter-container, #filterStatus')) {
+                    window.userHasInteractedWithFilters = true;
+                }
+            }, { passive: true });
+        });
 
         const CATEGORY_DATA = {
             "Wellness & Healing": ["Yoga", "Breathwork", "Ayurveda", "Traditional Healing", "Detox Programs", "Nutrition", "Longevity", "Sleep Optimization", "Sound Healing", "Energy Healing"],
@@ -482,7 +577,7 @@
             }
         });
 
-        window.toggleSubCategoryFilter = function(sub) {
+        window.toggleSubCategoryFilter = function(sub, e) {
             const index = selectedSubCategories.indexOf(sub);
             const btnId = `btn-sub-${sub.replace(/[^a-zA-Z0-9]/g, '')}`;
             const btn = document.getElementById(btnId);
@@ -501,7 +596,7 @@
             runFilter();
         };
 
-        window.clearSelectedSubCategory = function(sub) {
+        window.clearSelectedSubCategory = function(sub, e) {
             const index = selectedSubCategories.indexOf(sub);
             if (index > -1) {
                 selectedSubCategories.splice(index, 1);
@@ -559,7 +654,7 @@
                                     <button type="button" 
                                             id="btn-sub-${sub.replace(/[^a-zA-Z0-9]/g, '')}" 
                                             class="relative px-3.5 py-1.5 rounded-full text-[13px] font-semibold border select-none sub-cat-btn mr-1.5 ${isSelected ? 'selected' : ''}" 
-                                            onclick="toggleSubCategoryFilter('${sub.replace(/'/g, "\\'")}')">
+                                            onclick="toggleSubCategoryFilter('${sub.replace(/'/g, "\\'")}', event)">
                                         ${sub}
                                         ${getSubCategoryBadge(sub)}
                                     </button>
@@ -591,12 +686,17 @@
                     'experience_name': name
                 });
             }
+            if (typeof trackCardClickToFirestore === 'function') {
+                trackCardClickToFirestore({
+                    experienceId: id,
+                    experienceName: name,
+                    experienceSlug: slug
+                });
+            }
             window.location.href = `/experience/${slug || id}`;
         };
 
         function trackSearchEvent(resultsCount) {
-            if (typeof gtag !== 'function') return;
-
             const searchQuery = document.getElementById('searchInput').value.trim();
             const dateStart = document.getElementById('startDateInput').value;
             const dateEnd = document.getElementById('endDateInput').value;
@@ -612,22 +712,38 @@
                 if (hasActiveFilter) {
                     const isRedefined = hasSearchedInSession && (searchQuery !== lastSearchQuery || selectedSubCategories.length > 0 || dateStart !== "" || dateEnd !== "" || stateVal !== "");
                     
-                    gtag('event', isRedefined ? 'redefine_search' : 'search_experiences', {
-                        'search_term': searchQuery || '(empty)',
-                        'results_count': resultsCount,
-                        'category': selectedSubCategories.join(',') || 'all',
-                        'start_date': dateStart || 'none',
-                        'end_date': dateEnd || 'none',
-                        'is_redefined': isRedefined
-                    });
+                    if (typeof gtag === 'function') {
+                        gtag('event', isRedefined ? 'redefine_search' : 'search_experiences', {
+                            'search_term': searchQuery || '(empty)',
+                            'results_count': resultsCount,
+                            'category': selectedSubCategories.join(',') || 'all',
+                            'start_date': dateStart || 'none',
+                            'end_date': dateEnd || 'none',
+                            'is_redefined': isRedefined
+                        });
+                    }
+
+                    if (typeof trackSearchQueryToFirestore === 'function') {
+                        trackSearchQueryToFirestore({
+                            query: searchQuery,
+                            resultsCount: resultsCount,
+                            filters: {
+                                categories: selectedSubCategories,
+                                startDate: dateStart,
+                                endDate: dateEnd,
+                                state: stateVal
+                            }
+                        });
+                    }
 
                     lastSearchQuery = searchQuery;
                     hasSearchedInSession = true;
                 } else if (hasSearchedInSession) {
-                    // Search criteria cleared - closed search
-                    gtag('event', 'close_or_clear_search', {
-                        'action': 'clear_all_filters'
-                    });
+                    if (typeof gtag === 'function') {
+                        gtag('event', 'close_or_clear_search', {
+                            'action': 'clear_all_filters'
+                        });
+                    }
                     lastSearchQuery = "";
                     hasSearchedInSession = false;
                 }
@@ -660,6 +776,7 @@
             const regex2b = new RegExp(`\\b(${monthsStr})\\s*(\\d{1,2})\\s*(?:-|to)\\s*(\\d{1,2})\\b`, 'i');
             const regex3 = new RegExp(`\\b(\\d{1,2})\\s*(${monthsStr})\\b`, 'i');
             const regex4 = new RegExp(`\\b(${monthsStr})\\s*(\\d{1,2})\\b`, 'i');
+            const regex5 = new RegExp(`\\b(?:in\\s+)?(${monthsStr})\\b`, 'i');
             
             const now = new Date();
             const currentYear = now.getFullYear();
@@ -739,6 +856,25 @@
                 let m1 = match[1], d1 = match[2];
                 let date1 = parseDate(d1, m1, currentMonth, currentYear);
                 result.start = result.end = formatDateStr(date1);
+                result.cleanText = text.replace(match[0], '').trim();
+                result.isNLP = true;
+                result.originalMatch = match[0];
+                return result;
+            }
+
+            match = text.match(regex5);
+            if (match) {
+                let mStr = match[1];
+                let m = monthMap[mStr.toLowerCase()];
+                let y = currentYear;
+                if (m < currentMonth - 2) {
+                    y = currentYear + 1;
+                }
+                let firstDay = new Date(y, m, 1);
+                let lastDay = new Date(y, m + 1, 0);
+
+                result.start = formatDateStr(firstDay);
+                result.end = formatDateStr(lastDay);
                 result.cleanText = text.replace(match[0], '').trim();
                 result.isNLP = true;
                 result.originalMatch = match[0];
@@ -854,6 +990,8 @@
                         CPhone: String(r.contactWhatsApp || ''),
                         CNum: String(r.contactNumber || ''),
                         ExternalLinks: Array.isArray(r.externalLinks) ? r.externalLinks : [],
+                        mediaPriority: String(r.mediaPriority || 'youtube_first'),
+                        moreDetailsLink: String(r.moreDetailsLink || ''),
                         MediaArray: media,
                         Timestamp: r.timestamp || Date.now(),
                         FlexibleDates: isFlexible,
@@ -906,7 +1044,7 @@
 
         function getInstagramId(url) {
             if (!url || typeof url !== 'string') return null;
-            const match = url.trim().match(/instagram\.com\/(?:reel|reels|p)\/([a-zA-Z0-9_-]+)/i);
+            const match = url.trim().match(/(?:instagram\.com|instagr\.am)\/(?:reel|reels|p|tv|share\/p|share\/reel)\/([a-zA-Z0-9_-]+)/i);
             return match ? match[1] : null;
         }
 
@@ -943,21 +1081,53 @@
                 const ytId = getYouTubeId(ytUrl);
                 const instaId = getInstagramId(instaUrl);
 
-                if (ytId) {
-                    primaryMedia = `<iframe class="absolute top-0 left-0 w-full h-full lazy-video pointer-events-none" data-src="https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${ytId}" frameborder="0" allow="autoplay; encrypted-media"></iframe>`;
-                } else if (imgUrl) {
-                    primaryMedia = `<img src="${imgUrl}" class="absolute top-0 left-0 w-full h-full object-cover object-top" alt="Experience Image">`;
-                } else if (instaId) {
-                    // We removed 'src' and changed it to 'data-src', and added the 'lazy-video' class
-                    // This forces Instagram to use your custom Intersection Observer!
+                // Determine dynamic media order
+                const priority = item.mediaPriority || 'youtube_first';
+                let selectedType = '';
+
+                if (priority === 'image_first') {
+                    if (imgUrl) selectedType = 'image';
+                    else if (instaId) selectedType = 'instagram';
+                    else if (ytId) selectedType = 'youtube';
+                    else if (pdfUrl) selectedType = 'pdf';
+                } else if (priority === 'instagram_first') {
+                    if (instaId) selectedType = 'instagram';
+                    else if (imgUrl) selectedType = 'image';
+                    else if (ytId) selectedType = 'youtube';
+                    else if (pdfUrl) selectedType = 'pdf';
+                } else {
+                    // Default: youtube_first (YouTube -> Instagram -> Image -> PDF)
+                    if (ytId) selectedType = 'youtube';
+                    else if (instaId) selectedType = 'instagram';
+                    else if (imgUrl) selectedType = 'image';
+                    else if (pdfUrl) selectedType = 'pdf';
+                }
+
+                if (selectedType === 'youtube') {
                     primaryMedia = `
                     <iframe
-                        data-src="https://www.instagram.com/reel/${instaId}/embed/"
+                        data-src="https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&loop=1&playlist=${ytId}&controls=0&playsinline=1"
+                        class="w-full h-full border-0 pointer-events-none lazy-video"
+                        tabindex="-1"
+                        aria-hidden="true"
+                        allow="autoplay; encrypted-media"
+                        allowfullscreen>
+                    </iframe>`;
+                } else if (selectedType === 'image') {
+                    primaryMedia = `<img src="${imgUrl}" class="absolute top-0 left-0 w-full h-full object-cover object-top" alt="Experience Image">`;
+                } else if (selectedType === 'instagram') {
+                    primaryMedia = `
+                    <iframe
+                        data-src="https://www.instagram.com/p/${instaId}/embed/"
                         class="w-full h-[160%] -mt-[75px] pointer-events-none lazy-video"
+                        tabindex="-1"
+                        aria-hidden="true"
+                        frameborder="0"
+                        scrolling="no"
+                        allowtransparency="true"
                         onerror="this.parentNode.innerHTML='<div class=\\'absolute inset-0 flex items-center justify-center bg-gradient-to-br from-pink-500 via-red-500 to-yellow-500 text-white font-bold\\'>Instagram Reel</div>'">
                     </iframe>`;
-
-                } else if (pdfUrl) {
+                } else if (selectedType === 'pdf') {
                     primaryMedia = `
                     <div class="absolute inset-0 flex flex-col items-center justify-center bg-stone-100 text-stone-600">
                         <div class="text-6xl mb-4">📄</div>
@@ -1007,6 +1177,12 @@
                             iframe.src = iframe.dataset.src;
                             iframe.onload = () => {
                                 iframe.classList.add('loaded');
+                                if (document.activeElement === iframe) {
+                                    document.activeElement.blur();
+                                }
+                                if (!window.isUserScrolling && !window.userHasInteractedWithFilters) {
+                                    window.scrollTo(0, 0);
+                                }
                             };
                             // Safety fallback for cached videos / slow trigger
                             setTimeout(() => {
@@ -1015,7 +1191,7 @@
                         }
                     }
                 });
-            }, { threshold: 0.01, rootMargin: "0px 0px 1200px 0px"});
+            }, { threshold: 0.01, rootMargin: "0px 0px 0px 0px" });
             document.querySelectorAll('.lazy-video').forEach(vid => {
                 if (vid.src) {
                     vid.classList.add('loaded');
@@ -1046,6 +1222,7 @@
 
         // Filtering System
         function runFilter() {
+            updateBannerState();
             let sRaw = document.getElementById('searchInput').value.toLowerCase();
             
             const nlpDate = extractDateRange(sRaw);
@@ -1086,7 +1263,20 @@
                     if (dStart === dEnd) {
                         txt = `${formatDisplayDate(dStart)}`;
                     } else {
-                        txt = `${formatDisplayDate(dStart)} to ${formatDisplayDate(dEnd)}`;
+                        const sParts = dStart.split('-');
+                        const eParts = dEnd.split('-');
+                        if (sParts.length === 3 && eParts.length === 3 && sParts[0] === eParts[0] && sParts[1] === eParts[1] && sParts[2] === '01') {
+                            const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                            const mIdx = parseInt(sParts[1], 10) - 1;
+                            const lastDayOfM = new Date(parseInt(sParts[0], 10), mIdx + 1, 0).getDate();
+                            if (parseInt(eParts[2], 10) === lastDayOfM) {
+                                txt = `${months[mIdx]} ${sParts[0]}`;
+                            } else {
+                                txt = `${formatDisplayDate(dStart)} to ${formatDisplayDate(dEnd)}`;
+                            }
+                        } else {
+                            txt = `${formatDisplayDate(dStart)} to ${formatDisplayDate(dEnd)}`;
+                        }
                     }
                 } else if (dStart) {
                     txt = `From ${formatDisplayDate(dStart)}`;
@@ -1289,13 +1479,130 @@
             runFilter();
         }
 
-        // Event Listeners for Filters
+        // Marketing Header Banner Handler (Holds on page load; vanishes only when user types or selects any filter)
+        window.userExplicitlyDismissedBanner = false;
+        
+        window.dismissBanner = function() {
+            window.userExplicitlyDismissedBanner = true;
+            const banner = document.getElementById('heroMarketingBanner');
+            if (banner) {
+                banner.classList.add('banner-hidden');
+            }
+        };
+
+        function updateBannerState() {
+            const banner = document.getElementById('heroMarketingBanner');
+            if (!banner) return;
+
+            if (window.userExplicitlyDismissedBanner) {
+                banner.classList.add('banner-hidden');
+                return;
+            }
+
+            // 1. GUARANTEED HOLD: If the user hasn't explicitly interacted with filters yet,
+            // DO NOT hide the banner. This ensures it stays on page load and data load.
+            if (!window.userHasInteractedWithFilters) {
+                banner.classList.remove('banner-hidden');
+                return;
+            }
+
+            // 2. Check if any search query or filter selection is currently active
+            const searchInput = document.getElementById('searchInput');
+            const hasSearchText = searchInput && searchInput.value.trim().length > 0;
+
+            const stateSelect = document.getElementById('stateFilterSelect');
+            const hasState = stateSelect && stateSelect.value !== '';
+
+            const startDate = document.getElementById('startDateInput');
+            const hasStartDate = startDate && startDate.value !== '';
+
+            const endDate = document.getElementById('endDateInput');
+            const hasEndDate = endDate && endDate.value !== '';
+
+            const subs = window.selectedSubCategories || [];
+            const hasSubCategories = Array.isArray(subs) && subs.length > 0;
+
+            const isFilterActive = hasSearchText || hasState || hasStartDate || hasEndDate || hasSubCategories;
+
+            // Vanish ONLY when user types or selects any active filter; hold/show if empty
+            if (isFilterActive) {
+                banner.classList.add('banner-hidden');
+            } else {
+                banner.classList.remove('banner-hidden');
+            }
+        }
+
+        // Event Listeners for Filters (User interaction triggers)
         const searchInputEl = document.getElementById('searchInput');
-        if (searchInputEl) searchInputEl.oninput = runFilter;
+        if (searchInputEl) {
+            searchInputEl.addEventListener('input', (e) => {
+                runFilter();
+            });
+            searchInputEl.addEventListener('keyup', (e) => {
+                runFilter();
+            });
+
+            // Smooth Scrolling Marquee Placeholder for Mobile & Tablet Readability
+            (function initPlaceholderMarquee() {
+                const fullPrompt = "Search experiences, locations, categories or dates individually (e.g. 'Goa', '21 July', 'Wellness') or combined (e.g. 'Yoga Rishikesh Dec')     •     ";
+                let step = 0;
+                let marqueeTimer = null;
+
+                function startMarquee() {
+                    if (marqueeTimer) clearInterval(marqueeTimer);
+                    marqueeTimer = setInterval(() => {
+                        if (document.activeElement === searchInputEl || searchInputEl.value.trim() !== '') {
+                            stopMarquee();
+                            return;
+                        }
+                        step = (step + 1) % fullPrompt.length;
+                        searchInputEl.placeholder = fullPrompt.substring(step) + fullPrompt.substring(0, step);
+                    }, 225);
+                }
+
+                function stopMarquee() {
+                    if (marqueeTimer) {
+                        clearInterval(marqueeTimer);
+                        marqueeTimer = null;
+                    }
+                    if (searchInputEl.value.trim() === '') {
+                        searchInputEl.placeholder = "Search experiences, locations, categories or dates individually (e.g. 'Goa', '21 July', 'Wellness') or combined (e.g. 'Yoga Rishikesh Dec')...";
+                    }
+                }
+
+                searchInputEl.addEventListener('focus', stopMarquee);
+                searchInputEl.addEventListener('blur', () => {
+                    if (searchInputEl.value.trim() === '') {
+                        startMarquee();
+                    }
+                });
+                searchInputEl.addEventListener('input', () => {
+                    if (searchInputEl.value.trim() !== '') {
+                        stopMarquee();
+                    }
+                });
+
+                setTimeout(startMarquee, 800);
+            })();
+        }
+        const stateFilterSelectEl = document.getElementById('stateFilterSelect');
+        if (stateFilterSelectEl) {
+            stateFilterSelectEl.addEventListener('change', (e) => {
+                runFilter();
+            });
+        }
         const startDateInputEl = document.getElementById('startDateInput');
-        if (startDateInputEl) startDateInputEl.onchange = validateAndFilter;
+        if (startDateInputEl) {
+            startDateInputEl.addEventListener('change', (e) => {
+                validateAndFilter();
+            });
+        }
         const endDateInputEl = document.getElementById('endDateInput');
-        if (endDateInputEl) endDateInputEl.onchange = validateAndFilter;
+        if (endDateInputEl) {
+            endDateInputEl.addEventListener('change', (e) => {
+                validateAndFilter();
+            });
+        }
 
         // Setup initial dropdown states
 
@@ -1332,8 +1639,9 @@
         });
 
         const urlParams = new URLSearchParams(window.location.search);
-        const categoryParam = urlParams.get('category') || urlParams.get('subcategory') || urlParams.get('search');
+        const categoryParam = urlParams.get('category') || urlParams.get('subcategory');
         const tagParam = urlParams.get('tag');
+        const searchParam = urlParams.get('search');
 
         if (categoryParam) {
             // Assign directly to the database category filter instead of the text input box
@@ -1352,6 +1660,13 @@
             }
         }
 
+        if (searchParam) {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.value = searchParam;
+            }
+        }
+
         if (tagParam) {
             const searchInput = document.getElementById('searchInput');
             if (searchInput) {
@@ -1359,7 +1674,7 @@
             }
         }
 
-        if ((categoryParam || tagParam) && typeof allData !== 'undefined' && allData.length > 0) {
+        if ((categoryParam || tagParam || searchParam) && typeof allData !== 'undefined' && allData.length > 0) {
             runFilter();
         }
         const loginBtnMenuEl = document.getElementById('login-btn-menu');

@@ -35,6 +35,7 @@ export default defineConfig({
         experience: resolve(__dirname, 'public/experience.html'),
         privacy: resolve(__dirname, 'public/privacy.html'),
         submit: resolve(__dirname, 'public/submit.html'),
+        searchAnalytics: resolve(__dirname, 'public/search-analytics.html'),
         terms: resolve(__dirname, 'public/terms.html')
       }
     }

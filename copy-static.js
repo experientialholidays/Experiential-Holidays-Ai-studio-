@@ -4,7 +4,7 @@ import path from 'path';
 const srcDir = path.join(process.cwd(), 'public');
 const destDir = path.join(process.cwd(), 'dist');
 
-const filesToCopy = ['config.js', 'navbar.js', 'footer.js'];
+const filesToCopy = ['config.js', 'navbar.js', 'footer.js', 'search-tracker.js'];
 
 for (const file of filesToCopy) {
   const src = path.join(srcDir, file);
