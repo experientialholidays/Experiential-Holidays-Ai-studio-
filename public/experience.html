@@ -411,8 +411,15 @@
     <script>
         const firebaseConfig = window.GLOBAL_FIREBASE_CONFIG;
         // Initialize Firebase SDK
-        firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
         const db = firebase.firestore();
+        try {
+            db.settings({ experimentalAutoDetectLongPolling: true });
+        } catch(e) {
+            // Settings already initialized
+        }
         const urlParams = new URLSearchParams(window.location.search);
         let experienceId = urlParams.get('id');
         if (!experienceId) {

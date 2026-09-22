@@ -8,6 +8,71 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// Serve robots.txt
+app.get('/robots.txt', (req, res) => {
+    res.type('text/plain');
+    res.send(`User-agent: *\nAllow: /\nDisallow: /search-analytics.html\nDisallow: /dashboard.html\n\nSitemap: https://experientialholidays.info/sitemap.xml\n`);
+});
+
+// Dynamic sitemap.xml generator
+app.get('/sitemap.xml', async (req, res) => {
+    res.type('application/xml');
+    const baseUrl = 'https://experientialholidays.info';
+    
+    const staticPages = [
+        { url: '/', priority: '1.0', changefreq: 'daily' },
+        { url: '/about.html', priority: '0.8', changefreq: 'monthly' },
+        { url: '/contact.html', priority: '0.8', changefreq: 'monthly' },
+        { url: '/submit.html', priority: '0.9', changefreq: 'weekly' },
+        { url: '/privacy.html', priority: '0.3', changefreq: 'yearly' },
+        { url: '/terms.html', priority: '0.3', changefreq: 'yearly' },
+    ];
+
+    let dynamicUrls = [];
+
+    try {
+        const projectId = 'submit-a';
+        const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/retreats`;
+        const response = await fetch(url);
+        if (response.ok) {
+            const data = await response.json();
+            if (data.documents) {
+                data.documents.forEach(doc => {
+                    const fields = doc.fields || {};
+                    const slug = fields.slug?.stringValue || fields.id?.stringValue || doc.name.split('/').pop();
+                    const status = fields.status?.stringValue || 'approved';
+                    const updatedAt = doc.updateTime || new Date().toISOString();
+
+                    if (slug && status === 'approved') {
+                        dynamicUrls.push({
+                            url: `/experience/${encodeURIComponent(slug)}`,
+                            lastmod: updatedAt.split('T')[0],
+                            priority: '0.8',
+                            changefreq: 'weekly'
+                        });
+                    }
+                });
+            }
+        }
+    } catch (err) {
+        console.error('Error building dynamic sitemap:', err);
+    }
+
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+    xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+
+    staticPages.forEach(p => {
+        xml += `  <url>\n    <loc>${baseUrl}${p.url}</loc>\n    <changefreq>${p.changefreq}</changefreq>\n    <priority>${p.priority}</priority>\n  </url>\n`;
+    });
+
+    dynamicUrls.forEach(p => {
+        xml += `  <url>\n    <loc>${baseUrl}${p.url}</loc>\n    <lastmod>${p.lastmod}</lastmod>\n    <changefreq>${p.changefreq}</changefreq>\n    <priority>${p.priority}</priority>\n  </url>\n`;
+    });
+
+    xml += `</urlset>`;
+    res.send(xml);
+});
+
 app.get(['/experience', '/experience/:id', '/experience.html'], async (req, res, next) => {
     const id = req.params.id || req.query.id;
     if (!id) {

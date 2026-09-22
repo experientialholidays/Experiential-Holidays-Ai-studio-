@@ -18,7 +18,11 @@
             return window.db;
         }
         if (typeof firebase !== 'undefined' && firebase.firestore) {
-            return firebase.firestore();
+            const instance = firebase.firestore();
+            try {
+                instance.settings({ experimentalAutoDetectLongPolling: true });
+            } catch(e) {}
+            return instance;
         }
         return null;
     }

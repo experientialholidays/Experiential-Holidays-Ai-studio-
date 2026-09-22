@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Experiential Holidays India | Retreats, Workshops & Wellness Experiences</title>
     <meta name="description" content="Discover retreats, workshops, festivals, wellness journeys and transformational experiences across India.">
-    <meta name="keywords" content="retreats india, workshops india, yoga retreats, wellness retreats, experiential travel, meditation retreats">
+    <meta name="keywords" content="retreats india, workshops india, yoga retreats, wellness retreats, experiential travel, meditation retreats, holistic wellness retreats, sound healing workshops, ayurveda retreats, silent retreats india, weekend retreats near me, art workshops india, list retreat india">
     <meta name="author" content="Experiential Holidays">
     <meta name="robots" content="index, follow">
 
     <link rel="canonical" href="https://experientialholidays.info/">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Experiential Holidays India">
-    <meta property="og:description" content="Discover meaningful retreats and transformational experiences across India.">
+    <meta property="og:title" content="Experiential Holidays India | Retreats, Workshops & Wellness">
+    <meta property="og:description" content="Discover curated retreats, workshops, wellness journeys, and transformational experiences across India.">
     <meta property="og:url" content="https://experientialholidays.info/">
     <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/submit-a.firebasestorage.app/o/file_00000000644071fa82872ccf94d36b6f.png?alt=media&token=28d7ea2e-7eb8-486f-aa51-3a6d8a438eb1">
     <meta property="og:site_name" content="Experiential Holidays">
@@ -45,14 +45,52 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="/search-tracker.js"></script>
 
+    <!-- Schema.org Rich Snippets -->
     <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        "name": "Experiential Holidays",
-        "url": "https://experientialholidays.info",
-        "description": "Curated retreats and experiential travel opportunities across India."
-    }
+    [
+        {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "Experiential Holidays",
+            "url": "https://experientialholidays.info",
+            "description": "Curated retreats, workshops, and experiential travel opportunities across India.",
+            "potentialAction": {
+                "@type": "SearchAction",
+                "target": "https://experientialholidays.info/?search={search_term_string}",
+                "query-input": "required name=search_term_string"
+            }
+        },
+        {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "Experiential Holidays",
+            "url": "https://experientialholidays.info",
+            "logo": "https://firebasestorage.googleapis.com/v0/b/submit-a.firebasestorage.app/o/file_00000000644071fa82872ccf94d36b6f.png?alt=media&token=28d7ea2e-7eb8-486f-aa51-3a6d8a438eb1",
+            "sameAs": []
+        },
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                {
+                    "@type": "Question",
+                    "name": "What is Experiential Holidays?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Experiential Holidays is a platform that curates transformational retreats, workshops, wellness journeys, and experiential events across India."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "How can organizers submit a retreat or workshop?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Organizers can easily list their retreat or workshop by clicking 'Submit Experience' on the Experiential Holidays platform."
+                    }
+                }
+            ]
+        }
+    ]
     </script>
 
     <style>
@@ -507,8 +545,15 @@
         const firebaseConfig = window.GLOBAL_FIREBASE_CONFIG;
 
         // Initialize Firebase SDK
-        firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
         const db = firebase.firestore();
+        try {
+            db.settings({ experimentalAutoDetectLongPolling: true });
+        } catch(e) {
+            // Settings already initialized
+        }
 
         let allData = [];
         let activeCategory = null; // fallback for backward compatibility
