@@ -321,22 +321,22 @@
             position: fixed;
             top: 50%;
             transform: translateY(-50%);
-            width: 56px;
-            height: 56px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             background: rgba(255, 255, 255, .95);
             color: #444;
-            font-size: 30px;
+            font-size: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: 0 4px 20px rgba(0,0,0,.12);
+            box-shadow: 0 4px 15px rgba(0,0,0,.15);
             z-index: 100001;
         }
 
-        .lightbox-prev { left: 16px; }
-        .lightbox-next { right: 16px; }
+        .lightbox-prev { left: 12px; }
+        .lightbox-next { right: 12px; }
 
         @media(max-width: 768px) {
             #modal-top-info { padding: 20px 18px 8px; }
@@ -344,7 +344,7 @@
             #modal-carousel { padding: 0 10px; gap: 10px; }
             .carousel-item iframe, .instagram-frame, .pdf-frame { height: 72vh; }
             #lightbox-content iframe { height: 88vh; }
-            .lightbox-prev, .lightbox-next { width: 42px; height: 42px; font-size: 22px; }
+            .lightbox-prev, .lightbox-next { width: 28px; height: 28px; font-size: 15px; }
             .lightbox-close { width: 42px; height: 42px; font-size: 26px; }
             .carousel-thumb { width: 68px; height: 68px; border-radius: 14px; }
             .youtube-frame, .carousel-image { height: 72vh; }
@@ -686,6 +686,41 @@
             return digits.length >= 6;
         }
 
+        let lastNavTime = 0;
+
+        function attachMainSwipeGesture() {
+            const mainEl = document.getElementById('modal-carousel-main');
+            if (!mainEl || mainEl.dataset.swipeAttached === 'true') return;
+            mainEl.dataset.swipeAttached = 'true';
+
+            let startX = 0;
+            let startY = 0;
+
+            mainEl.addEventListener('touchstart', (e) => {
+                if (e.touches.length > 1) return;
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+            }, { passive: true });
+
+            mainEl.addEventListener('touchend', (e) => {
+                if (e.changedTouches.length === 0) return;
+                const endX = e.changedTouches[0].clientX;
+                const endY = e.changedTouches[0].clientY;
+
+                const diffX = endX - startX;
+                const diffY = endY - startY;
+
+                // Horizontal swipe dominant and >= 30px
+                if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) >= 30) {
+                    if (diffX < 0) {
+                        window.nextMainMedia();
+                    } else {
+                        window.prevMainMedia();
+                    }
+                }
+            }, { passive: true });
+        }
+
         function renderMainMedia(index) {
             if (!currentMedia || !currentMedia.length) return;
             activeDetailMedia = index;
@@ -693,37 +728,104 @@
             const ytId = getYouTubeId(url);
             const instaId = getInstagramId(url);
             const pdfFile = isPdf(url);
-            let html = '';
+            
+            const totalMedia = currentMedia.length;
+            const isFirst = index <= 0;
+            const isLast = index >= totalMedia - 1;
+
+            const prevBtnHtml = totalMedia > 1 ? `
+                <button onclick="prevMainMedia(event)" ontouchstart="prevMainMedia(event)" type="button"
+                    class="absolute left-2.5 top-1/2 -translate-y-1/2 z-50 w-8 h-8 rounded-full bg-stone-900/80 hover:bg-stone-950 text-white flex items-center justify-center transition-all shadow-lg backdrop-blur-md border border-white/30 ${isFirst ? 'opacity-20 cursor-not-allowed pointer-events-none' : 'opacity-85 hover:opacity-100 hover:scale-110 cursor-pointer active:scale-90'}"
+                    ${isFirst ? 'disabled' : ''} title="Previous Media">
+                    <svg class="w-4 h-4 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                </button>
+            ` : '';
+
+            const nextBtnHtml = totalMedia > 1 ? `
+                <button onclick="nextMainMedia(event)" ontouchstart="nextMainMedia(event)" type="button"
+                    class="absolute right-2.5 top-1/2 -translate-y-1/2 z-50 w-8 h-8 rounded-full bg-stone-900/80 hover:bg-stone-950 text-white flex items-center justify-center transition-all shadow-lg backdrop-blur-md border border-white/30 ${isLast ? 'opacity-20 cursor-not-allowed pointer-events-none' : 'opacity-85 hover:opacity-100 hover:scale-110 cursor-pointer active:scale-90'}"
+                    ${isLast ? 'disabled' : ''} title="Next Media">
+                    <svg class="w-4 h-4 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                </button>
+            ` : '';
+
+            const counterBadgeHtml = totalMedia > 1 ? `
+                <div class="absolute bottom-3 left-3 z-50 bg-stone-900/85 text-white text-[11px] font-black px-3 py-1 rounded-full backdrop-blur-md border border-white/30 shadow-lg">
+                    ${index + 1} / ${totalMedia}
+                </div>
+            ` : '';
+
+            let mediaHtml = '';
 
             if (ytId) {
-                html = `
+                mediaHtml = `
                 <div class="carousel-item">
                     <iframe class="youtube-frame" src="https://www.youtube.com/embed/${ytId}" allowfullscreen></iframe>
                 </div>`;
             } else if (isImage(url)) {
-                html = `
+                mediaHtml = `
                 <div class="carousel-item" onclick="openLightbox(${index})">
                     <img src="${url}" class="carousel-image" loading="lazy">
                 </div>`;
             } else if (pdfFile) {
-                html = `
+                mediaHtml = `
                 <div class="carousel-item">
                     <iframe class="pdf-frame" src="https://drive.google.com/viewerng/viewer?embedded=true&url=${encodeURIComponent(url)}"></iframe>
                 </div>`;
             } else if (instaId) {
-                html = `
+                mediaHtml = `
                 <div class="carousel-item instagram-wrap">
                     <iframe class="instagram-frame" src="https://www.instagram.com/p/${instaId}/embed/" loading="lazy" frameborder="0" scrolling="no" allowtransparency="true"></iframe> 
                 </div>`;
             }
 
-            document.getElementById('modal-carousel-main').innerHTML = html;
+            const mainContainer = document.getElementById('modal-carousel-main');
+            if (mainContainer) {
+                mainContainer.style.position = 'relative';
+                mainContainer.innerHTML = `
+                    ${mediaHtml}
+                    ${counterBadgeHtml}
+                    ${prevBtnHtml}
+                    ${nextBtnHtml}
+                `;
+            }
+
+            attachMainSwipeGesture();
+
             document.querySelectorAll('.carousel-thumb').forEach((el, i) => {
                 if(i === index) el.classList.add('active');
                 else el.classList.remove('active');
             });
         }
         window.renderMainMedia = renderMainMedia;
+
+        window.prevMainMedia = (e) => {
+            if (e) {
+                e.stopPropagation();
+                if (e.type === 'touchstart' && e.cancelable) e.preventDefault();
+            }
+            const now = Date.now();
+            if (now - lastNavTime < 250) return;
+            lastNavTime = now;
+
+            if (activeDetailMedia > 0) {
+                renderMainMedia(activeDetailMedia - 1);
+            }
+        };
+
+        window.nextMainMedia = (e) => {
+            if (e) {
+                e.stopPropagation();
+                if (e.type === 'touchstart' && e.cancelable) e.preventDefault();
+            }
+            const now = Date.now();
+            if (now - lastNavTime < 250) return;
+            lastNavTime = now;
+
+            if (currentMedia && activeDetailMedia < currentMedia.length - 1) {
+                renderMainMedia(activeDetailMedia + 1);
+            }
+        };
 
         function renderExperience(i) { 
             const loading = document.getElementById('loading-state');
@@ -1066,6 +1168,29 @@
             const container = document.getElementById('lightbox-content');
             if (!container) return;
 
+            const total = currentMedia.length;
+            const isFirst = (currentMediaIndex <= 0);
+            const isLast = (currentMediaIndex >= total - 1);
+
+            const prevBtn = document.querySelector('.lightbox-prev');
+            const nextBtn = document.querySelector('.lightbox-next');
+
+            if (prevBtn) {
+                if (isFirst || total <= 1) {
+                    prevBtn.classList.add('opacity-20', 'pointer-events-none', 'cursor-not-allowed');
+                } else {
+                    prevBtn.classList.remove('opacity-20', 'pointer-events-none', 'cursor-not-allowed');
+                }
+            }
+
+            if (nextBtn) {
+                if (isLast || total <= 1) {
+                    nextBtn.classList.add('opacity-20', 'pointer-events-none', 'cursor-not-allowed');
+                } else {
+                    nextBtn.classList.remove('opacity-20', 'pointer-events-none', 'cursor-not-allowed');
+                }
+            }
+
             const instaId = getInstagramId(url);
             const ytId = getYouTubeId(url);
             const pdfFile = isPdf(url);
@@ -1111,10 +1236,7 @@
         });
 
         function handleSwipe() {
-            const threshold = 50; 
-            const isIframe = document.querySelector('#lightbox-content iframe');
-            if (isIframe) return; 
-
+            const threshold = 35; 
             if (endX < startX - threshold) changeLightbox(1); 
             if (endX > startX + threshold) changeLightbox(-1);
         }

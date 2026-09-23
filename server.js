@@ -80,7 +80,11 @@ app.get(['/experience', '/experience/:id', '/experience.html'], async (req, res,
     }
 
     try {
-        let html = fs.readFileSync(path.join(__dirname, 'dist', 'experience.html'), 'utf-8');
+        let htmlPath = path.join(__dirname, 'public', 'experience.html');
+        if (!fs.existsSync(htmlPath)) {
+            htmlPath = path.join(__dirname, 'dist', 'experience.html');
+        }
+        let html = fs.readFileSync(htmlPath, 'utf-8');
 
         const projectId = 'submit-a';
         let url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/retreats/${id}`;
