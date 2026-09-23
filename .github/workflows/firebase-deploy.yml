@@ -30,4 +30,5 @@ jobs:
           repoToken: "${{ secrets.GITHUB_TOKEN }}"
           firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_SUBMIT_A }}"
           projectId: submit-a
+          target: "${{ secrets.FIREBASE_TARGET || secrets.FIREBASE_SITE || secrets.FIREBASE_SITE_TARGET || secrets.FIREBASE_HOSTING_SITE || vars.FIREBASE_TARGET }}"
           channelId: live

@@ -1,6 +1,5 @@
 {
   "hosting": {
-    "site": "expholi-testing",
     "public": "dist",
     "ignore": [
       "firebase.json",
