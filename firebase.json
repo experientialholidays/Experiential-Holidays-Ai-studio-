@@ -1,23 +1,50 @@
 {
-  "hosting": {
-    "public": "dist",
-    "ignore": [
-      "firebase.json",
-      "package.json",
-      "package-lock.json",
-      "tsconfig.json",
-      "metadata.json",
-      "server.js",
-      "copy-static.js",
-      "**/.*",
-      "**/node_modules/**"
-    ],
-    "rewrites": [
-      {
-        "source": "/experience/**",
-        "destination": "/experience.html"
-      }
-    ],
-    "cleanUrls": true
-  }
+  "hosting": [
+    {
+      "target": "expholi-testing",
+      "site": "expholi-testing",
+      "public": "dist",
+      "ignore": [
+        "firebase.json",
+        "package.json",
+        "package-lock.json",
+        "tsconfig.json",
+        "metadata.json",
+        "server.js",
+        "copy-static.js",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "/experience/**",
+          "destination": "/experience.html"
+        }
+      ],
+      "cleanUrls": true
+    },
+    {
+      "target": "submit-a",
+      "site": "submit-a",
+      "public": "dist",
+      "ignore": [
+        "firebase.json",
+        "package.json",
+        "package-lock.json",
+        "tsconfig.json",
+        "metadata.json",
+        "server.js",
+        "copy-static.js",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "/experience/**",
+          "destination": "/experience.html"
+        }
+      ],
+      "cleanUrls": true
+    }
+  ]
 }
