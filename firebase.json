@@ -1,7 +1,6 @@
 {
   "hosting": [
     {
-      "target": "expholi-testing",
       "site": "expholi-testing",
       "public": "dist",
       "ignore": [
@@ -24,7 +23,6 @@
       "cleanUrls": true
     },
     {
-      "target": "submit-a",
       "site": "submit-a",
       "public": "dist",
       "ignore": [
